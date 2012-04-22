@@ -1,0 +1,13 @@
+# HashDot launch profile for JRuby (http://jruby.codehaus.org/)
+#. hashdot.profile = jruby
+
+jruby.home    = /usr/local/lib/jruby/jruby-1.6.7
+jruby.lib     = ${jruby.home}/lib
+jruby.script  = jruby
+jruby.shell   = /bin/sh
+jruby.bindir  = /usr/local/bin
+
+hashdot.profile += jruby-common
+
+# Rubygems Home (Install)
+jruby.gem.home = /usr/local/lib/jruby/gems

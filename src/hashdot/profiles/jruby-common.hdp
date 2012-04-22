@@ -1,0 +1,28 @@
+# Common setting for multiple version of jruby.
+
+# Identical defaults to jruby launcher
+# These can still be overridden by the individual scripts
+hashdot.vm.options += -Xmx500m -Xss1024k
+
+# Only jruby.jar is required for typical usage (scripts can require
+# bsf.jar or JIP profiler if desired).
+hashdot.vm.options += -Xbootclasspath/a:${jruby.lib}/jruby.jar
+
+hashdot.main = org.jruby.Main
+
+# Arguments following these flags are _not_ a script to scan for
+# hashdot headers.
+hashdot.parse_flags.value_args = -F -I -r
+
+# Give up looking for a script header with any of these
+hashdot.parse_flags.terminal = -C -e -S
+
+#JFFI path
+jffi.boot.library.path = ${jruby.home}/lib/native/i386-Linux
+
+# Disable native extensions
+# Note: Process.pid no longer works without native. Others?
+# jruby.native.enabled = false
+
+# JMX setup slows startup and wont be used
+jruby.management.enabled = false

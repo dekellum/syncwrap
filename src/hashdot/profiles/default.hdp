@@ -1,0 +1,28 @@
+# HashDot default launch profile
+# This profile is always read before any other profiles or hashdot
+# properties.
+
+## Setup the default JVM
+
+# JVM install directory
+# Linux:
+hashdot.vm.home = /usr/lib/jvm/java-6-sun
+# Mac (default JVM): hashdot.vm.home = /System/Library/Frameworks/JavaVM.framework
+# Mac (version JVM): hashdot.vm.home = /System/Library/Frameworks/JavaVM.framework/Versions/1.6.0
+
+# For Linux: amd64, i386, etc.
+# Unused on Mac OS X
+hashdot.vm.arch = i386
+
+# Mode: client, server
+# client is unavailable on platforms like Linux amd64
+# (See override in shortlived.hdp)
+hashdot.vm.mode = server
+
+# JVM library to Load
+# Delay expansion (:=) to allow variable overrides
+# Linux:
+hashdot.vm.lib := ${hashdot.vm.home}/jre/lib/${hashdot.vm.arch}/${hashdot.vm.mode}/libjvm.so
+# Mac: hashdot.vm.lib := ${hashdot.vm.home}/Libraries/lib${hashdot.vm.mode}.dylib
+
+# user.timezone = America/Los_Angeles
