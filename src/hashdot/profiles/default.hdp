@@ -6,13 +6,13 @@
 
 # JVM install directory
 # Linux:
-hashdot.vm.home = /usr/lib/jvm/java-6-sun
+hashdot.vm.home = /usr/local/lib/jdk-ora-1.7.0_04-x64
 # Mac (default JVM): hashdot.vm.home = /System/Library/Frameworks/JavaVM.framework
 # Mac (version JVM): hashdot.vm.home = /System/Library/Frameworks/JavaVM.framework/Versions/1.6.0
 
 # For Linux: amd64, i386, etc.
 # Unused on Mac OS X
-hashdot.vm.arch = i386
+hashdot.vm.arch = amd64
 
 # Mode: client, server
 # client is unavailable on platforms like Linux amd64

@@ -1,0 +1,6 @@
+# HashDot profile for short lived processes.
+#. hashdot.profile = shortlived
+
+# Use client VM
+# Comment out on Linux amd64, as no client vm is available
+# hashdot.vm.mode     = client

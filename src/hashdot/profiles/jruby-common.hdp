@@ -18,7 +18,7 @@ hashdot.parse_flags.value_args = -F -I -r
 hashdot.parse_flags.terminal = -C -e -S
 
 #JFFI path
-jffi.boot.library.path = ${jruby.home}/lib/native/i386-Linux
+jffi.boot.library.path = ${jruby.home}/lib/native/x86_64-Linux
 
 # Disable native extensions
 # Note: Process.pid no longer works without native. Others?
