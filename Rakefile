@@ -3,27 +3,52 @@
 require 'rubygems'
 require 'bundler/setup'
 
-require 'rake/remote_task'
+$LOAD_PATH.unshift( 'lib' )
 
-set :sudo_flags,  %w[ -H ]
+require 'syncwrap/java'
+require 'syncwrap/hashdot'
+require 'syncwrap/jruby'
+require 'syncwrap/iyyov'
+require 'syncwrap/ubuntu'
+require 'syncwrap/remote_task'
 
-set :rsync_flags, %w[ -rlpcb -ii ]
+class Generator
+  include Rake::DSL
+  include SyncWrap::Java
+  include SyncWrap::Hashdot
+  include SyncWrap::JRuby
 
-# SETUP: Server instance goes here
-set :domain, "localhost"
+  include SyncWrap::UserRun
+  include SyncWrap::Iyyov
 
-# See tasks in rakelib/*.rake
+  include SyncWrap::Ubuntu
+  include SyncWrap::RemoteTask
 
-## Common support functions
+  def initialize
+    super
 
-# remote put [extra args], SRC..., [DEST]
-def rput( *args )
-  if args.length == 1
-    abspath = "/" + args.first
-  else
-    abspath = args.pop
+    # SETUP: Install user, server instance goes here
+    set :domain, "localhost"
+
   end
-  args << [ target_host, abspath ].join( ':' )
-  args = args.flatten.compact
-  rsync( *args )
+
+  def generate
+
+    desc "Combined Java, Hashdot, JRuby Deployment"
+    remote_task :jruby_deploy do
+      java_install
+      hashdot_install
+      jruby_install
+    end
+
+    desc "Deploy Iyyov Deamon"
+    remote_task :iyyov_deploy do
+      user_run_dir_setup
+      iyyov_install
+    end
+
+  end
+
 end
+
+Generator.new.generate
