@@ -51,17 +51,6 @@ module SyncWrap::PostgreSQL
       super
     end
 
-    # Install PostgreSQL from 'pitti' apt repo
-    # https://launchpad.net/~pitti/+archive/postgresql
-    def pg_install
-      # FIXME: No longer needed on precise?
-      sudo <<-SH
-        add-apt-repository ppa:pitti/postgresql
-        apt-get update
-      SH
-      super
-    end
-
   end
 
   module EC2
@@ -72,6 +61,7 @@ module SyncWrap::PostgreSQL
     end
 
     def pg_relocate
+      # FIXME: Different default location on RHEL?
       sudo <<-SH
         mkdir -p /mnt/var/postgresql/
         mv /var/lib/postgresql/9.1 /mnt/var/postgresql/
