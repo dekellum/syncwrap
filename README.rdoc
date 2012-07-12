@@ -1,10 +1,12 @@
-= remote-tasks
+= SyncWrap
 
-* http://github.com/dekellum/remote-tasks
+* http://github.com/dekellum/syncwrap
 
 == Description
 
-Various rake_remote-task recipes, configs
+A generalized and modular set of provisioning and deployment routines.
+Known to work with rake-remote_task but could also be integrated with
+Capistrano, or others.
 
 == License
 

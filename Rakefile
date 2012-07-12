@@ -3,7 +3,9 @@
 require 'rubygems'
 require 'bundler/setup'
 
-$LOAD_PATH.unshift( 'lib' )
+require 'rjack-tarpit'
+
+RJack::TarPit.new( 'syncwrap' ).define_tasks
 
 require 'syncwrap/java'
 require 'syncwrap/hashdot'
@@ -35,7 +37,7 @@ class Generator
 
   end
 
-  def generate
+  def define_tasks
 
     desc "Combined Java, Hashdot, JRuby Deployment"
     remote_task :jruby_deploy do
@@ -63,4 +65,4 @@ class Generator
 
 end
 
-Generator.new.generate
+Generator.new.define_tasks
