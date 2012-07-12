@@ -1,13 +1,19 @@
-#!/bin/bash
-#
-# iyyov    Startup script for Iyyov monitoring daemon
-#
-# chkconfig: 2345 88 12
-# description: Iyyov monitoring daemon
-# processname: iyyov
-# config: /opt/var/iyyov/jobs.rb
+#!/bin/sh
 
-. /etc/rc.d/init.d/functions
+### BEGIN INIT INFO
+# Provides:          iyyov
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $named
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Iyyov jruby monitor
+# Description:       Iyyov jruby monitoring and job control daemon
+### END INIT INFO
+
+set -e
+
+. /lib/lsb/init-functions
 
 # Gem home directory
 # Set to match system "jgem environment path"
@@ -17,10 +23,10 @@ gem_home="/usr/local/lib/jruby/gems"
 version="1.1.3"
 
 # User to run the daemon as (should own rundir)
-user="wurun"
+user="runr"
 
 # Running directory (for jobs.rb config, log, and pid file)
-rundir="/var/local/wurun/iyyov"
+rundir="/var/local/runr/iyyov"
 
 prog="iyyov"
 daemon="${gem_home}/gems/iyyov-${version}-java/init/${prog}"
@@ -34,16 +40,16 @@ start() {
     [ -f "$config" ] || exit 6
     [ -d "$rundir" ] || exit 7
 
-    echo -n $"Starting $prog: "
-    runuser -c "cd $rundir && $daemon $config" $user
+    log_daemon_msg "Starting rsync daemon" "rsync"
+    start-stop-daemon --start -d $rundir -c $user --exec $daemon -- $config
     RETVAL=$?
-    [ $RETVAL -eq 0 ] && success $"$prog startup" || failure $"$prog startup"
-    echo
+    log_end_msg $RETVAL
 }
 
 status() {
     if [ -f "$pidfile" ]; then
-        echo "Status $prog: running pid $(<$pidfile)"
+        pid=`cat $pidfile`
+        echo "Status $prog: running pid $pid"
     else
         echo "Status $prog: not running"
     fi
@@ -56,12 +62,10 @@ reload() {
 }
 
 stop() {
-    echo -n $"Shutting down $prog: "
-    killproc -p $pidfile $prog
+    log_daemon_msg "Stopping iyyov daemon" "iyyov"
+    start-stop-daemon --stop --quiet --oknodo --pidfile $pidfile
     RETVAL=$?
-    [ $RETVAL -eq 0 ] && success || failure
-    echo
-    return $RETVAL
+    log_end_msg $RETVAL
 }
 
 case "$1" in
