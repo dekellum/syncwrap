@@ -10,6 +10,7 @@ require 'syncwrap/hashdot'
 require 'syncwrap/jruby'
 require 'syncwrap/iyyov'
 require 'syncwrap/ubuntu'
+require 'syncwrap/postgresql'
 require 'syncwrap/remote_task'
 
 class Generator
@@ -22,6 +23,8 @@ class Generator
   include SyncWrap::Iyyov
 
   include SyncWrap::Ubuntu
+  include SyncWrap::PostgreSQL
+
   include SyncWrap::RemoteTask
 
   def initialize
@@ -45,6 +48,15 @@ class Generator
     remote_task :iyyov_deploy do
       user_run_dir_setup
       iyyov_install
+    end
+
+    desc "Deploy PostgreSQL"
+    remote_task :pg_deploy do
+      pg_install
+      pg_stop
+      pg_adjust_sysctl
+      pg_configure
+      pg_start
     end
 
   end
