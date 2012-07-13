@@ -24,7 +24,7 @@ module SyncWrap::PostgreSQL
 
   # Update PostgreSQL config files from local etc
   def pg_configure
-    rput( 'etc/postgresql/9.1/main/', :user => 'postgres:postgres' )
+    rput( 'etc/postgresql/9.1/main/', :user => 'postgres' )
   end
 
   def pg_install

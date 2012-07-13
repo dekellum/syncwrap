@@ -54,7 +54,7 @@ module SyncWrap::JRuby
       cd #{common_prefix}/bin && ln -sf ../lib/jruby/jruby/bin/jirb .
     SH
 
-    rput( 'usr/local/bin/', :excludes => :dev, :user => 'root:root' )
+    rput( 'usr/local/bin/', :excludes => :dev, :user => 'root' )
   end
 
   # Return true if gem is already installed.

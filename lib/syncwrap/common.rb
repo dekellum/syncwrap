@@ -31,7 +31,7 @@ module SyncWrap::Common
     exec_conditional { run "test -e #{file}" } == 0
   end
 
-  # Put (synchronize) files or entire directories to remote.
+  # Put files or entire directories to remote.
   #
   #   rput( src..., dest, {options} )
   #   rput( src, {options} )
@@ -45,15 +45,13 @@ module SyncWrap::Common
   #
   #   rput( 'etc/gemrc', :user => 'root' )
   #
-  # has an implied destination of: `/etc/`
-  #
-  # After interpreting args calls rsync, possibly followed by sudo
-  # chown.
+  # has an implied destination of: `/etc/`. The src and destination
+  # are intrepreted as by rsync: glob patterns are expanded and
+  # trailing '/' is significant.
   #
   # ==== Options
   # :user:: Files should be owned on destination by a user other than
   #         installer (ex: 'root') (implies sudo)
-  # :sudo:: If true, use 'sudo rsync' on remote side.
   # :perms:: Permissions to set for install files.
   # :excludes:: One or more rsync compatible --filter excludes, or
   #             :dev which excludes common developmoent tree dropping,
@@ -75,7 +73,6 @@ module SyncWrap::Common
       if e == :dev
         '--cvs-exclude'
       else
-        raise "Unsupported exclude [#{e}] with :user option" if opts[ :user ]
         "--filter=#{e}"
       end
     end
@@ -85,65 +82,19 @@ module SyncWrap::Common
       flags << "--chmod=#{opts[ :perms ]}"
     end
 
-    if opts[ :user ] || opts[ :sudo ]
-      # Use sudo is needed to place files at remote
-      flags << '--rsync-path=sudo rsync'
+    if opts[ :user ]
+      # Use sudo to place files at remote.
+      user = opts[ :user ] || 'root'
+      flags << ( if user != 'root'
+                   "--rsync-path=sudo -u #{user} rsync"
+                 else
+                   "--rsync-path=sudo rsync"
+                 end )
     end
 
     cmd = [ flags, args, [ target_host, abspath ].join(':') ].flatten.compact
     rsync( *cmd )
 
-    if opts[ :user ]
-      dest_files = expand_local_paths( args )
-      dest_files = dest_files.map do |df|
-        File.join( abspath, df )
-      end
-      unless dest_files.empty?
-        sudo "chown #{opts[ :user ]} #{dest_files.join(' ')}"
-      end
-    end
-
-  end
-
-  # Expand local source patterns in an rsync compatible way,
-  # i.e. tailing '/' is signficant.
-  def expand_local_paths( srcs )
-    # Expand globs
-    srcs = srcs.map do |src|
-      s = Dir.glob( src )
-      raise "Local rput source [#{src}] not found" if s.empty?
-      s
-    end.flatten
-
-    # Expand, recursively
-    srcs = srcs.map do |src|
-      if src =~ %r{/$}
-        expand( src, '' )
-      elsif File.directory?( src )
-        expand( src, File.basename( src ) )
-      else
-        File.basename( src )
-      end
-    end.flatten.sort.uniq
-
-    # FIXME: Need general support for filters. Would be nice
-    # to support filtering (local + rsync) by `git ls-files -o`
-    # For now lets exclude the obvious case:
-    srcs.reject { |src| src =~ /~$/ }
-  end
-
-  def expand( lpath, rpath )
-    Dir.entries( lpath ).
-      reject { |s| s =~ /^\.+$/ }.
-      map do |e|
-        apath = File.join( lpath, e )
-        npath = File.join( rpath, e )
-        if File.directory?( apath )
-          [ npath, expand( apath, npath ) ]
-        else
-          npath
-        end
-      end
   end
 
 end
