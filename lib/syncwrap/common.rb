@@ -59,7 +59,7 @@ module SyncWrap::Common
   #             :dev which excludes common developmoent tree dropping,
   #             like '*~'
   def rput( *args )
-    opts = args.pop if args.last.is_a?( Hash )
+    opts = args.last.is_a?( Hash ) && args.pop || {}
 
     if args.length == 1
       abspath = "/" + args.first
