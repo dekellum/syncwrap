@@ -32,17 +32,55 @@ module SyncWrap::RemoteTask
     Rake::RemoteTask.set( *args )
   end
 
+  # Run args as shell command on the remote host. A line delimited
+  # argument is interpreted as multiple commands, otherwise arguments
+  # are joined as a single command.
+  #
+  # A trailing Hash is interpreted as options, however no options are
+  # currently interpreted.
   def run( *args )
+    opts = args.last.is_a?( Hash ) && args.pop
+    args = cleanup_arg_lines( args )
+
     #FIXME: Should cleanup multi-line commands
     Thread.current[ :task ].run( *args )
   end
 
+  # Run args under sudo on remote host. A line delimited argument is
+  # interpreted as multiple commands, otherwise arguments are joined
+  # as a single command.
+  #
+  # A trailing Hash is interpreted as options, see below.
+  #
+  # ==== options
+  # :user:: Run as specified user (default: root)
+  # :flags:: Additional sudo flags
+  # :shell:: Run command in a shell by wrapping it in sh -c "", and
+  #          escaping quotes in the original joined args command.
+  #          (default: true)
   def sudo( *args )
-    #FIXME: Can't pass sudo -u, etc.
-    #FIXME: Should cleanup multi-line commands
-    cmd = args.flatten.compact.join( ' ' ).gsub( /"/, '\"' )
-    cmd = "sh -c \"#{cmd}\""
-    Thread.current[ :task ].sudo( cmd )
+    opts = args.last.is_a?( Hash ) && args.pop || {}
+
+    flags = opts[ :flags ] || []
+    if opts[ :user ]
+      flags += [ '-u', opts[ :user ] ]
+    end
+
+    cmd = cleanup_arg_lines( args )
+
+    unless opts[ :shell ] == false
+      cmd = cmd.join( ' ' ).gsub( /"/, '\"' )
+      cmd = "sh -c \"#{cmd}\""
+    end
+
+    Thread.current[ :task ].sudo( [ flags, cmd ] )
+  end
+
+  # Remove extra whitespace from multi-line and single arguments
+  def cleanup_arg_lines( args )
+    args.flatten.compact.map do |arg|
+      arg.split( $/ ).map { |f| f.strip }.join( $/ )
+    end
   end
 
   def rsync( *args )

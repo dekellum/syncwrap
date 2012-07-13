@@ -59,7 +59,7 @@ module SyncWrap::Hashdot
       curl -sSL #{url} | tar -C #{src_root} -zxf -
     SH
     rput( 'src/hashdot/', "#{hd_src}/", :excludes => :dev )
-    run "cd #{hd_src} && make"
+    run  "cd #{hd_src} && make"
     sudo "cd #{hd_src} && make install"
   end
 
