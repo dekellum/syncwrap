@@ -43,6 +43,27 @@ module SyncWrap::UserRun
     SH
   end
 
+  def user_run_service_dir_setup( sname, instance = nil )
+    sdir =  user_run_service_dir( sname, instance )
+
+    sudo <<-SH
+      mkdir -p #{sdir}
+      chown #{user_run}:#{user_run_group} #{sdir}
+      chmod 775 #{sdir}
+    SH
+  end
+
+  def user_run_service_dir( sname, instance = nil )
+    "#{user_run_dir}/" + [ sname, instance ].compact.join( '-' )
+  end
+
+  def user_run_rput( *args )
+    opts = args.last.is_a?( Hash ) && args.pop || {}
+    opts[ :user ] = user_run
+    args.push( opts )
+    rput( *args )
+  end
+
   def user_run_chmod( *args )
     flags, paths = args.partition { |a| a =~ /^-/ }
     sudo( 'chown', flags, "#{user_run}:#{user_run_group}", paths )
