@@ -77,4 +77,17 @@ module SyncWrap::Iyyov
     dist_install_init_service( 'iyyov' )
   end
 
+  def iyyov_start
+    dist_service( 'iyyov', 'start' )
+  end
+
+  def iyyov_stop
+    dist_service( 'iyyov', 'stop' )
+  end
+
+  def iyyov_restart
+    dist_service( 'iyyov', 'restart' )
+  end
+
+
 end
