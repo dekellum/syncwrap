@@ -169,7 +169,8 @@ class TestSyncWrap < MiniTest::Unit::TestCase
         mkdir -p foo
         touch foo/goo
       SH
-      assert_equal( [ [ 'mkdir -p foo',
+      assert_equal( [ [ 'set -e',
+                        'mkdir -p foo',
                         'touch foo/goo' ].join( $/ ) ],
                     t.last_args )
     end
@@ -193,7 +194,7 @@ class TestSyncWrap < MiniTest::Unit::TestCase
         touch foo/goo
       SH
 
-      assert_equal( [ "sh -c \"mkdir -p foo\ntouch foo/goo\"" ],
+      assert_equal( [ "sh -c \"set -e\nmkdir -p foo\ntouch foo/goo\"" ],
                     t.last_args.flatten.compact )
     end
   end

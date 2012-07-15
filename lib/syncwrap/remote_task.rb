@@ -33,36 +33,19 @@ module SyncWrap::RemoteTask
     set( :rsync_flags, %w[ -rlpcb -ii ] )
   end
 
-  def set( *args )
-    Rake::RemoteTask.set( *args )
-  end
-
-  # Run args as shell command on the remote host. A line delimited
-  # argument is interpreted as multiple commands, otherwise arguments
-  # are joined as a single command.
-  #
-  # A trailing Hash is interpreted as options, however no options are
-  # currently interpreted.
+  # Implements SyncWrap::Common#run
   def run( *args )
-    opts = args.last.is_a?( Hash ) && args.pop
-    args = cleanup_arg_lines( args )
+    opts = args.last.is_a?( Hash ) && args.pop || {}
+
+    exit_multi = opts[ :error ].nil? || opts[ :error ] == :exit
+
+    args = cleanup_arg_lines( args, exit_multi )
 
     #FIXME: Should cleanup multi-line commands
-    Thread.current[ :task ].run( *args )
+    remote_task_current.run( *args )
   end
 
-  # Run args under sudo on remote host. A line delimited argument is
-  # interpreted as multiple commands, otherwise arguments are joined
-  # as a single command.
-  #
-  # A trailing Hash is interpreted as options, see below.
-  #
-  # ==== options
-  # :user:: Run as specified user (default: root)
-  # :flags:: Additional sudo flags
-  # :shell:: Run command in a shell by wrapping it in sh -c "", and
-  #          escaping quotes in the original joined args command.
-  #          (default: true)
+  # Implements SyncWrap::Common#sudo
   def sudo( *args )
     opts = args.last.is_a?( Hash ) && args.pop || {}
 
@@ -71,29 +54,28 @@ module SyncWrap::RemoteTask
       flags += [ '-u', opts[ :user ] ]
     end
 
-    cmd = cleanup_arg_lines( args )
-
     unless opts[ :shell ] == false
+      exit_multi = opts[ :error ].nil? || opts[ :error ] == :exit
+      cmd = cleanup_arg_lines( args, exit_multi )
       cmd = cmd.join( ' ' ).gsub( /"/, '\"' )
       cmd = "sh -c \"#{cmd}\""
+    else
+      cmd = cleanup_arg_lines( args, false )
     end
 
-    Thread.current[ :task ].sudo( [ flags, cmd ] )
+    remote_task_current.sudo( [ flags, cmd ] )
   end
 
-  # Remove extra whitespace from multi-line and single arguments
-  def cleanup_arg_lines( args )
-    args.flatten.compact.map do |arg|
-      arg.split( $/ ).map { |f| f.strip }.join( $/ )
-    end
-  end
-
+  # Implements SyncWrap::Common#rsync
   def rsync( *args )
-    Thread.current[ :task ].rsync( *args )
+    remote_task_current.rsync( *args )
   end
 
-  # Return exit status of the first non-zero command result, or 0 if
-  # all command succeeded
+  def target_host
+    remote_task_current.target_host
+  end
+
+  # Implements Common#exec_conditional
   def exec_conditional
     yield
     0
@@ -101,4 +83,34 @@ module SyncWrap::RemoteTask
     e.status
   end
 
+  # Remove extra whitespace from multi-line and single arguments
+  def cleanup_arg_lines( args, exit_error_on_multi )
+    args.flatten.compact.map do |arg|
+      alines = arg.split( $/ )
+      if alines.length > 1 && exit_error_on_multi
+        alines.unshift( "set -e" )
+      end
+      alines.map { |f| f.strip }.join( $/ )
+    end
+  end
+
+  def remote_task( name, *args, &block )
+    Rake::RemoteTask.remote_task( name, *args, &block )
+  end
+
+  def set( *args )
+    Rake::RemoteTask.set( *args )
+  end
+
+  def host( host_name, *roles )
+    Rake::RemoteTask.host( host_name, *roles )
+  end
+
+  def role( role_name, host = nil, args = {} )
+    Rake::RemoteTask.role( role_name, host, args )
+  end
+
+  def remote_task_current
+    Thread.current[ :task ] or raise "Not running from a RemoteTask"
+  end
 end

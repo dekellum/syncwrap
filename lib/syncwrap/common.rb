@@ -102,8 +102,12 @@ module SyncWrap::Common
   # argument is interpreted as multiple commands, otherwise arguments
   # are joined as a single command.
   #
-  # A trailing Hash is interpreted as options, however no options are
-  # currently interpreted.
+  # A trailing Hash is interpreted as options, see below.
+  #
+  # ==== options
+  # :error:: Set the error handling mode: If `:exit`, causes "set -e" to
+  #          be passed as the first line of a multi-line
+  #          command. (Default: :exit)
   def run( *args )
     raise "Include a remoting-specific module, e.g. RemoteTask"
   end
@@ -120,6 +124,9 @@ module SyncWrap::Common
   # :shell:: Run command in a shell by wrapping it in sh -c "", and
   #          escaping quotes in the original joined args command.
   #          (default: true)
+  # :error:: Set the error handling mode: If `:exit`, causes "set -e" to
+  #          be passed as the first line of a multi-line
+  #          command. (Default: :exit, only applies if :shell)
   def sudo( *args )
     raise "Include a remoting-specific module, e.g. RemoteTask"
   end
