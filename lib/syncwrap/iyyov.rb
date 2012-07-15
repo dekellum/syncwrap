@@ -61,7 +61,7 @@ module SyncWrap::Iyyov
         touch #{iyyov_run_dir}/jobs.rb
       fi
     SH
-    user_run_chmod( '-R', iyyov_run_dir )
+    user_run_chown( '-R', iyyov_run_dir )
   end
 
   # Ensure install of same gem version as init.d/iyyov script

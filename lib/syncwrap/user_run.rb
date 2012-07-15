@@ -74,7 +74,7 @@ module SyncWrap::UserRun
   end
 
   # Chown to user_run where args may be flags and files/directories.
-  def user_run_chmod( *args )
+  def user_run_chown( *args )
     flags, paths = args.partition { |a| a =~ /^-/ }
     sudo( 'chown', flags, "#{user_run}:#{user_run_group}", paths )
   end
