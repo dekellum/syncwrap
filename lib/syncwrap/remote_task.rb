@@ -17,8 +17,13 @@
 require 'rake/remote_task'
 
 require 'syncwrap/base'
+require 'syncwrap/common'
 
+# Implements common remoting methods in terms of rake/remote_task (and
+# thus Vlad compatible)
 module SyncWrap::RemoteTask
+  include SyncWrap::Common
+  include Rake::DSL
 
   def initialize
     super

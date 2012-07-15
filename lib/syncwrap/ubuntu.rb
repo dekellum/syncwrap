@@ -14,9 +14,10 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
 require 'syncwrap/distro'
 
+# Customizations for Ubuntu and possibly other Debian/apt packaged
+# derivatives. Specific distros/versions may further specialize.
 module SyncWrap::Ubuntu
   include SyncWrap::Distro
 

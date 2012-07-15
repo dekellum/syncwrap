@@ -14,9 +14,11 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
+require 'syncwrap/common'
 
+# Provisions for common Amazon EC2 image tasks.
 module SyncWrap::EC2
+  include SyncWrap::Common
 
   def initialize
     super

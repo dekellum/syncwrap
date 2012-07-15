@@ -14,14 +14,20 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
+require 'syncwrap/common'
 
+# Provisions for a (daemon) run user and var directory. Utilities for
+# working with the same.
 module SyncWrap::UserRun
+  include SyncWrap::Common
 
+  # A user for running deployed daemons, jobs (default: 'runr')
   attr_accessor :user_run
 
+  # A group for running (default: 'runr')
   attr_accessor :user_run_group
 
+  # Directory for persistent data, logs. (default: /var/local/runr)
   attr_accessor :user_run_dir
 
   def initialize
@@ -43,6 +49,8 @@ module SyncWrap::UserRun
     SH
   end
 
+  # Create and set owner/permission of a named service directory under
+  # user_run_dir.
   def user_run_service_dir_setup( sname, instance = nil )
     sdir =  user_run_service_dir( sname, instance )
 
@@ -57,6 +65,7 @@ module SyncWrap::UserRun
     "#{user_run_dir}/" + [ sname, instance ].compact.join( '-' )
   end
 
+  # As per SyncWrap::Common#rput with :user => user_run
   def user_run_rput( *args )
     opts = args.last.is_a?( Hash ) && args.pop || {}
     opts[ :user ] = user_run
@@ -64,6 +73,7 @@ module SyncWrap::UserRun
     rput( *args )
   end
 
+  # Chown to user_run where args may be flags and files/directories.
   def user_run_chmod( *args )
     flags, paths = args.partition { |a| a =~ /^-/ }
     sudo( 'chown', flags, "#{user_run}:#{user_run_group}", paths )

@@ -15,24 +15,20 @@ require 'syncwrap/ubuntu'
 require 'syncwrap/postgresql'
 require 'syncwrap/remote_task'
 
-class Generator
-  include Rake::DSL
+class SyncWrapper
   include SyncWrap::Java
   include SyncWrap::Hashdot
   include SyncWrap::JRuby
-
-  include SyncWrap::UserRun
   include SyncWrap::Iyyov
-
   include SyncWrap::Ubuntu
-  include SyncWrap::PostgreSQL
+  include SyncWrap::PostgreSQL::Ubuntu
 
   include SyncWrap::RemoteTask
 
   def initialize
     super
 
-    # SETUP: Install user, server instance goes here
+    # SETUP: Install user@server instance goes here
     set :domain, "localhost"
 
   end
@@ -65,4 +61,4 @@ class Generator
 
 end
 
-Generator.new.define_tasks
+SyncWrapper.new.define_tasks

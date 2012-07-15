@@ -14,12 +14,16 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
 require 'syncwrap/common'
+require 'syncwrap/distro'
 
+# Provisions the {Hashdot}[http://hashdot.sourceforge.net/] JVM/script
+# launcher by building it with gcc on the target host.
 module SyncWrap::Hashdot
   include SyncWrap::Common
+  include SyncWrap::Distro
 
+  # Hashdot version (default: 1.4.0)
   attr_accessor :hashdot_version
 
   def initialize
@@ -32,9 +36,9 @@ module SyncWrap::Hashdot
     dist_install( %w[ make gcc apr apr-devel ] )
   end
 
+  # Install hashdot if the binary is not found. If the binary is found
+  # then still attempt to update the profile config files.
   def hashdot_install
-    # FIXME: Hashdot needs template for Makefile to use
-    # common_prefix != /usr/local
     if !exist?( "#{common_prefix}/bin/hashdot" )
       hashdot_install!
     else

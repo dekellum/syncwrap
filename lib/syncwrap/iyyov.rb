@@ -1,4 +1,3 @@
-# -*- ruby -*-
 #--
 # Copyright (c) 2011-2012 David Kellum
 #
@@ -15,12 +14,15 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
 require 'syncwrap/user_run'
+require 'syncwrap/distro'
 require 'syncwrap/jruby'
 
+# Provisions the {Iyyov}[http://rubydoc.info/gems/iyyov/] job
+# scheduler and process monitor by jruby_install_gem.
 module SyncWrap::Iyyov
   include SyncWrap::UserRun
+  include SyncWrap::Distro
   include SyncWrap::JRuby
 
   attr_accessor :iyyov_version
@@ -32,7 +34,8 @@ module SyncWrap::Iyyov
   end
 
   # Deploy iyyov gem, init.d/iyyov and at least an empty
-  # jobs.rb. Returns true if iyyov was installed/upgraded.
+  # jobs.rb. Returns true if iyyov was installed/upgraded and should
+  # be restarted.
   def iyyov_install
     iyyov_install_rundir
 
@@ -50,8 +53,7 @@ module SyncWrap::Iyyov
   end
 
   # Create iyyov rundir and make sure there is at minimum an empty
-  # jobs file.
-  # Avoid touching it if alreeady present
+  # jobs file. Avoid touching it if already present
   def iyyov_install_rundir
     run <<-SH
       mkdir -p #{iyyov_run_dir}
@@ -88,6 +90,5 @@ module SyncWrap::Iyyov
   def iyyov_restart
     dist_service( 'iyyov', 'restart' )
   end
-
 
 end

@@ -14,22 +14,25 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
 require 'syncwrap/distro'
 
+# Customizations for RedHat Enterprise Linux and derivatives like
+# CentOS and Amazon Linux.  Specific distros/versions may further
+# override these.
 module SyncWrap::RHEL
   include SyncWrap::Distro
 
   def initialize
     super
 
-    packages_map.merge! {
-      'emacs' => 'emacs-nox',
-      'postgresql' => 'postgresql-server'
-    }
+    packages_map.merge!( 'emacs' => 'emacs-nox',
+                         'postgresql' => 'postgresql-server' )
   end
 
-  # 'rpm -Uvh http://linux.mirrors.es.net/fedora-epel/6/x86_64/epel-release-6-7.noarch.rpm'
+  # FIXME
+  # rpm -Uvh \
+  # http://linux.mirrors.es.net/fedora-epel/6/x86_64/ \
+  # epel-release-6-7.noarch.rpm
 
   def dist_install( *pkgs )
     pkgs = dist_map_packages( pkgs )
@@ -41,7 +44,6 @@ module SyncWrap::RHEL
     sudo "yum remove -qy #{pkgs.join( ' ' )}"
   end
 
-  # Install a System V style init.d script
   def dist_install_init_service( name )
     sudo "/sbin/chkconfig --add #{name}"
   end

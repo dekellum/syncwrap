@@ -16,17 +16,18 @@
 
 require 'syncwrap/base'
 
+# Common utility methods and variables.
 module SyncWrap::Common
 
+  # The prefix for local non-distro installs (default: /usr/local)
   attr_accessor :common_prefix
 
   def initialize
     super
-
     @common_prefix = '/usr/local'
   end
 
-  # Return true is remote file exists
+  # Return true if remote file exists, as per "test -e"
   def exist?( file )
     exec_conditional { run "test -e #{file}" } == 0
   end
@@ -40,13 +41,13 @@ module SyncWrap::Common
   #
   # If there is two or more remaining arguments, the last is
   # interpreted as the remote destination.  If there is a single
-  # remaining argument, the destination is implied by find its base
+  # remaining argument, the destination is implied by finding its base
   # directory and prepending '/'. Thus for example:
   #
   #   rput( 'etc/gemrc', :user => 'root' )
   #
   # has an implied destination of: `/etc/`. The src and destination
-  # are intrepreted as by rsync: glob patterns are expanded and
+  # are intrepreted as by `rsync`: glob patterns are expanded and
   # trailing '/' is significant.
   #
   # ==== Options
@@ -54,7 +55,7 @@ module SyncWrap::Common
   #         installer (ex: 'root') (implies sudo)
   # :perms:: Permissions to set for install files.
   # :excludes:: One or more rsync compatible --filter excludes, or
-  #             :dev which excludes common developmoent tree dropping,
+  #             :dev which excludes common developmoent tree droppings
   #             like '*~'
   def rput( *args )
     opts = args.last.is_a?( Hash ) && args.pop || {}
@@ -95,6 +96,49 @@ module SyncWrap::Common
     cmd = [ flags, args, [ target_host, abspath ].join(':') ].flatten.compact
     rsync( *cmd )
 
+  end
+
+  # Run args as shell command on the remote host. A line delimited
+  # argument is interpreted as multiple commands, otherwise arguments
+  # are joined as a single command.
+  #
+  # A trailing Hash is interpreted as options, however no options are
+  # currently interpreted.
+  def run( *args )
+    raise "Include a remoting-specific module, e.g. RemoteTask"
+  end
+
+  # Run args under sudo on remote host. A line delimited argument is
+  # interpreted as multiple commands, otherwise arguments are joined
+  # as a single command.
+  #
+  # A trailing Hash is interpreted as options, see below.
+  #
+  # ==== options
+  # :user:: Run as specified user (default: root)
+  # :flags:: Additional sudo flags
+  # :shell:: Run command in a shell by wrapping it in sh -c "", and
+  #          escaping quotes in the original joined args command.
+  #          (default: true)
+  def sudo( *args )
+    raise "Include a remoting-specific module, e.g. RemoteTask"
+  end
+
+  # Return the exit status of the first non-zero command result, or 0
+  # if all commands succeeded.
+  def exec_conditional
+    raise "Include a remoting-specific module, e.g. RemoteTask"
+  end
+
+  # Implement rsync as used by rput. Note that args should not be
+  # passed through shell interpretation, eg run via system( Array )
+  def rsync( *args )
+    raise "Include a remoting-specific module, e.g. RemoteTask"
+  end
+
+  # Returns the current target host when called from a running task.
+  def target_host
+    raise "Include a remoting-specific module, e.g. RemoteTask"
   end
 
 end

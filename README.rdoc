@@ -5,8 +5,75 @@
 == Description
 
 A generalized and modular set of provisioning and deployment routines.
-Known to work with rake-remote_task but could also be integrated with
-Capistrano, or others.
+The Rake-centric Vlad and not-actually-Rake Capistrano both suffer
+from lack of objects, e.g. the ability to customize and mix-in
+behavior. SyncWrap offers an Object/Module system that can be used
+with either.  Known to work with Vlad/rake-remote_task but could also
+be integrated with Capistrano, or others.
+
+== Features
+
+* Multi-line shell support in SyncWrap::Common#run,
+  SyncWrap::Common#sudo for more natural script embedding
+
+* SyncWrap::Common::rput offers some useful rsync magic, like setting
+  the owner of placed remote files
+
+* Platform differences are factored out into platform-specific modules
+
+* SyncWrap::RemoteTask rake-remote_task adapter (see synopsis below)
+
+* Gem install utilities. e.g. SyncWrap::JRuby#jruby_check_gem,
+  SyncWrap::JRuby#jruby_install_gem
+
+== Provisions
+
+Currently the following provisions are provided:
+
+* Complete SyncWrap::Java, SyncWrap::Hashdot, SyncWrap::JRuby stack
+
+* SyncWrap::PostgreSQL
+
+* SyncWrap::Iyyov job scheduler and process monitor
+
+* SyncWrap::UserRun for setup of a run user for deployed daemons, jobs
+  and var directories.
+
+== Synopsis
+
+For example, in your Rakefile with the SyncWrap::RemoteTask adapter:
+
+  class SyncWrapper
+
+    # Include these support modules for the tasks below, or include
+    # your own.
+
+    include SyncWrap::Java
+    include SyncWrap::Hashdot
+    include SyncWrap::JRuby
+    include SyncWrap::Ubuntu
+
+    include SyncWrap::RemoteTask
+
+    def initialize
+      super
+      self.common_prefix = '/usr/local'
+    end
+
+    def define_tasks
+      desc "Combined Java, Hashdot, JRuby Deployment"
+      remote_task :jruby_deploy do
+        java_install
+        hashdot_install
+        jruby_install
+      end
+    end
+
+    # Override any of the support methods as needed.
+
+  end
+
+  SyncWrapper.new.define_tasks
 
 == License
 

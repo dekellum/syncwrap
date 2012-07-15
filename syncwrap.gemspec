@@ -9,4 +9,6 @@ RJack::TarPit.specify do |s|
   s.version = SyncWrap::VERSION
 
   s.add_developer( 'David Kellum', 'dek-oss@gravitext.com' )
+
+  s.depend 'minitest', '~> 3.2.0', :dev
 end

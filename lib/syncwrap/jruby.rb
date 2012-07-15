@@ -14,16 +14,20 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
 require 'syncwrap/common'
 
+# Provisions JRuby by direct download from public S3 repo. Includes
+# utility methods for checking and installing JRuby gems.
 module SyncWrap::JRuby
   include SyncWrap::Common
 
+  # JRuby version to install (default: 1.6.7)
   attr_accessor :jruby_version
 
+  # The name of the gem command to be installed/used (default: jgem)
   attr_accessor :jruby_gem_command
 
+  # Default gem install arguments (default: --no-rdoc, --no-ri)
   attr_accessor :jruby_gem_install_args
 
   def initialize
@@ -34,12 +38,14 @@ module SyncWrap::JRuby
     @jruby_gem_install_args = %w[ --no-rdoc --no-ri ]
   end
 
+  # Install jruby if the jruby_version is not already present.
   def jruby_install
     unless exist?( "#{common_prefix}/lib/jruby/jruby-#{jruby_version}" )
       jruby_install!
     end
   end
 
+  # Install jruby, including usr/local/bin local contents
   def jruby_install!
     url = ( "http://jruby.org.s3.amazonaws.com/downloads/#{jruby_version}/" +
             "jruby-bin-#{jruby_version}.tar.gz" )
@@ -58,7 +64,12 @@ module SyncWrap::JRuby
   end
 
   # Return true if gem is already installed.
-  def jruby_check_gem( gems, opts )
+  # ==== Options
+  # :version:: Version specifier array, like in spec. files
+  #            (default: none, i.e. latest)
+  # :user:: If true, perform a --user-install as current user, else
+  #         system install with sudo (default: false )
+  def jruby_check_gem( gems, opts = {} )
     query = [ jruby_gem_command, 'query', '-i',
               jruby_gem_version_flags( opts[ :version ] ),
               '-n', gems, '>/dev/null' ].flatten.compact
@@ -69,7 +80,12 @@ module SyncWrap::JRuby
     ( status == 0 )
   end
 
-  # Install the specified gem(s) with options
+  # Install the specified gem(s)
+  # ==== Options
+  # :version:: Version specifier array, like in spec. files
+  #            (default: none, i.e. latest)
+  # :user:: If true, perform a --user-install as current user, else
+  #         system install with sudo (default: false )
   def jruby_install_gem( gems, opts = {} )
     if opts[ :check ] && jruby_check_gem( gems, opts )
       false

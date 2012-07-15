@@ -14,13 +14,21 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
 require 'syncwrap/common'
 
+# Provisions a JDK via an HTTP accessable binary repository of your
+# making.  Sun/Oracle JDK usage terms generally preclude sharing a
+# binary repository for these.
 module SyncWrap::Java
   include SyncWrap::Common
 
+  # HTTP URL to repo base directory. Note that the default
+  # (http://localhost/repo) is unlikely to work here.
   attr_accessor :java_repo_base_url
+
+  # The name of the JDK, which is used for download via
+  # java_repo_base_url/<name>.tar.gz and the expected top level
+  # directory when unpackaged.
   attr_accessor :java_jdk_name
 
   def initialize

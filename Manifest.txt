@@ -1,3 +1,4 @@
+History.rdoc
 Manifest.txt
 README.rdoc
 Rakefile
@@ -23,4 +24,5 @@ lib/syncwrap/remote_task.rb
 lib/syncwrap/rhel.rb
 lib/syncwrap/ubuntu.rb
 lib/syncwrap/user_run.rb
+test/test_syncwrap.rb
 usr/local/bin/jgem

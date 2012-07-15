@@ -14,9 +14,11 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
+require 'syncwrap/distro'
 
+# Provisions for install and configuration of PostgreSQL
 module SyncWrap::PostgreSQL
+  include SyncWrap::Distro
 
   def initialize
     super
