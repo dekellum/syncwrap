@@ -40,7 +40,7 @@ start() {
     [ -f "$config" ] || exit 6
     [ -d "$rundir" ] || exit 7
 
-    log_daemon_msg "Starting rsync daemon" "rsync"
+    log_daemon_msg "Starting Iyyov Daemon" "iyyov"
     start-stop-daemon --start -d $rundir -c $user --exec $daemon -- $config
     RETVAL=$?
     log_end_msg $RETVAL
