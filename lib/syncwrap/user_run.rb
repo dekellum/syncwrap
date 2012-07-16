@@ -42,6 +42,7 @@ module SyncWrap::UserRun
   # Create and set owner/permission of run_dir, such that user_run may
   # create new directories there.
   def user_run_dir_setup
+    user_create
     sudo <<-SH
       mkdir -p #{user_run_dir}
       chown #{user_run}:#{user_run_group} #{user_run_dir}
@@ -88,9 +89,14 @@ module SyncWrap::UserRun
   end
 
   def user_create!
-    sudo <<-SH
-      useradd -g #{user_run_group} #{user_run}
-    SH
+    if user_run_group == user_run
+      sudo "useradd #{user_run}"
+    else
+      sudo <<-SH
+        groupadd #{user_run_group}
+        useradd -g #{user_run_group} #{user_run}
+      SH
+    end
   end
 
 end
