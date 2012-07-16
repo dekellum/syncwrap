@@ -57,6 +57,10 @@ module SyncWrap::Iyyov
     yield if block_given?
 
     user_run_rput( 'var/iyyov/jobs.rb', iyyov_run_dir )
+
+    # FIXME: If no jobs.rb change, still touch file to ensure
+    # check, but avoid both an update and a touch...
+
   end
 
   # Deploy iyyov gem, init.d/iyyov and at least an empty
