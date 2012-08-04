@@ -11,7 +11,7 @@ require 'syncwrap/java'
 require 'syncwrap/hashdot'
 require 'syncwrap/jruby'
 require 'syncwrap/iyyov'
-require 'syncwrap/ubuntu'
+require 'syncwrap/rhel'
 require 'syncwrap/postgresql'
 require 'syncwrap/remote_task'
 
@@ -20,8 +20,8 @@ class SyncWrapper
   include SyncWrap::Hashdot
   include SyncWrap::JRuby
   include SyncWrap::Iyyov
-  include SyncWrap::Ubuntu
-  include SyncWrap::PostgreSQL::Ubuntu
+  include SyncWrap::RHEL
+  include SyncWrap::PostgreSQL
 
   include SyncWrap::RemoteTask
 
