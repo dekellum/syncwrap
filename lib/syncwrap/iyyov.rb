@@ -85,7 +85,7 @@ module SyncWrap::Iyyov
   # Create iyyov rundir and make sure there is at minimum an empty
   # jobs file. Avoid touching it if already present
   def iyyov_install_rundir
-    run <<-SH
+    sudo( <<-"SH", :user => user_run )
       mkdir -p #{iyyov_run_dir}
       if [ ! -e #{iyyov_run_dir}/jobs.rb ]; then
         touch #{iyyov_run_dir}/jobs.rb
