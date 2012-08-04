@@ -1,19 +1,13 @@
-#!/bin/sh
+#!/bin/bash
+#
+# iyyov    Startup script for Iyyov monitoring daemon
+#
+# chkconfig: 2345 88 12
+# description: Iyyov monitoring daemon
+# processname: iyyov
+# config: /opt/var/iyyov/jobs.rb
 
-### BEGIN INIT INFO
-# Provides:          iyyov
-# Required-Start:    $remote_fs $syslog
-# Required-Stop:     $remote_fs $syslog
-# Should-Start:      $named
-# Default-Start:     2 3 4 5
-# Default-Stop:
-# Short-Description: Iyyov jruby monitor
-# Description:       Iyyov jruby monitoring and job control daemon
-### END INIT INFO
-
-set -e
-
-. /lib/lsb/init-functions
+. /etc/rc.d/init.d/functions
 
 # Gem home directory
 # Set to match system "jgem environment path"
@@ -28,6 +22,9 @@ user="runr"
 # Running directory (for jobs.rb config, log, and pid file)
 rundir="/var/local/runr/iyyov"
 
+# Add PATH to jruby if non-standard
+export PATH=$PATH:/usr/local/bin
+
 prog="iyyov"
 daemon="${gem_home}/gems/iyyov-${version}-java/init/${prog}"
 config="${rundir}/jobs.rb"
@@ -40,16 +37,16 @@ start() {
     [ -f "$config" ] || exit 6
     [ -d "$rundir" ] || exit 7
 
-    log_daemon_msg "Starting Iyyov Daemon" "iyyov"
-    start-stop-daemon --start -d $rundir -c $user --exec $daemon -- $config
+    echo -n $"Starting $prog: "
+    runuser -c "cd $rundir && $daemon $config" $user
     RETVAL=$?
-    log_end_msg $RETVAL
+    [ $RETVAL -eq 0 ] && success $"$prog startup" || failure $"$prog startup"
+    echo
 }
 
 status() {
     if [ -f "$pidfile" ]; then
-        pid=`cat $pidfile`
-        echo "Status $prog: running pid $pid"
+        echo "Status $prog: running pid $(<$pidfile)"
     else
         echo "Status $prog: not running"
     fi
@@ -62,10 +59,12 @@ reload() {
 }
 
 stop() {
-    log_daemon_msg "Stopping iyyov daemon" "iyyov"
-    start-stop-daemon --stop --quiet --oknodo --pidfile $pidfile
+    echo -n $"Shutting down $prog: "
+    killproc -p $pidfile $prog
     RETVAL=$?
-    log_end_msg $RETVAL
+    [ $RETVAL -eq 0 ] && success || failure
+    echo
+    return $RETVAL
 }
 
 case "$1" in
