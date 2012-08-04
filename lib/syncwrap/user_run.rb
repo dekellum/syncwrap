@@ -81,7 +81,7 @@ module SyncWrap::UserRun
   end
 
   def user_exist?
-    exec_conditional { run "id #{user_run}" } == 0
+    exec_conditional { run "id #{user_run} >/dev/null" } == 0
   end
 
   def user_create
