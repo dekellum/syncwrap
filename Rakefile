@@ -29,7 +29,7 @@ class SyncWrapper
     super
 
     # SETUP: Install user@server instance goes here
-    set :domain, "localhost"
+    set :domain, "ec2-user@ec2-54-245-8-146.us-west-2.compute.amazonaws.com"
 
     set :ssh_flags,   %w[ -i key.pem ]
     set :rsync_flags, [ '-e', "ssh -i key.pem" ] + %w[ -rlpcb -ii ]
