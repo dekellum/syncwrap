@@ -31,6 +31,11 @@ class SyncWrapper
     # SETUP: Install user@server instance goes here
     set :domain, "localhost"
 
+    set :ssh_flags,   %w[ -i key.pem ]
+    set :rsync_flags, [ '-e', "ssh -i key.pem" ] + %w[ -rlpcb -ii ]
+
+    self.java_repo_base_url =
+      'https://s3-us-west-2.amazonaws.com/repo.gravitext.com'
   end
 
   def define_tasks
