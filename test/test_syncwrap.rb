@@ -27,6 +27,7 @@ require 'syncwrap/java'
 require 'syncwrap/hashdot'
 require 'syncwrap/jruby'
 require 'syncwrap/iyyov'
+require 'syncwrap/geminabox'
 require 'syncwrap/ec2'
 require 'syncwrap/ubuntu'
 require 'syncwrap/rhel'
@@ -40,6 +41,7 @@ class TestSyncWrap < MiniTest::Unit::TestCase
     include SyncWrap::Hashdot
     include SyncWrap::JRuby
     include SyncWrap::Iyyov
+    include SyncWrap::Geminabox
 
     include SyncWrap::RHEL
     include SyncWrap::Ubuntu # Not a recomendated combo
