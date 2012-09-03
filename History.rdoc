@@ -1,4 +1,10 @@
 === 1.1.0 (TBD)
+* Add (boxed-)geminabox provisions and deploy task
+* Upgrade to (default) jdk-ora-1.7.0_05-x64
+* RHEL version of test Rakefile, init.d/iyyov
+* Fix RHEL yum args
+* Silence user_exist? id command output
+* iyyov_install_rundir as user_run
 
 === 1.0.0 (2012-7-15)
 * Initial release.
