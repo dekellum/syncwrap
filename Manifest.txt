@@ -15,6 +15,7 @@ lib/syncwrap.rb
 lib/syncwrap/common.rb
 lib/syncwrap/distro.rb
 lib/syncwrap/ec2.rb
+lib/syncwrap/geminabox.rb
 lib/syncwrap/hashdot.rb
 lib/syncwrap/iyyov.rb
 lib/syncwrap/java.rb
@@ -26,3 +27,4 @@ lib/syncwrap/ubuntu.rb
 lib/syncwrap/user_run.rb
 test/test_syncwrap.rb
 usr/local/bin/jgem
+var/iyyov/jobs.rb
