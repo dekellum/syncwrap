@@ -48,6 +48,13 @@ class SyncWrapper
       iyyov_install
     end
 
+    desc "Deploy Geminabox Daemon"
+    remote_task :geminabox_deploy do
+      iyyov_install_jobs do
+        geminabox_install
+      end
+    end
+
     desc "Deploy PostgreSQL"
     remote_task :pg_deploy do
       pg_install

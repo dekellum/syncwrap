@@ -15,7 +15,6 @@
 #++
 
 require 'syncwrap/user_run'
-require 'syncwrap/distro'
 require 'syncwrap/jruby'
 
 # Provisions the
@@ -29,7 +28,6 @@ module SyncWrap::Geminabox
 
   def initialize
     super
-
     @geminabox_version = '1.0.0'
   end
 
