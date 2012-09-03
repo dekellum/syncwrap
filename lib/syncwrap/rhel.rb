@@ -36,12 +36,12 @@ module SyncWrap::RHEL
 
   def dist_install( *pkgs )
     pkgs = dist_map_packages( pkgs )
-    sudo "yum install -qy #{pkgs.join( ' ' )}"
+    sudo "yum install -q -y #{pkgs.join( ' ' )}"
   end
 
   def dist_uninstall( *pkgs )
     pkgs = dist_map_packages( pkgs )
-    sudo "yum remove -qy #{pkgs.join( ' ' )}"
+    sudo "yum remove -q -y #{pkgs.join( ' ' )}"
   end
 
   def dist_install_init_service( name )
