@@ -49,17 +49,29 @@ module SyncWrap::Iyyov
       sleep 15
     end
 
+    # Any Iyyov restart completes *before* job changes
+
     # FIXME: Need a better solution to wait on Iyyov than an arbitrary
     # sleep.
 
-    # Any Iyyov restart completes *before* job changes
+    tfile = '/tmp/iyyov_jobs_deploy'
+    sudo <<-SH
+      rm -f #{tfile}
+      touch #{tfile}
+    SH
 
     yield if block_given?
 
     user_run_rput( 'var/iyyov/jobs.rb', iyyov_run_dir )
 
-    # FIXME: If no jobs.rb change, still touch file to ensure
-    # check, but avoid both an update and a touch...
+    # Touch jobs.rb if not changed by above, so iyyov can check if
+    # daemons need restart.
+    sudo( <<-SH, :user => user_run )
+      if [ #{iyyov_run_dir}/jobs.rb -ot #{tfile} ]; then
+        touch #{iyyov_run_dir}/jobs.rb
+        echo "touch #{iyyov_run_dir}/jobs.rb"
+      fi
+    SH
 
   end
 
