@@ -30,7 +30,7 @@ module SyncWrap::Iyyov
   def initialize
     super
 
-    @iyyov_version = '1.1.3'
+    @iyyov_version = '1.1.4'
   end
 
   # Install then (re-)start Iyyov if needed, yield to block if given
