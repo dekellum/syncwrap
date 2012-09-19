@@ -6,7 +6,7 @@
 
 # JVM install directory
 # Linux:
-hashdot.vm.home = /usr/local/lib/jdk-ora-1.7.0_05-x64
+hashdot.vm.home = /usr/local/lib/jdk-ora-1.7.0_07-x64
 # Mac (default JVM): hashdot.vm.home = /System/Library/Frameworks/JavaVM.framework
 # Mac (version JVM): hashdot.vm.home = /System/Library/Frameworks/JavaVM.framework/Versions/1.6.0
 
