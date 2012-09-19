@@ -35,7 +35,7 @@ module SyncWrap::Java
     super
 
     @java_repo_base_url = 'http://localhost/repo'
-    @java_jdk_name = 'jdk-ora-1.7.0_05-x64'
+    @java_jdk_name = 'jdk-ora-1.7.0_07-x64'
   end
 
   def java_jdk_url
