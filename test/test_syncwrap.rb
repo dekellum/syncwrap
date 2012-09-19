@@ -57,7 +57,7 @@ class TestSyncWrap < MiniTest::Unit::TestCase
                   'Common#initialize should run for defaults' )
     assert_equal( 'runr', w.user_run,
                   'UserRun#initialize should run for defaults' )
-    assert_equal( '1.1.3', w.iyyov_version,
+    assert_equal( '1.1.4', w.iyyov_version,
                   'Iyyov#initialize should run for defaults' )
   end
 
