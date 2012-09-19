@@ -1,4 +1,10 @@
 === 1.1.1 (TBD)
+* Touch jobs.rb if not otherwise modified by iyyov_install_jobs. This
+  notifies iyyov to restart a daemon when the jobs.rb is otherwise
+  unchanged (and using a daemon version range.)
+* Upgrade to JRuby 1.6.8 (default)
+* Upgrade to Iyyov 1.1.4 (default, in init.d/iyyov)
+* Upgrade to java 1.7.0_07
 
 === 1.1.0 (2012-9-13)
 * Add (boxed-)geminabox provisions and deploy task
