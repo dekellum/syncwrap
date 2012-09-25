@@ -1,6 +1,6 @@
 # JDK used for compiling, a different one can be set at runtime,
 # see profiles/default.hdp
-JAVA_HOME=/usr/local/lib/jdk-ora-1.7.0_05-x64
+JAVA_HOME=/usr/local/lib/jdk-ora-1.7.0_07-x64
 # Dependent on apache portable runtime (apr-devel-1.x apr-1.x)
 APR_CONFIG=$(shell which apr-1-config)
 
