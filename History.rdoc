@@ -1,4 +1,6 @@
-=== 1.2.1 (TBD)
+=== 1.2.1 (2012-9-25)
+* Build hashdot with java 1.7.0_07 as well
+* Fix lib jruby link on update: --no-dereference
 
 === 1.2.0 (2012-9-25)
 * Touch jobs.rb if not otherwise modified by iyyov_install_jobs. This
