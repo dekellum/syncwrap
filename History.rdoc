@@ -1,4 +1,4 @@
-=== 1.1.1 (TBD)
+=== 1.2.0 (TBD)
 * Touch jobs.rb if not otherwise modified by iyyov_install_jobs. This
   notifies iyyov to restart a daemon when the jobs.rb is otherwise
   unchanged (and using a daemon version range.)
