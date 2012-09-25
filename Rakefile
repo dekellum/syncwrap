@@ -14,6 +14,7 @@ require 'syncwrap/iyyov'
 require 'syncwrap/rhel'
 require 'syncwrap/postgresql'
 require 'syncwrap/remote_task'
+require 'syncwrap/geminabox'
 
 class SyncWrapper
   include SyncWrap::Java
@@ -22,6 +23,7 @@ class SyncWrapper
   include SyncWrap::Iyyov
   include SyncWrap::RHEL
   include SyncWrap::PostgreSQL
+  include SyncWrap::Geminabox
 
   include SyncWrap::RemoteTask
 
