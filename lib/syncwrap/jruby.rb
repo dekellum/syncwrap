@@ -56,7 +56,7 @@ module SyncWrap::JRuby
       mkdir -p #{root}
       mkdir -p #{root}/gems
       curl -sSL #{url} | tar -C #{root} -zxf -
-      cd #{root} && ln -sf jruby-#{jruby_version} jruby
+      cd #{root} && ln -sfn jruby-#{jruby_version} jruby
       cd #{common_prefix}/bin && ln -sf ../lib/jruby/jruby/bin/jirb .
     SH
 
