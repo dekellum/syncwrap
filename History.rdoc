@@ -1,4 +1,13 @@
 === 1.3.0 (TBD)
+* Include RHEL/Amazon Linux Postgresql 9.1 config and deploy support
+  and reorganize for Ubuntu support as well. Default deploy data dir
+  is now /pg/data which makes sense for an EBS mount. Config is
+  further tuned for EBS.  PostgreSQL::EC2 has been dropped.
+  PostgreSQL::RHEL and PostgreSQL::Ubuntu are auto-included with
+  PostgreSQL module if RHEL or Ubuntu is included.
+* Include jstat in list of java command symlinks with java_install
+* EC2.ec2_reformat_mnt_as_ext is for ephemoral not EBS, rename
+  attribute to ec2_es_device
 
 === 1.2.1 (2012-9-25)
 * Build hashdot with java 1.7.0_07 as well
