@@ -37,14 +37,17 @@ module SyncWrap::Iyyov
   # for daemon gem or other setup, then finally update remote
   # (user_run) var/iyyov/jobs.rb; which will trigger any necessary
   # restarts.
-  def iyyov_install_jobs
+  # === Options
+  # :install:: If true, run iyyov_install first and make sure iyyov is
+  # running (default: false)
+  def iyyov_install_jobs( opts = {} )
     user_run_dir_setup
 
-    restart = iyyov_install
+    restart = opts[ :install ] && iyyov_install
     if restart
       iyyov_restart
       sleep 15
-    elsif !exist?( "#{iyyov_run_dir}/iyyov.pid" )
+    elsif opts[ :install ] && !exist?( "#{iyyov_run_dir}/iyyov.pid" )
       iyyov_start
       sleep 15
     end
