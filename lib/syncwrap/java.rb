@@ -47,7 +47,7 @@ module SyncWrap::Java
   end
 
   def java_install!
-    bins = %w[ java jmap jstack jps jinfo jhat javac ].
+    bins = %w[ java jmap jstack jstat jps jinfo jhat javac ].
       map { |b| "../lib/java/bin/#{b}" }.
       join( ' ' )
 
