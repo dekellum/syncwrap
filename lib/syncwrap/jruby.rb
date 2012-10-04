@@ -38,11 +38,22 @@ module SyncWrap::JRuby
     @jruby_gem_install_args = %w[ --no-rdoc --no-ri ]
   end
 
+  def jruby_gemrc_path
+    "#{common_prefix}/lib/jruby/jruby-#{jruby_version}/etc"
+  end
+
   # Install jruby if the jruby_version is not already present.
   def jruby_install
     unless exist?( "#{common_prefix}/lib/jruby/jruby-#{jruby_version}" )
       jruby_install!
     end
+    jruby_install_gemrc
+  end
+
+  # Install gemrc file to jruby_gemrc_path
+  def jruby_install_gemrc
+    sudo "mkdir -p #{jruby_gemrc_path}"
+    rput( 'etc/gemrc', jruby_gemrc_path, :user => 'root' )
   end
 
   # Install jruby, including usr/local/bin local contents

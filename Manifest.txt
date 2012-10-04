@@ -2,6 +2,7 @@ History.rdoc
 Manifest.txt
 README.rdoc
 Rakefile
+etc/gemrc
 etc/init.d/iyyov
 etc/sysconfig/pgsql/postgresql
 etc/sysctl.d/61-postgresql-shm.conf
