@@ -20,27 +20,27 @@ require 'syncwrap/common'
 module SyncWrap::EC2
   include SyncWrap::Common
 
-  # The device name of the EBS device mounted on /mnt
+  # The device name of the ephemeral storage device
   # (default: 'xvdb')
-  attr_accessor :ec2_ebs_mnt_device
+  attr_accessor :ec2_es_device
 
   def initialize
     super
 
-    @ec2_ebs_mnt_device = 'xvdb'
+    @ec2_es_device = 'xvdb'
   end
 
   # WARNING: Destructive if run!
-  # Re-mkfs /mnt partition as ext4 if its ec2_ebs_mnt_device and is
+  # Re-mkfs /mnt partition as ext4 if its ec2_es_device and is
   # currently ext3
   def ec2_reformat_mnt_as_ext4
     rc = exec_conditional do
-      run "mount | grep '/dev/#{ec2_ebs_mnt_device} on /mnt'"
+      run "mount | grep '/dev/#{ec2_es_device} on /mnt'"
     end
-    raise "Device /dev/#{ec2_ebs_mnt_device} not mounted on /mnt" unless rc == 0
+    raise "Device /dev/#{ec2_es_device} not mounted on /mnt" unless rc == 0
 
     rc = exec_conditional do
-      run "mount | grep '/dev/#{ec2_ebs_mnt_device} on /mnt type ext3'"
+      run "mount | grep '/dev/#{ec2_es_device} on /mnt type ext3'"
     end
     ec2_reformat_mnt_as_ext4! if rc == 0
   end
@@ -51,7 +51,7 @@ module SyncWrap::EC2
   def ec2_reformat_mnt_as_ext4!
     sudo <<-SH
       umount /mnt
-      mkfs -t ext4 /dev/#{ec2_ebs_mnt_device}
+      mkfs -t ext4 /dev/#{ec2_es_device}
       mount  /mnt
     SH
   end

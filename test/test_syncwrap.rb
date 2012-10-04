@@ -42,13 +42,9 @@ class TestSyncWrap < MiniTest::Unit::TestCase
     include SyncWrap::JRuby
     include SyncWrap::Iyyov
     include SyncWrap::Geminabox
-
-    include SyncWrap::RHEL
-    include SyncWrap::Ubuntu # Not a recomendated combo
-
+    include SyncWrap::Ubuntu
     include SyncWrap::EC2
-    include SyncWrap::PostgreSQL::Ubuntu
-    include SyncWrap::PostgreSQL::EC2
+    include SyncWrap::PostgreSQL
   end
 
   def test_init

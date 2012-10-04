@@ -15,22 +15,41 @@
 #++
 
 require 'syncwrap/distro'
+require 'syncwrap/ubuntu'
+require 'syncwrap/rhel'
 
 # Provisions for install and configuration of PostgreSQL
 module SyncWrap::PostgreSQL
   include SyncWrap::Distro
 
+  # Location of postgresql data dir (databases + config in default
+  # case)
+  attr_accessor :pg_data_dir
+
+  # The stock distribution default data_dir. Difference with
+  # pg_data_dir triggers additional install steps.
+  attr_accessor :pg_default_data_dir
+
+  # Local directory for configuration files (different by
+  # distribution)
+  attr_accessor :pg_deploy_config
+
   def initialize
     super
+    @pg_data_dir = '/pg/data'
   end
 
-  # Update PostgreSQL config files from local etc
-  def pg_configure
-    rput( 'etc/postgresql/9.1/main/', :user => 'postgres' )
+  def pg_config_dir
+    @pg_data_dir
   end
 
   def pg_install
     dist_install 'postgresql'
+  end
+
+  # Update PostgreSQL config files
+  def pg_configure
+    rput( "#{pg_deploy_config}/", pg_config_dir, :user => 'postgres' )
   end
 
   def pg_start
@@ -41,32 +60,72 @@ module SyncWrap::PostgreSQL
     dist_service( 'postgresql', 'stop' )
   end
 
-  def pg_adjust_sysctl
-    rput( 'etc/sysctl.d/61-postgresql-shm.conf', :user => 'root' )
-    sudo "sysctl -p /etc/sysctl.d/61-postgresql-shm.conf"
+  def self.included( base )
+    if base.include?( SyncWrap::RHEL )
+      base.send( :include, SyncWrap::PostgreSQL::RHEL )
+    elsif base.include?( SyncWrap::Ubuntu )
+      base.send( :include, SyncWrap::PostgreSQL::Ubuntu )
+    end
+  end
+
+  module RHEL
+
+    def initialize
+      super
+      #Per Amazon Linux 2012 3.3
+      @pg_default_data_dir = '/var/lib/pgsql9/data'
+      @pg_deploy_config = 'postgresql/rhel'
+    end
+
+    def pg_install
+      super
+      unless @pg_data_dir == @pg_default_data_dir
+        # (Per Amazon Linux)
+        # Install PGDATA var override for init.d/postgresql
+        rput( 'etc/sysconfig/pgsql/postgresql', :user => 'root' )
+        sudo <<-SH
+          mkdir -p #{pg_data_dir}
+          chown postgres:postgres #{pg_data_dir}
+          chmod 700 #{pg_data_dir}
+        SH
+      end
+      dist_service( 'postgresql', 'initdb' )
+    end
+
   end
 
   module Ubuntu
-    include SyncWrap::PostgreSQL
 
     def initialize
       super
+      @pg_default_data_dir = '/var/lib/postgresql/9.1/main'
+      @pg_deploy_config = 'postgresql/ubuntu'
     end
 
-  end
-
-  module EC2
-    include SyncWrap::PostgreSQL
-
-    def initialize
+    def pg_install
       super
+      pg_stop #Ubuntu does a start
+      pg_adjust_sysctl
+      pg_relocate unless @pg_data_dir == @pg_default_data_dir
     end
 
+    def pg_config_dir
+      "/etc/postgresql/9.1/main"
+    end
+
+    def pg_adjust_sysctl
+      rput( 'etc/sysctl.d/61-postgresql-shm.conf', :user => 'root' )
+      sudo "sysctl -p /etc/sysctl.d/61-postgresql-shm.conf"
+    end
+
+    # Move the data dir into its final location, since on Ubuntu the
+    # package install does the initdb step
     def pg_relocate
-      # FIXME: Different default location on RHEL?
       sudo <<-SH
-        mkdir -p /mnt/var/postgresql/
-        mv /var/lib/postgresql/9.1 /mnt/var/postgresql/
+        mkdir -p #{pg_data_dir}
+        chown postgres:postgres #{pg_data_dir}
+        chmod 700 #{pg_data_dir}
+        mv #{pg_default_data_dir}/* #{pg_data_dir}/
       SH
     end
 
