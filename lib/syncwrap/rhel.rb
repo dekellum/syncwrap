@@ -29,11 +29,6 @@ module SyncWrap::RHEL
                          'postgresql' => 'postgresql-server' )
   end
 
-  # FIXME
-  # rpm -Uvh \
-  # http://linux.mirrors.es.net/fedora-epel/6/x86_64/ \
-  # epel-release-6-7.noarch.rpm
-
   def dist_install( *pkgs )
     pkgs = dist_map_packages( pkgs )
     sudo "yum install -q -y #{pkgs.join( ' ' )}"
