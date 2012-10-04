@@ -83,6 +83,11 @@ module SyncWrap::PostgreSQL
         # (Per Amazon Linux)
         # Install PGDATA var override for init.d/postgresql
         rput( 'etc/sysconfig/pgsql/postgresql', :user => 'root' )
+        sudo <<-SH
+          mkdir -p #{pg_data_dir}
+          chown postgres:postgres #{pg_data_dir}
+          chmod 700 #{pg_data_dir}
+        SH
       end
       dist_service( 'postgresql', 'initdb' )
     end
@@ -119,6 +124,7 @@ module SyncWrap::PostgreSQL
       sudo <<-SH
         mkdir -p #{pg_data_dir}
         chown postgres:postgres #{pg_data_dir}
+        chmod 700 #{pg_data_dir}
         mv #{pg_default_data_dir}/* #{pg_data_dir}/
       SH
     end
