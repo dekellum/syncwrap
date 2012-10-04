@@ -5,6 +5,9 @@
   further tuned for EBS.  PostgreSQL::EC2 has been dropped.
   PostgreSQL::RHEL and PostgreSQL::Ubuntu are auto-included with
   PostgreSQL module if RHEL or Ubuntu is included.
+* For performance on relatively slow virtual hosts, only check
+  iyyov_install if iyyov_install_jobs( :install => true )
+* Add generic etc/gemrc and jruby_install_gemrc (incl in jruby_install)
 * Include jstat in list of java command symlinks with java_install
 * EC2.ec2_reformat_mnt_as_ext is for ephemoral not EBS, rename
   attribute to ec2_es_device
