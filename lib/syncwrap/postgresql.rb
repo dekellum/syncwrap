@@ -22,10 +22,16 @@ require 'syncwrap/rhel'
 module SyncWrap::PostgreSQL
   include SyncWrap::Distro
 
-  # Location of
+  # Location of postgresql data dir (databases + config in default
+  # case)
   attr_accessor :pg_data_dir
 
+  # The stock distribution default data_dir. Difference with
+  # pg_data_dir triggers additional install steps.
   attr_accessor :pg_default_data_dir
+
+  # Local directory for configuration files (different by
+  # distribution)
   attr_accessor :pg_deploy_config
 
   def initialize
@@ -91,11 +97,6 @@ module SyncWrap::PostgreSQL
       @pg_deploy_config = 'postgresql/ubuntu'
     end
 
-    def pg_adjust_sysctl
-      rput( 'etc/sysctl.d/61-postgresql-shm.conf', :user => 'root' )
-      sudo "sysctl -p /etc/sysctl.d/61-postgresql-shm.conf"
-    end
-
     def pg_install
       super
       pg_stop #Ubuntu does a start
@@ -105,6 +106,11 @@ module SyncWrap::PostgreSQL
 
     def pg_config_dir
       "/etc/postgresql/9.1/main"
+    end
+
+    def pg_adjust_sysctl
+      rput( 'etc/sysctl.d/61-postgresql-shm.conf', :user => 'root' )
+      sudo "sysctl -p /etc/sysctl.d/61-postgresql-shm.conf"
     end
 
     # Move the data dir into its final location, since on Ubuntu the
