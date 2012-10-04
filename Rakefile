@@ -60,8 +60,6 @@ class SyncWrapper
     desc "Deploy PostgreSQL"
     remote_task :pg_deploy do
       pg_install
-      pg_stop
-      pg_adjust_sysctl
       pg_configure
       pg_start
     end
