@@ -2,6 +2,7 @@ History.rdoc
 Manifest.txt
 README.rdoc
 Rakefile
+etc/gemrc
 etc/init.d/iyyov
 etc/postgresql/9.1/main/environment
 etc/postgresql/9.1/main/pg_ctl.conf
