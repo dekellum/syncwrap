@@ -48,8 +48,25 @@ module SyncWrap::Qpid
   def qpid_install
     unless exist?( "/usr/local/sbin/qpidd" )
       qpid_install!
+      qpid_install_init!
     end
     qpid_tools_install
+    rput( 'usr/local/etc/qpidd.conf', :user => 'root' )
+  end
+
+  def qpid_install_init!
+    unless exec_conditional { run "id qpidd >/dev/null" } == 0
+      sudo <<-SH
+        useradd -r qpidd
+        mkdir -p /var/local/qpidd
+        chown qpidd:qpidd /var/local/qpidd
+      SH
+    end
+
+    rput( 'etc/init.d/qpidd', :user => 'root' )
+
+    # Add to init.d
+    dist_install_init_service( 'qpidd' )
   end
 
   def qpid_tools_install
@@ -164,9 +181,9 @@ module SyncWrap::Qpid
   end
 
   def corosync_packages( include_devel = false )
-    packs = [ "corosync-#{version}-1.#{qpid_distro}.x86_64.rpm",
-              "corosynclib-#{version}-1.#{qpid_distro}.x86_64.rpm" ]
-    packs <<  "corosynclib-devel-#{version}-1.#{qpid_distro}.x86_64.rpm" if include_devel
+    packs = [ "corosync-#{corosync_version}-1.#{qpid_distro}.x86_64.rpm",
+              "corosynclib-#{corosync_version}-1.#{qpid_distro}.x86_64.rpm" ]
+    packs <<  "corosynclib-devel-#{corosync_version}-1.#{qpid_distro}.x86_64.rpm" if include_devel
     packs
   end
 
@@ -191,8 +208,16 @@ module SyncWrap::Qpid
       @qpid_prebuild_repo = nil
     end
 
+    def qpid_install
+      corosync_install
+      super
+    end
+
     def qpid_install!
       raise "qpid_prebuild_repo required, but not set" unless qpid_prebuild_repo
+
+      dist_install( %w[ boost cyrus-sasl ] )
+
       sudo <<-SH
         cd /usr/local
         curl -sS #{qpid_prebuild_repo}/qpidc-#{qpid_version}-1-#{qpid_distro}-x64.tar.gz | tar -zxf -
@@ -201,7 +226,7 @@ module SyncWrap::Qpid
 
     def corosync_install!( opts = {} )
       raise "qpid_prebuild_repo required, but not set" unless qpid_prebuild_repo
-      packs = corosync_packages( opts[ :devel ] )
+      packs = corosync_packages
       curls = packs.map do |p|
         "curl -sS -O #{qpid_prebuild_repo}/#{p}"
       end

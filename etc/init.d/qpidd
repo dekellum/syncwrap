@@ -1,0 +1,89 @@
+#!/bin/bash
+#
+# qpidd        Startup script for the Qpid messaging daemon.
+#
+# chkconfig: 2345 85 15
+# description: Qpidd is an AMQP broker.
+# processname: qpidd
+# config: /usr/local/etc/qpidd.conf
+
+prog=qpidd
+lockfile=/var/lock/subsys/$prog
+pidfile=/var/run/qpidd.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+if [ -f /etc/sysconfig/$prog ] ; then
+    . /etc/sysconfig/$prog
+fi
+
+RETVAL=0
+
+#ensure binary is present and executable
+if [[ !(-x /usr/local/sbin/$prog) ]] ; then
+    echo "/usr/local/sbin/$prog not found or not executable"
+    exit 5
+fi
+
+#ensure user has sufficient permissions
+runuser -s /bin/sh qpidd -c "echo x > /dev/null" 2> /dev/null || RETVAL=4
+if [ $RETVAL = 4 ]; then
+    echo "user had insufficient privilege";
+    exit $RETVAL
+fi
+
+start() {
+    echo -n $"Starting Qpid AMQP daemon: "
+    daemon --pidfile $pidfile --check $prog --user qpidd /usr/local/sbin/$prog --daemon $QPID_OPTIONS
+    RETVAL=$?
+    echo
+    [ $RETVAL = 0 ] && touch $lockfile
+    if [ $RETVAL = 0 ]; then
+        touch $pidfile
+        chown qpidd.qpidd $pidfile
+        [ -x /sbin/restorecon ] && /sbin/restorecon $pidfile
+        runuser -s /bin/sh qpidd -c "/usr/local/sbin/$prog --check > $pidfile"
+    fi
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping Qpid AMQP daemon: "
+    killproc -p ${pidfile} $prog
+    RETVAL=$?
+    echo
+    [ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
+}
+
+reload() {
+    echo 1>&2 $"$0: reload not supported"
+    exit 3
+}
+
+restart() {
+    stop
+    start
+}
+
+# See how we were called.
+case "$1" in
+  start|stop|restart|reload)
+    $1
+    ;;
+  status)
+    status $prog
+    RETVAL=$?
+    ;;
+  force-reload)
+    restart
+    ;;
+  try-restart|condrestart)
+    [ -e $lockfile ] && restart || :
+    ;;
+  *)
+    echo 1>&2 $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|force-reload}"
+    exit 2
+esac
+
+exit $RETVAL

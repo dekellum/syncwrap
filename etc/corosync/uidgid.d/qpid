@@ -1,0 +1,4 @@
+uidgid {
+  uid: qpidd
+  gid: qpidd
+}
