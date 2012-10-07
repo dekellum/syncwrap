@@ -17,6 +17,7 @@ lib/syncwrap/iyyov.rb
 lib/syncwrap/java.rb
 lib/syncwrap/jruby.rb
 lib/syncwrap/postgresql.rb
+lib/syncwrap/qpid.rb
 lib/syncwrap/remote_task.rb
 lib/syncwrap/rhel.rb
 lib/syncwrap/ubuntu.rb
