@@ -65,7 +65,19 @@ module SyncWrap::Qpid
 
   def qpid_tools_install!
     dist_install( 'python-setuptools' )
-    sudo "easy_install #{qpid_tools_tarball}"
+    qpid_src = "#{qpid_src_root}/qpid-#{qpid_version}"
+
+    run <<-SH
+      mkdir -p #{qpid_src_root}
+      rm -rf #{qpid_src}
+      cd #{qpid_src_root}
+      curl -sSL #{qpid_tools_tarball} | tar -zxf -
+    SH
+
+    sudo <<-SH
+      cd #{qpid_src}
+      easy_install ./python ./tools ./extras/qmf
+    SH
   end
 
   def qpid_build
@@ -110,7 +122,7 @@ module SyncWrap::Qpid
   end
 
   def qpid_tools_tarball
-    "#{qpid_repo}/#{qpid_version}/qpid-tools-#{qpid_version}.tar.gz"
+    "#{qpid_repo}/#{qpid_version}/qpid-#{qpid_version}.tar.gz"
   end
 
   def qpid_install_build_deps
@@ -203,8 +215,10 @@ module SyncWrap::Qpid
       dist_install( "/tmp/rpm-drop/*.rpm", :succeed => true )
     end
 
+    # Where uploaded qpid-python-tools-M.N.tar.gz contains the
+    # ./python ./tools ./extras/qmf packages for easy_install.
     def qpid_tools_tarball
-      "#{qpid_prebuild_repo}/qpid-tools-#{qpid_version}.tar.gz"
+      "#{qpid_prebuild_repo}/qpid-python-tools-#{qpid_version}.tar.gz"
     end
 
   end
