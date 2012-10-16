@@ -1,4 +1,4 @@
-=== 1.4.0 (TBD)
+=== 1.4.0 (2012-10-16)
 * PostgreSQL configuration updates for 9.2.x (RHEL only)
 * Add support for build, deploy, configure of Apache Qpid for which
   stock RPMs are not available on Amazon Linux. This includes corosync
