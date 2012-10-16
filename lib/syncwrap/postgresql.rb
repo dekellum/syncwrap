@@ -50,6 +50,7 @@ module SyncWrap::PostgreSQL
   # Update PostgreSQL config files
   def pg_configure
     rput( "#{pg_deploy_config}/", pg_config_dir, :user => 'postgres' )
+    sudo( "chmod 700 #{pg_data_dir}" ) if pg_config_dir == pg_data_dir
   end
 
   def pg_start
