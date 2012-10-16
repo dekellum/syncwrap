@@ -29,9 +29,27 @@ module SyncWrap::RHEL
                          'postgresql' => 'postgresql-server' )
   end
 
+  # Install packages. The last argument is interpreted as a options if
+  # it is a Hash.
+  # === Options
+  # :succeed:: Always succeed (useful for local rpms which might
+  # already be installed.
   def dist_install( *pkgs )
+
+    if pkgs.last.is_a?( Hash )
+      pkgs = pkgs.dup
+      opts = pkgs.pop
+    else
+      opts = {}
+    end
+
     pkgs = dist_map_packages( pkgs )
-    sudo "yum install -q -y #{pkgs.join( ' ' )}"
+
+    if opts[ :succeed ]
+      sudo "yum install -q -y #{pkgs.join( ' ' )} || true"
+    else
+      sudo "yum install -q -y #{pkgs.join( ' ' )}"
+    end
   end
 
   def dist_uninstall( *pkgs )

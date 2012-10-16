@@ -3,7 +3,10 @@ Manifest.txt
 README.rdoc
 Rakefile
 etc/gemrc
+etc/corosync/corosync.conf
+etc/corosync/uidgid.d/qpid
 etc/init.d/iyyov
+etc/init.d/qpidd
 etc/sysconfig/pgsql/postgresql
 etc/sysctl.d/61-postgresql-shm.conf
 lib/syncwrap/base.rb
@@ -17,6 +20,7 @@ lib/syncwrap/iyyov.rb
 lib/syncwrap/java.rb
 lib/syncwrap/jruby.rb
 lib/syncwrap/postgresql.rb
+lib/syncwrap/qpid.rb
 lib/syncwrap/remote_task.rb
 lib/syncwrap/rhel.rb
 lib/syncwrap/ubuntu.rb
@@ -32,4 +36,5 @@ postgresql/ubuntu/postgresql.conf
 postgresql/ubuntu/start.conf
 test/test_syncwrap.rb
 usr/local/bin/jgem
+usr/local/etc/qpidd.conf
 var/iyyov/jobs.rb
