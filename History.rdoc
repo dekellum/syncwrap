@@ -1,4 +1,10 @@
 === 1.4.0 (TBD)
+* PostgreSQL configuration updates for 9.2.x (RHEL only)
+* Add support for build, deploy, configure of Apache Qpid for which
+  stock RPMs are not available on Amazon Linux. This includes corosync
+  build for a working cluster setup on EC2.
+* Add :succeed option to RHEL.dist_install (for local RPM files that
+  may already be installed)
 
 === 1.3.0 (2012-10-4)
 * Include RHEL/Amazon Linux Postgresql 9.1 config and deploy support
