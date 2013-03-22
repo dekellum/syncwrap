@@ -1,10 +1,10 @@
 # -*- ruby -*-
 
-source :rubygems
+source 'https://rubygems.org'
 
 gemspec :name => 'syncwrap'
 
-gem( 'rake', '~> 0.9.2' )
+gem( 'rake', '~> 10.0.3' )
 gem( 'rake-remote_task',
      :git => 'git://github.com/dekellum/rake-remote_task.git',
-     :tag => 'v2.0.6-jruby.1' )
+     :tag => 'v2.1.0-jruby.0' )
