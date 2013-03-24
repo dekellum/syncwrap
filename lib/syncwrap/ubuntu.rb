@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/distro'
+require 'thread'
 
 # Customizations for Ubuntu and possibly other Debian/apt packaged
 # derivatives. Specific distros/versions may further specialize.
@@ -22,14 +23,19 @@ module SyncWrap::Ubuntu
   include SyncWrap::Distro
 
   def initialize
+    @apt_update_state_lock = Mutex.new
+    @apt_update_state = {}
+
     super
 
     packages_map.merge!( 'apr'       => 'libapr1',
                          'apr-devel' => 'libapr1-dev' )
   end
 
-  # Generate command to install packages. The last argument is
-  # interpreted as a options if it is a Hash.
+  # Generate the apt-get command to install packages. The first time
+  # this is applied to any given host, an "apt-get update" is issued
+  # as well. The last argument is interpreted as a options if it is a
+  # Hash.
   # === Options
   # :minimal:: Eqv to --no-install-recommends
   def dist_install_s( *args )
@@ -40,9 +46,20 @@ module SyncWrap::Ubuntu
       opts = {}
     end
 
+    commands = []
+
+    @apt_update_state_lock.synchronize do
+      unless @apt_update_state[ target_host ]
+        commands << "apt-get -yq update"
+        @apt_update_state[ target_host ] = true
+      end
+    end
+
     args = dist_map_packages( args )
     args.unshift "--no-install-recommends" if opts[ :minimal ]
-    "apt-get -yq install #{args.join ' '}"
+    commands << "apt-get -yq install #{args.join ' '}"
+
+    commands.join( "\n" )
   end
 
   def dist_uninstall_s( *args )
