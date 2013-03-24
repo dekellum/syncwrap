@@ -27,14 +27,35 @@ module SyncWrap::AWS
   # the minimal required keys: access_key_id, secret_access_key
   attr_accessor :aws_config_json
 
+  attr_accessor :aws_instances_json
+
+  # Array of region strings to check for aws_import_instances
   attr_accessor :aws_regions
 
+  # Array of imported or read instances represented as hashes.
+  attr_accessor :aws_instances
+
+  # Default options (which may be overriden) in call to
+  # aws_create_instance.
+  attr_accessor :aws_default_instance_options
+
   def initialize
-    @aws_config_json = './private/aws.json'
-    @aws_regions = %w[ us-east-1 ]
+    @aws_config_json   = 'private/aws.json'
+    @aws_regions       = %w[ us-east-1 ]
+    @aws_instances_json = 'aws_instances.json'
+    @aws_instances = []
+    @aws_default_instance_options = {
+      :ebs_volumes     => 0,
+      :ebs_volume_options => { :size => 16 }, #gb
+      :security_groups => :default,
+      :instance_type   => 'm1.medium',
+      :region          => 'us-east-1'
+    }
+
     super
 
     aws_configure
+    aws_read_instances if File.exist?( @aws_instances_json )
   end
 
   def aws_configure
@@ -42,39 +63,116 @@ module SyncWrap::AWS
                             :symbolize_names => true ) )
   end
 
-  def aws_dump_instances( fout = $stdout )
-    fout.puts '['
+  def aws_create_instance( name, opts = {} )
+    opts = deep_merge_hashes( @aws_default_instance_options, opts )
+    region = opts.delete( :region )
+    ec2 = AWS::EC2.new.regions[ region ]
+
+    inst = ec2.instances.create( opts )
+
+    inst.add_tag( 'Name', :value => name )
+
+    if opts[ :roles ]
+      inst.add_tag( 'Roles', :value => opts[ :roles ].join(' ') )
+    end
+
+    wait_for_running( inst )
+
+    if opts[ :ebs_volumes ] > 0
+      vopts = { :availability_zone => inst.availability_zone }.
+        merge( opts[ :ebs_volume_options ] )
+
+      attachments = opts[ :ebs_volumes ].times.map do |i|
+        vol = ec2.volumes.create( vopts )
+        vol.attach_to( inst, "/dev/sdh#{i+1}" ) #=> Attachment
+      end
+
+      sleep 1 while attachments.any? { |a| a.status == :attaching }
+    end
+
+    aws_instance_added( aws_instance_to_props( region, inst ) )
+    aws_write_instances
+  end
+
+  def aws_instance_added( inst )
+    @aws_instances << inst
+    @aws_instances.sort! { |p,n| p[:name] <=> n[:name] }
+  end
+
+
+  def wait_for_running( inst )
+    while ( stat = inst.status ) == :pending
+      puts "Waiting 1s for instance to run"
+      sleep 1
+    end
+    unless stat == :running
+      raise "Instance #{inst.id} has status #{stat}"
+    end
+    nil
+  end
+
+  # Find running/pending instances in each of aws_regions, convert to
+  # props, and save in aws_instances list.
+  def aws_import_instances
+
+    instances = []
 
     aws_regions.each do |region|
       ec2 = AWS::EC2.new.regions[ region ]
 
-      rows = ec2.instances.map do |inst|
+      found = ec2.instances.map do |inst|
         next unless [ :running, :pending ].include?( inst.status )
-
-        tags = inst.tags.to_h
-        name = tags[ 'Name' ]
-        roles = decode_roles( tags[ 'Roles' ] )
-
-        { :id     => inst.id,
-          :region => region,
-          :ami    => inst.image_id,
-          :name   => name,
-          :internet_name => inst.dns_name,
-          :internet_ip   => inst.ip_address,
-          :internal_ip   => inst.private_ip_address,
-          :instance_type => inst.instance_type,
-          :roles  => roles }
+        aws_instance_to_props( region, inst )
       end
 
-      rows = rows.compact.sort { |p,n| p[:name] <=> n[:name] }
-      rows.each_with_index do |row, i|
-        fout.puts( "  " + JSON.generate( row, :space => ' ', :object_nl => ' ' ) +
-                   ( ( i == ( rows.length - 1 ) ) ? '' : ',' ) )
-      end
+      instances += found.compact
     end
 
-    fout.puts ']'
+    @aws_instances = instances
+  end
 
+  def aws_instance_to_props( region, inst )
+    tags = inst.tags.to_h
+    name = tags[ 'Name' ]
+    roles = decode_roles( tags[ 'Roles' ] )
+
+    { :id     => inst.id,
+      :region => region,
+      :ami    => inst.image_id,
+      :name   => name,
+      :internet_name => inst.dns_name,
+      :internet_ip   => inst.ip_address,
+      :internal_ip   => inst.private_ip_address,
+      :instance_type => inst.instance_type,
+      :roles  => roles }
+  end
+
+
+  # Read the aws_instances_json file, replacing in RAM AWS instances
+  def aws_read_instances
+    list = JSON.parse( IO.read( aws_instances_json ), :symbolize_names => true )
+    list.each do |inst|
+      inst[:roles] = ( inst[:roles] || [] ).map { |r| r.to_sym }
+    end
+    @aws_instances = list.sort { |p,n| p[:name] <=> n[:name] }
+  end
+
+  # Overwrite aws_instances_json file with the current AWS instances.
+  def aws_write_instances
+    File.open( aws_instances_json, 'w' ) do |fout|
+      aws_dump_instances( fout )
+    end
+  end
+
+  # Dump AWS instances as JSON but with custom layout of host per line.
+  def aws_dump_instances( fout = $stdout )
+    fout.puts '['
+    rows = @aws_instances.sort { |p,n| p[:name] <=> n[:name] }
+    rows.each_with_index do |row, i|
+      fout.puts( "  " + JSON.generate( row, :space => ' ', :object_nl => ' ' ) +
+                 ( ( i == ( rows.length - 1 ) ) ? '' : ',' ) )
+    end
+    fout.puts ']'
   end
 
   def decode_roles( roles )
@@ -89,5 +187,6 @@ if $0 == __FILE__
   end
 
   t = Test.new
-  t.aws_dump_instances
+  t.aws_import_instances
+  t.aws_write_instances
 end
