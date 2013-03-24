@@ -41,7 +41,6 @@ module SyncWrap::RemoteTask
 
     args = cleanup_arg_lines( args, exit_multi )
 
-    #FIXME: Should cleanup multi-line commands
     remote_task_current.run( *args )
   end
 
@@ -57,7 +56,7 @@ module SyncWrap::RemoteTask
     unless opts[ :shell ] == false
       exit_multi = opts[ :error ].nil? || opts[ :error ] == :exit
       cmd = cleanup_arg_lines( args, exit_multi )
-      cmd = cmd.join( ' ' ).gsub( /"/, '\"' )
+      cmd = shell_escape_cmd( cmd.join( ' ' ) )
       cmd = "sh -c \"#{cmd}\""
     else
       cmd = cleanup_arg_lines( args, false )
@@ -92,6 +91,10 @@ module SyncWrap::RemoteTask
       end
       alines.map { |f| f.strip }.join( $/ )
     end
+  end
+
+  def shell_escape_cmd( cmd )
+    cmd.gsub( /["$`\\]/ ) { |c| '\\' + c }
   end
 
   def remote_task( name, *args, &block )
