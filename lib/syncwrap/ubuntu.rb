@@ -28,22 +28,34 @@ module SyncWrap::Ubuntu
                          'apr-devel' => 'libapr1-dev' )
   end
 
-  def dist_install( *pkgs )
-    pkgs = dist_map_packages( pkgs )
-    sudo "apt-get -yq install #{pkgs.join( ' ' )}"
+  # Generate command to install packages. The last argument is
+  # interpreted as a options if it is a Hash.
+  # === Options
+  # :minimal:: Eqv to --no-install-recommends
+  def dist_install_s( *args )
+    args = args.dup
+    if args.last.is_a?( Hash )
+      opts = args.pop
+    else
+      opts = {}
+    end
+
+    args = dist_map_packages( args )
+    args.unshift "--no-install-recommends" if opts[ :minimal ]
+    "apt-get -yq install #{args.join ' '}"
   end
 
-  def dist_uninstall( *pkgs )
-    pkgs = dist_map_packages( pkgs )
-    sudo "aptitude -yq purge #{pkgs.join( ' ' )}"
+  def dist_uninstall_s( *args )
+    args = dist_map_packages( args )
+    "aptitude -yq purge #{args.join ' '}"
   end
 
-  def dist_install_init_service( name )
-    sudo "/usr/sbin/update-rc.d #{name} defaults"
+  def dist_install_init_service_s( name )
+    "/usr/sbin/update-rc.d #{name} defaults"
   end
 
-  def dist_service( *args )
-    sudo( [ '/usr/sbin/service' ] + args )
+  def dist_service_s( *args )
+    "/usr/sbin/service #{args.join ' '}"
   end
 
 end

@@ -29,40 +29,39 @@ module SyncWrap::RHEL
                          'postgresql' => 'postgresql-server' )
   end
 
-  # Install packages. The last argument is interpreted as a options if
-  # it is a Hash.
+  # Generate command to install packages. The last argument is
+  # interpreted as a options if it is a Hash.
   # === Options
   # :succeed:: Always succeed (useful for local rpms which might
   # already be installed.
-  def dist_install( *pkgs )
-
-    if pkgs.last.is_a?( Hash )
-      pkgs = pkgs.dup
-      opts = pkgs.pop
+  def dist_install_s( *args )
+    if args.last.is_a?( Hash )
+      args = args.dup
+      opts = args.pop
     else
       opts = {}
     end
 
-    pkgs = dist_map_packages( pkgs )
+    args = dist_map_packages( args )
 
     if opts[ :succeed ]
-      sudo "yum install -q -y #{pkgs.join( ' ' )} || true"
+      "yum install -q -y #{args.join ' '} || true"
     else
-      sudo "yum install -q -y #{pkgs.join( ' ' )}"
+      "yum install -q -y #{args.join ' '}"
     end
   end
 
-  def dist_uninstall( *pkgs )
-    pkgs = dist_map_packages( pkgs )
-    sudo "yum remove -q -y #{pkgs.join( ' ' )}"
+  def dist_uninstall_s( *args )
+    args = dist_map_packages( args )
+    "yum remove -q -y #{args.join ' '}"
   end
 
-  def dist_install_init_service( name )
-    sudo "/sbin/chkconfig --add #{name}"
+  def dist_install_init_service_s( name )
+    "/sbin/chkconfig --add #{name}"
   end
 
-  def dist_service( *args )
-    sudo( [ '/sbin/service' ] + args )
+  def dist_service_s( *args )
+    "/sbin/service #{args.join ' '}"
   end
 
 end
