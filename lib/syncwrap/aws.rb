@@ -271,13 +271,3 @@ module SyncWrap::AWS
   end
 
 end
-
-if $0 == __FILE__
-  class Test
-    include SyncWrap::AWS
-  end
-
-  t = Test.new
-  t.aws_import_instances
-  t.aws_write_instances
-end

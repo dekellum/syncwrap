@@ -28,6 +28,7 @@ require 'syncwrap/hashdot'
 require 'syncwrap/jruby'
 require 'syncwrap/iyyov'
 require 'syncwrap/geminabox'
+require 'syncwrap/aws'
 require 'syncwrap/ec2'
 require 'syncwrap/ubuntu'
 require 'syncwrap/rhel'
@@ -44,6 +45,7 @@ class TestSyncWrap < MiniTest::Unit::TestCase
     include SyncWrap::Geminabox
     include SyncWrap::Ubuntu
     include SyncWrap::EC2
+    include SyncWrap::AWS
     include SyncWrap::PostgreSQL
   end
 
