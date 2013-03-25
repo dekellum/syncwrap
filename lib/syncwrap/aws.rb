@@ -88,7 +88,7 @@ module SyncWrap::AWS
     ec2 = AWS::EC2.new.regions[ region ]
 
     if opts[ :count ] && opts[ :count ] != 1
-      raise ":count #{opts[ :count ]} != 1 is not a supported"
+      raise ":count #{opts[ :count ]} != 1 is not supported"
     end
 
     if opts[ :security_groups ] == :default
