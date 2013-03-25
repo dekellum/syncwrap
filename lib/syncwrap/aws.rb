@@ -63,10 +63,36 @@ module SyncWrap::AWS
                             :symbolize_names => true ) )
   end
 
+  # Create an instance, using name as the Name tag and assumed
+  # localhost name. For options see
+  # {AWS::EC2::InstanceCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/InstanceCollection.html#create-instance_method]
+  # with the following additions/differences:
+  #
+  # :count:: must be 1 or unspecified.
+  # :region:: Default 'us-east-1'
+  # :security_groups:: As per aws-sdk, but the special :default value
+  #                    is replaced with a single security group with
+  #                    same name as the :region option.
+  # :ebs_volumes:: The number of EBS volumes to create an attach to this instance.
+  # :ebs_volume_options:: A nested Hash of options, as per
+  #                       {AWS::EC2::VolumeCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/VolumeCollection.html#create-instance_method]
+  #                       with custom default :size 16 GB, and the same
+  #                       :availibility_zone as the instance.
+  # :lvm_volumes:: Ignored here.
   def aws_create_instance( name, opts = {} )
     opts = deep_merge_hashes( @aws_default_instance_options, opts )
     region = opts.delete( :region )
+    opts.delete( :lvm_volumes ) #unused here
+
     ec2 = AWS::EC2.new.regions[ region ]
+
+    if opts[ :count ] && opts[ :count ] != 1
+      raise ":count #{opts[ :count ]} != 1 is not a supported"
+    end
+
+    if opts[ :security_groups ] == :default
+      opts[ :security_groups ] = [ opts[ :region ] ]
+    end
 
     inst = ec2.instances.create( opts )
 
@@ -98,7 +124,6 @@ module SyncWrap::AWS
     @aws_instances << inst
     @aws_instances.sort! { |p,n| p[:name] <=> n[:name] }
   end
-
 
   def wait_for_running( inst )
     while ( stat = inst.status ) == :pending
@@ -146,7 +171,6 @@ module SyncWrap::AWS
       :instance_type => inst.instance_type,
       :roles  => roles }
   end
-
 
   # Read the aws_instances_json file, replacing in RAM AWS instances
   def aws_read_instances
