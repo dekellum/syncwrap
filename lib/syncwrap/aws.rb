@@ -47,6 +47,7 @@ module SyncWrap::AWS
     @aws_default_instance_options = {
       :ebs_volumes     => 0,
       :ebs_volume_options => { :size => 16 }, #gb
+      :lvm_volumes     => [ [ 1.00, '/data' ] ],
       :security_groups => :default,
       :instance_type   => 'm1.medium',
       :region          => 'us-east-1'
@@ -201,6 +202,72 @@ module SyncWrap::AWS
 
   def decode_roles( roles )
     ( roles || "" ).split( /\s+/ ).map { |r| r.to_sym }
+  end
+
+  # Runs create_lvm_volumes! if the first :lvm_volumes mount path does
+  # not yet exist.
+  def create_lvm_volumes( opts = {} )
+    opts = deep_merge_hashes( @aws_default_instance_options, opts )
+    unless exist?( opts[ :lvm_volumes ].first[1] )
+      create_lvm_volumes!( opts )
+    end
+  end
+
+  # Create an mdraid array from previously attached EBS volumes, then
+  # divvy up across N lvm mount points by ratio, creating filesystems and
+  # mounting.  This mdadm and lvm recipe was originally derived from
+  # {Install MongoDB on Amazon EC2}[http://docs.mongodb.org/ecosystem/tutorial/install-mongodb-on-amazon-ec2/]
+  #
+  # === Options
+  # :ebs_volumes:: The number of EBS volumes previously created and
+  #                attached to this instance.
+  # :lvm_volumes:: A table of [ slice, path (,name) ] rows where;
+  #                slice is a floating point ratio in range (0.0,1.0],
+  #                path is the mount point, and name is the lvm name,
+  #                defaulting if omitted to the last path element. The
+  #                sum of all slice values in the table should be 1.0.
+  def create_lvm_volumes!( opts = {} )
+    opts = deep_merge_hashes( @aws_default_instance_options, opts )
+
+    vol_count = opts[ :ebs_volumes ]
+    devices = vol_count.times.map { |i| "/dev/xvdh#{i+1}" }
+
+    cmd = <<-SH
+      #{dist_install_s( "mdadm", "lvm2", :minimal => true )}
+      mdadm --create /dev/md0 --level=10 --chunk=256 --raid-devices=#{vol_count} \
+        #{devices.join ' '}
+      echo "DEVICE #{devices.join ' '}" > /etc/mdadm.conf
+      mdadm --detail --scan >> /etc/mdadm.conf
+    SH
+
+    devices.each do |d|
+      cmd << <<-SH
+        blockdev --setra 128 #{d}
+      SH
+    end
+
+    cmd << <<-SH
+      blockdev --setra 128 /dev/md0
+      dd if=/dev/zero of=/dev/md0 bs=512 count=1
+      pvcreate /dev/md0
+      vgcreate vg0 /dev/md0
+    SH
+
+    opts[ :lvm_volumes ].each do | slice, path, name |
+      name ||= ( path =~ /\/(\w+)$/ ) && $1
+      cmd << <<-SH
+        lvcreate -l #{(slice * 100).round}%vg -n #{name} vg0
+        mke2fs -t ext4 -F /dev/vg0/#{name}
+        if [ -d #{path} ]; then
+          rm -rf #{path}
+        fi
+        mkdir -p #{path}
+        echo '/dev/vg0/#{name} #{path} ext4 defaults,auto,noatime,noexec 0 0' >> /etc/fstab
+        mount #{path}
+      SH
+    end
+
+    sudo cmd
   end
 
 end
