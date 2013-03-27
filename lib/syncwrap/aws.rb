@@ -141,6 +141,45 @@ module SyncWrap::AWS
     aws_write_instances
   end
 
+  # Terminates an instance and permanently deletes any EBS volumes
+  # attached to /dev/sdh like via create. WARNING: potential for data
+  # loss! The minimum required propererties in iprops hash are :region
+  # and :id.
+  def aws_terminate_instance_and_ebs_volumes( iprops )
+    ec2 = AWS::EC2.new.regions[ iprops[ :region ] ]
+    inst = ec2.instances[ iprops[ :id ] ]
+    unless inst.exists?
+      raise "Instance #{iprops[:id]} does not exist in #{iprops[:region]}"
+    end
+
+    ebs_volumes = inst.block_devices.map do |dev|
+      ebs = dev[ :ebs ]
+      if ebs && dev[:device_name] =~ /dh\d+$/ && !ebs[:delete_on_termination]
+        ebs[ :volume_id ]
+      end
+    end.compact
+
+    puts "Terminating instance #{inst.id}"
+    inst.terminate
+    sleep 1 while inst.status != :terminated
+
+    ebs_volumes = ebs_volumes.map do |vid|
+      volume = ec2.volumes[ vid ]
+      if volume.exists?
+        volume
+      else
+        puts "WARN: #{volume} doesn't exist"
+        nil
+      end
+    end.compact
+
+    ebs_volumes.each do |vol|
+      puts "Deleting vol #{vol.id} (#{vol.status})"
+      sleep 1 until vol.status == :available || vol.status == :deleted
+      vol.delete if vol.status == :available
+    end
+  end
+
   def aws_instance_added( inst )
     @aws_instances << inst
     @aws_instances.sort! { |p,n| p[:name] <=> n[:name] }
