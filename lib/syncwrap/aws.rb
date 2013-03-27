@@ -88,15 +88,20 @@ module SyncWrap::AWS
 
     ec2 = AWS::EC2.new.regions[ region ]
 
-    if opts[ :count ] && opts[ :count ] != 1
-      raise ":count #{opts[ :count ]} != 1 is not supported"
+    iopts = opts.dup
+    iopts.delete( :ebs_volumes )
+    iopts.delete( :ebs_volume_options )
+    iopts.delete( :roles )
+
+    if iopts[ :count ] && iopts[ :count ] != 1
+      raise ":count #{iopts[ :count ]} != 1 is not supported"
     end
 
-    if opts[ :security_groups ] == :default
-      opts[ :security_groups ] = [ opts[ :region ] ]
+    if iopts[ :security_groups ] == :default
+      iopts[ :security_groups ] = [ region ]
     end
 
-    inst = ec2.instances.create( opts )
+    inst = ec2.instances.create( iopts )
 
     inst.add_tag( 'Name', :value => name )
 
