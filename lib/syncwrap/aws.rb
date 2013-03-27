@@ -53,7 +53,9 @@ module SyncWrap::AWS
       :instance_type   => 'm1.medium',
       :region          => 'us-east-1'
     }
-
+    @aws_default_sg_options = {
+      :region          => 'us-east-1'
+    }
     super
 
     aws_configure
@@ -63,6 +65,18 @@ module SyncWrap::AWS
   def aws_configure
     AWS.config( JSON.parse( IO.read( @aws_config_json ),
                             :symbolize_names => true ) )
+  end
+
+  # Create a security_group given name and options. :region is the
+  # only required option, :description is a good to have. Currently
+  # this is a no-op of the security group already exists.
+  def aws_create_security_group( name, opts = {} )
+    opts = deep_merge_hashes( @aws_default_sg_options, opts )
+    region = opts.delete( :region )
+    ec2 = AWS::EC2.new.regions[ region ]
+    unless ec2.security_groups.find { |sg| sg.name == name }
+      ec2.security_groups.create( name, opts )
+    end
   end
 
   # Create an instance, using name as the Name tag and assumed
