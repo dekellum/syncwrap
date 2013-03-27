@@ -17,10 +17,11 @@
 require 'json'
 require 'aws-sdk'
 
-require 'syncwrap/base'
+require 'syncwrap/common'
 
 # FIXME: rdoc
 module SyncWrap::AWS
+  include SyncWrap::Common
 
   # The json configuration file, parsed and passed directly to
   # AWS::config method. This file should contain a json object with
