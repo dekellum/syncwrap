@@ -183,11 +183,38 @@ module SyncWrap::AWS
       sleep 1 until vol.status == :available || vol.status == :deleted
       vol.delete if vol.status == :available
     end
+
+    found = aws_find_instance( iprops )
+    if found
+      aws_instance_removed( found )
+      aws_write_intances
+    end
+  end
+
+  # Return instance properties, by example via iprops, either by [
+  # :id, :region ], :internet_name, :internet_ip, or :name, attempted
+  # in that order.
+  def aws_find_instance( iprops )
+    if iprops[:id]
+      @aws_instances.find do |r|
+        r[:id] == iprops[:id] && r[:region] == iprops[:region]
+      end
+    else
+      [ :internet_name, :internet_ip, :name ].inject( nil ) do |found, key|
+        found || @aws_instances.find { |r| r[key] == iprops[key] }
+      end
+    end
   end
 
   def aws_instance_added( inst )
     @aws_instances << inst
     @aws_instances.sort! { |p,n| p[:name] <=> n[:name] }
+  end
+
+  def aws_instance_removed( iprops )
+    @aws_instances.reject! do |row|
+      row[:id] == iprops[:id] && row[:region] == iprops[:region]
+    end
   end
 
   def wait_for_running( inst )
