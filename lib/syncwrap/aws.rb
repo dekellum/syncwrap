@@ -28,6 +28,7 @@ module SyncWrap::AWS
   # the minimal required keys: access_key_id, secret_access_key
   attr_accessor :aws_config_json
 
+  # The cached aws instance json file (default: ./aws_instances.json)
   attr_accessor :aws_instances_json
 
   # Array of region strings to check for aws_import_instances
@@ -36,9 +37,13 @@ module SyncWrap::AWS
   # Array of imported or read instances represented as hashes.
   attr_accessor :aws_instances
 
-  # Default options (which may be overriden) in call to
+  # Default options (which may be overridden) in call to
   # aws_create_instance.
   attr_accessor :aws_default_instance_options
+
+  # Default options (which may be overridden) in call to
+  # aws_create_security_group.
+  attr_accessor :aws_default_sg_options
 
   def initialize
     @aws_config_json   = 'private/aws.json'
@@ -69,7 +74,7 @@ module SyncWrap::AWS
 
   # Create a security_group given name and options. :region is the
   # only required option, :description is a good to have. Currently
-  # this is a no-op of the security group already exists.
+  # this is a no-op if the security group already exists.
   def aws_create_security_group( name, opts = {} )
     opts = deep_merge_hashes( @aws_default_sg_options, opts )
     region = opts.delete( :region )
