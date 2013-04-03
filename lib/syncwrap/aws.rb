@@ -91,7 +91,7 @@ module SyncWrap::AWS
   end
 
   # Create an instance, using name as the Name tag and assumed
-  # localhost name. For options see
+  # host name. For options see
   # {AWS::EC2::InstanceCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/InstanceCollection.html#create-instance_method]
   # with the following additions/differences:
   #
@@ -106,6 +106,7 @@ module SyncWrap::AWS
   #                       with custom default :size 16 GB, and the same
   #                       :availibility_zone as the instance.
   # :lvm_volumes:: Ignored here.
+  # :roles:: Array of role Strings or Symbols (applied as Roles tag)
   def aws_create_instance( name, opts = {} )
     opts = deep_merge_hashes( @aws_default_instance_options, opts )
     region = opts.delete( :region )
