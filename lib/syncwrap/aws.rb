@@ -19,13 +19,20 @@ require 'aws-sdk'
 
 require 'syncwrap/common'
 
-# FIXME: rdoc
+# Supports host provisioning in EC2 via AWS APIs, creating and
+# attaching EBS volumes, creating Route53 record sets, and as a remote
+# task: building mdraid volumes.
+#
+# This module also includes a disk based cache of meta-data on created
+# instances which allows automated role assignment (i.e. create an
+# instance and run deploy tasks on it in a single pass.)
 module SyncWrap::AWS
   include SyncWrap::Common
 
   # The json configuration file, parsed and passed directly to
   # AWS::config method. This file should contain a json object with
   # the minimal required keys: access_key_id, secret_access_key
+  # (default: ./private/aws.json)
   attr_accessor :aws_config_json
 
   # The cached aws instance json file (default: ./aws_instances.json)

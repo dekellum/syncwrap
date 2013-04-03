@@ -1,4 +1,12 @@
 === 1.5.0 (TBD)
+* Extended shell_escape_command for sudo sh command.
+* New SyncWrap::AWS for EC2 instance creation, mdraid over EBS
+  volumes, and Route53 DNS updates.
+* Add *_s command format-only variants of the distro commands for
+  increased flexibility usage and ability to reduce the number of
+  shells/round-trips.
+* Add :minimal flag support to Ubuntu.dist_install*
+* Add auto-once, per-host `apt-get update` to Ubuntu.dist_install*
 
 === 1.4.0 (2012-10-16)
 * PostgreSQL configuration updates for 9.2.x (RHEL only)

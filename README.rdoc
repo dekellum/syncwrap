@@ -8,8 +8,7 @@ A generalized and modular set of provisioning and deployment routines.
 The Rake-centric Vlad and not-actually-Rake Capistrano both suffer
 from lack of objects, e.g. the ability to customize and mix-in
 behavior. SyncWrap offers an Object/Module system that can be used
-with either.  Known to work with Vlad/rake-remote_task but could also
-be integrated with Capistrano, or others.
+with either.
 
 == Features
 
@@ -30,9 +29,12 @@ be integrated with Capistrano, or others.
 
 Currently the following provisions are provided:
 
-* Complete SyncWrap::Java, SyncWrap::Hashdot, SyncWrap::JRuby stack
+* SyncWrap::AWS for EC2 instances, mdraid over EBS volumes, and
+  Route53 DNS updates.
 
 * SyncWrap::PostgreSQL
+
+* Complete SyncWrap::Java, SyncWrap::Hashdot, SyncWrap::JRuby stack
 
 * SyncWrap::Iyyov job scheduler and process monitor
 
