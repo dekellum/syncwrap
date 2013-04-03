@@ -215,7 +215,7 @@ module SyncWrap::AWS
     found = aws_find_instance( iprops )
     if found
       aws_instance_removed( found )
-      aws_write_intances
+      aws_write_instances
     end
   end
 
