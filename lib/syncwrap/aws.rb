@@ -170,7 +170,8 @@ module SyncWrap::AWS
       merge( :resource_records => [ { :value => iprops[:internet_name] } ] )
 
     r53 = AWS::Route53.new
-    zone = r53.hosted_zones[ dname ]
+    zone = r53.hosted_zones.find { |hz| hz.name == dname } or
+      raise "Route53 Hosted Zone name #{dname} not found"
     zone.rrsets.create( [ iprops[:name], dname ].join('.'), 'CNAME', rs_opts )
   end
 
