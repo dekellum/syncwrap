@@ -11,6 +11,7 @@ etc/sysconfig/pgsql/postgresql
 etc/sysctl.d/61-postgresql-shm.conf
 lib/syncwrap/base.rb
 lib/syncwrap.rb
+lib/syncwrap/aws.rb
 lib/syncwrap/common.rb
 lib/syncwrap/distro.rb
 lib/syncwrap/ec2.rb
