@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/distro'
+require 'thread'
 
 # Customizations for Ubuntu and possibly other Debian/apt packaged
 # derivatives. Specific distros/versions may further specialize.
@@ -22,28 +23,56 @@ module SyncWrap::Ubuntu
   include SyncWrap::Distro
 
   def initialize
+    @apt_update_state_lock = Mutex.new
+    @apt_update_state = {}
+
     super
 
     packages_map.merge!( 'apr'       => 'libapr1',
                          'apr-devel' => 'libapr1-dev' )
   end
 
-  def dist_install( *pkgs )
-    pkgs = dist_map_packages( pkgs )
-    sudo "apt-get -yq install #{pkgs.join( ' ' )}"
+  # Generate the apt-get command to install packages. The first time
+  # this is applied to any given host, an "apt-get update" is issued
+  # as well. The last argument is interpreted as a options if it is a
+  # Hash.
+  # === Options
+  # :minimal:: Eqv to --no-install-recommends
+  def dist_install_s( *args )
+    args = args.dup
+    if args.last.is_a?( Hash )
+      opts = args.pop
+    else
+      opts = {}
+    end
+
+    commands = []
+
+    @apt_update_state_lock.synchronize do
+      unless @apt_update_state[ target_host ]
+        commands << "apt-get -yq update"
+        @apt_update_state[ target_host ] = true
+      end
+    end
+
+    args = dist_map_packages( args )
+    args.unshift "--no-install-recommends" if opts[ :minimal ]
+    commands << "apt-get -yq install #{args.join ' '}"
+
+    commands.join( "\n" )
   end
 
-  def dist_uninstall( *pkgs )
-    pkgs = dist_map_packages( pkgs )
-    sudo "aptitude -yq purge #{pkgs.join( ' ' )}"
+  def dist_uninstall_s( *args )
+    args = dist_map_packages( args )
+    "aptitude -yq purge #{args.join ' '}"
   end
 
-  def dist_install_init_service( name )
-    sudo "/usr/sbin/update-rc.d #{name} defaults"
+  def dist_install_init_service_s( name )
+    "/usr/sbin/update-rc.d #{name} defaults"
   end
 
-  def dist_service( *args )
-    sudo( [ '/usr/sbin/service' ] + args )
+  def dist_service_s( *args )
+    "/usr/sbin/service #{args.join ' '}"
   end
 
 end
