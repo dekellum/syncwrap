@@ -41,6 +41,8 @@ module SyncWrap::RemoteTask
     # Defaults:
     set( :sudo_flags, %w[ -H ] )
     set( :rsync_flags, %w[ -rlpcb -ii ] )
+
+    load_hosts_from_aws_instances if defined? aws_instances
   end
 
   # Implements SyncWrap::Common#run
@@ -143,6 +145,27 @@ module SyncWrap::RemoteTask
     if host_name =~ @host_pattern
       Rake::RemoteTask.host( host_long_name( host_name ), :all, *roles )
     end
+  end
+
+  # Define a RemoteTask host from an inst hash as defined by the AWS
+  # module. Override to change how instances are mapped to RemoteTask, host By
+  # default, using host_long_name( inst[:name] )
+  def host_from_instance( inst )
+    host( inst[:name], inst[:roles] )
+  end
+
+  # Calls host_from_instance for all aws_instances.
+  def load_hosts_from_aws_instances
+    aws_instances.each do |inst|
+      host_from_instance( inst )
+    end
+  end
+
+  # Speculative override from AWS to automaticly set a host when added.
+  # Will fail if used without AWS module as super receiver.
+  def aws_instance_added( inst )
+    super
+    host_from_instance( inst )
   end
 
   # Forward to Rake::RemoteTask.role using the host_long_name, but only if
