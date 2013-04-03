@@ -151,7 +151,7 @@ module SyncWrap::RemoteTask
   # module. Override to change how instances are mapped to RemoteTask, host By
   # default, using host_long_name( inst[:name] )
   def host_from_instance( inst )
-    host( inst[:name], inst[:roles] )
+    host( inst[:name], *inst[:roles] )
   end
 
   # Calls host_from_instance for all aws_instances.
