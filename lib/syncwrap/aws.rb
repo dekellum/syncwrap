@@ -45,6 +45,9 @@ module SyncWrap::AWS
   # aws_create_security_group.
   attr_accessor :aws_default_sg_options
 
+  # Default options for Route53 record set creation
+  attr_accessor :route53_default_rs_options
+
   def initialize
     @aws_config_json   = 'private/aws.json'
     @aws_regions       = %w[ us-east-1 ]
@@ -61,6 +64,9 @@ module SyncWrap::AWS
     @aws_default_sg_options = {
       :region          => 'us-east-1'
     }
+
+    @route53_default_rs_options = {}
+
     super
 
     aws_configure
@@ -144,6 +150,25 @@ module SyncWrap::AWS
 
     aws_instance_added( aws_instance_to_props( region, inst ) )
     aws_write_instances
+  end
+
+  # Create a Route53 DNS CNAME from iprops :name to :internet_name.
+  # Options are per {AWS::Route53::ResourceRecordSetCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/Route53/ResourceRecordSetCollection.html#create-instance_method]
+  # (currently undocumented) with the following addition:
+  #
+  # :domain_name:: name of the hosted zone and suffix for
+  #                CNAME. Should terminate in a DOT '.'
+  def route53_create_host_cname( iprops, opts = {} )
+    opts = deep_merge_hashes( @route53_default_rs_options, opts )
+    dname = opts.delete( :domain_name ) #with terminal '.'
+    rs_opts =
+      { :ttl => 300 }.
+      merge( opts ).
+      merge( :resource_records => [ { :value => iprops[:internet_name] } ] )
+
+    r53 = AWS::Route53.new
+    zone = r53.hosted_zones[ dname ]
+    zone.rrsets.create( [ iprops[:name], dname ].join('.'), 'CNAME', rs_opts )
   end
 
   # Terminates an instance and permanently deletes any EBS volumes
