@@ -25,12 +25,24 @@ module SyncWrap::RemoteTask
   include SyncWrap::Common
   include Rake::DSL
 
+  # Array of zero to many host_names (typically short) that were
+  # extracted from the HOSTS environment variable if set.
+  attr_reader :hosts
+
+  # A common domain name for all hosts, used to make host_long_name if
+  # specified (default: nil)
+  attr_accessor :common_domain
+
   def initialize
+    @common_domain = nil
+    interpret_hosts_var
     super
 
     # Defaults:
     set( :sudo_flags, %w[ -H ] )
     set( :rsync_flags, %w[ -rlpcb -ii ] )
+
+    load_hosts_from_aws_instances if defined? aws_instances
   end
 
   # Implements SyncWrap::Common#run
@@ -70,8 +82,17 @@ module SyncWrap::RemoteTask
     remote_task_current.rsync( *args )
   end
 
+  # Return the target host name of the currently executing RemoteTask.
+  # Raises a StandardError if executed out of that context.
   def target_host
     remote_task_current.target_host
+  end
+
+  # Return true if the current target_host or specified host is part
+  # of the specified role.
+  def host_in_role?( role, host = target_host )
+    role_hosts = Rake::RemoteTask.roles[ role ]
+    role_hosts && !!( role_hosts[ host ] )
   end
 
   # Implements Common#exec_conditional
@@ -105,15 +126,74 @@ module SyncWrap::RemoteTask
     Rake::RemoteTask.set( *args )
   end
 
-  def host( host_name, *roles )
-    Rake::RemoteTask.host( host_name, *roles )
+  def interpret_hosts_var
+    hvar, ENV[ 'HOSTS' ] = ENV[ 'HOSTS' ], nil
+    @hosts = (hvar || '').strip.split( /\s+/ )
+    @host_pattern = if @hosts.empty?
+                      // #match all if none specified.
+                    else
+                      Regexp.new( '^((' + @hosts.join( ')|(' ) + '))$' )
+                    end
   end
 
-  def role( role_name, host = nil, args = {} )
-    Rake::RemoteTask.role( role_name, host, args )
+  # Forward to Rake::RemoteTask.host using the host_long_name, but
+  # only if the specified host_name matches any host_pattern. The :all
+  # role is automatically included for all hosts.  Note this need not
+  # be manually provided int the Rakefile if aws_instances is provided
+  # instead.
+  def host( host_name, *roles )
+    if host_name =~ @host_pattern
+      Rake::RemoteTask.host( host_long_name( host_name ), :all, *roles )
+    end
+  end
+
+  # Define a RemoteTask host from an inst hash as defined by the AWS
+  # module. Override to change how instances are mapped to RemoteTask, host By
+  # default, using host_long_name( inst[:name] )
+  def host_from_instance( inst )
+    host( inst[:name], inst[:roles] )
+  end
+
+  # Calls host_from_instance for all aws_instances.
+  def load_hosts_from_aws_instances
+    aws_instances.each do |inst|
+      host_from_instance( inst )
+    end
+  end
+
+  # Speculative override from AWS to automaticly set a host when added.
+  # Will fail if used without AWS module as super receiver.
+  def aws_instance_added( inst )
+    super
+    host_from_instance( inst )
+  end
+
+  # Forward to Rake::RemoteTask.role using the host_long_name, but only if
+  # the specified host_name matches any host_pattern.
+  def role( role_name, host_name = nil, args = {} )
+    if host_name =~ @host_pattern
+      Rake::RemoteTask.role( role_name, host_long_name( host_name ), args )
+    end
   end
 
   def remote_task_current
     Thread.current[ :task ] or raise "Not running from a RemoteTask"
   end
+
+  # Return a long name for the specified host_name (which may be
+  # short).  This implementation adds common_domain if
+  # specified. Otherwise host_name is returned unmodified.
+  def host_long_name( host_name )
+    if common_domain
+      "#{host_name}.#{common_domain}"
+    else
+      host_name
+    end
+  end
+
+  # Return a short name for the specified host_name (which may be long).
+  def host_short_name( host_name )
+    ( host_name =~ /^([a-z0-9\-]+)/ ) && $1
+  end
+
 end
