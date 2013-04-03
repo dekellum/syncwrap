@@ -149,8 +149,10 @@ module SyncWrap::AWS
       sleep 1 while attachments.any? { |a| a.status == :attaching }
     end
 
-    aws_instance_added( aws_instance_to_props( region, inst ) )
+    iprops = aws_instance_to_props( region, inst )
+    aws_instance_added( iprops )
     aws_write_instances
+    iprops
   end
 
   # Create a Route53 DNS CNAME from iprops :name to :internet_name.
