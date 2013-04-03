@@ -12,6 +12,7 @@ require 'syncwrap/hashdot'
 require 'syncwrap/jruby'
 require 'syncwrap/iyyov'
 require 'syncwrap/rhel'
+require 'syncwrap/aws'
 require 'syncwrap/postgresql'
 require 'syncwrap/remote_task'
 require 'syncwrap/geminabox'
@@ -22,6 +23,7 @@ class SyncWrapper
   include SyncWrap::JRuby
   include SyncWrap::Iyyov
   include SyncWrap::RHEL
+  include SyncWrap::AWS
   include SyncWrap::PostgreSQL
   include SyncWrap::Geminabox
 
