@@ -185,7 +185,7 @@ module SyncWrap::RemoteTask
   # specified. Otherwise host_name is returned unmodified.
   def host_long_name( host_name )
     if common_domain
-      "host_name.#{common_domain}"
+      "#{host_name}.#{common_domain}"
     else
       host_name
     end
