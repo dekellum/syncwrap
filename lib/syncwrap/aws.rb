@@ -76,7 +76,7 @@ module SyncWrap::AWS
 
     super
 
-    aws_configure
+    aws_configure if File.exist?( @aws_config_json )
     aws_read_instances if File.exist?( @aws_instances_json )
   end
 
