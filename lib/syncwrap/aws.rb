@@ -16,6 +16,7 @@
 
 require 'json'
 require 'aws-sdk'
+require 'resolv'
 
 require 'syncwrap/common'
 
@@ -180,6 +181,20 @@ module SyncWrap::AWS
     zone = r53.hosted_zones.find { |hz| hz.name == dname } or
       raise "Route53 Hosted Zone name #{dname} not found"
     zone.rrsets.create( [ iprops[:name], dname ].join('.'), 'CNAME', rs_opts )
+  end
+
+  def wait_for_dns_resolve( long_name )
+    #FIXME: generalize wait/sleep loop
+    found = nil
+    until found
+      puts "Waiting 3s for dns #{long_name} to resolve."
+      sleep 3
+      # Google public DNS...
+      found = Resolv::DNS.open(:nameserver => ['8.8.8.8', '8.8.4.4']) do |rvr|
+        rvr.getaddresses( long_name ).first
+        #On sucess: returns #[ <Resolv::IPv4 54.244.208.53> ], fail: []
+      end
+    end
   end
 
   # Terminates an instance and permanently deletes any EBS volumes
