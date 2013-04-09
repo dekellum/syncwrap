@@ -1,3 +1,5 @@
+=== 1.5.2 (TBD)
+
 === 1.5.1 (2013-4-3)
 * Include syncwrap/aws.rb for real.
 
