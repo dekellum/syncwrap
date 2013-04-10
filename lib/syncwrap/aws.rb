@@ -76,7 +76,7 @@ module SyncWrap::AWS
 
     super
 
-    aws_configure
+    aws_configure if File.exist?( @aws_config_json )
     aws_read_instances if File.exist?( @aws_instances_json )
   end
 
@@ -150,6 +150,7 @@ module SyncWrap::AWS
 
       attachments = opts[ :ebs_volumes ].times.map do |i|
         vol = ec2.volumes.create( vopts )
+        sleep 1 while vol.status != :available #FIXME
         vol.attach_to( inst, "/dev/sdh#{i+1}" ) #=> Attachment
       end
 
