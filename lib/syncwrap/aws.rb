@@ -236,7 +236,7 @@ module SyncWrap::AWS
     end.compact
 
     inst.terminate
-    wait_until( "termination of #{inst.id}" ) { inst.status == :terminated }
+    wait_until( "termination of #{inst.id}", 2.0 ) { inst.status == :terminated }
 
     ebs_volumes = ebs_volumes.map do |vid|
       volume = ec2.volumes[ vid ]
@@ -289,7 +289,7 @@ module SyncWrap::AWS
   end
 
   def wait_for_running( inst )
-    wait_until( "instance #{inst.id} to run" ) { inst.status != :pending }
+    wait_until( "instance #{inst.id} to run", 2.0 ) { inst.status != :pending }
     stat = inst.status
     raise "Instance #{inst.id} has status #{stat}" unless stat == :running
     nil
