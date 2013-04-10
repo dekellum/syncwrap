@@ -56,6 +56,10 @@ module SyncWrap::AWS
   # Default options for Route53 record set creation
   attr_accessor :route53_default_rs_options
 
+  # DNS Resolver options for testing Route53 (default: Use public
+  # google name servers to avoid local negative caching)
+  attr_accessor :resolver_options
+
   def initialize
     @aws_config_json   = 'private/aws.json'
     @aws_regions       = %w[ us-east-1 ]
@@ -73,7 +77,14 @@ module SyncWrap::AWS
       :region          => 'us-east-1'
     }
 
-    @route53_default_rs_options = {}
+    @route53_default_rs_options = {
+      :ttl => 300,
+      :wait => true
+    }
+
+    @resolver_options = {
+      :nameserver => [ '8.8.8.8', '8.8.4.4' ]
+    }
 
     super
 
@@ -151,11 +162,13 @@ module SyncWrap::AWS
 
       attachments = opts[ :ebs_volumes ].times.map do |i|
         vol = ec2.volumes.create( vopts )
-        sleep 1 while vol.status != :available #FIXME
+        wait_until( vol.id, 0.5 ) { vol.status == :available }
         vol.attach_to( inst, "/dev/sdh#{i+1}" ) #=> Attachment
       end
 
-      sleep 1 while attachments.any? { |a| a.status == :attaching }
+      wait_until( "volumes to attach" ) do
+        !( attachments.any? { |a| a.status == :attaching } )
+      end
     end
 
     iprops = aws_instance_to_props( region, inst )
@@ -170,36 +183,35 @@ module SyncWrap::AWS
   #
   # :domain_name:: name of the hosted zone and suffix for
   #                CNAME. Should terminate in a DOT '.'
+  # :wait::        If true, wait for CNAME to resolve
   def route53_create_host_cname( iprops, opts = {} )
     opts = deep_merge_hashes( @route53_default_rs_options, opts )
-    dname = opts.delete( :domain_name ) #with terminal '.'
-    rs_opts =
-      { :ttl => 300 }.
-      merge( opts ).
-      merge( :resource_records => [ { :value => iprops[:internet_name] } ] )
+    dname = dot_terminate( opts.delete( :domain_name ) )
+    do_wait = opts.delete( :wait )
+    rs_opts = opts.
+      merge( :resource_records => [ {:value => iprops[:internet_name]} ] )
 
     r53 = AWS::Route53.new
     zone = r53.hosted_zones.find { |hz| hz.name == dname } or
       raise "Route53 Hosted Zone name #{dname} not found"
-    zone.rrsets.create( [ iprops[:name], dname ].join('.'), 'CNAME', rs_opts )
+    long_name = [ iprops[:name], dname ].join('.')
+    zone.rrsets.create( long_name, 'CNAME', rs_opts )
+    wait_for_dns_resolve( long_name, dname ) if do_wait
   end
 
   def wait_for_dns_resolve( long_name,
                             domain,
                             rtype = Resolv::DNS::Resource::IN::CNAME )
 
-    ns_addr = Resolv::DNS.open(:nameserver => ['8.8.8.8', '8.8.4.4']) do |rvr|
+    ns_addr = Resolv::DNS.open( @resolver_options ) do |rvr|
       ns_n = rvr.getresource( domain, Resolv::DNS::Resource::IN::SOA ).mname
       rvr.getaddress( ns_n ).to_s
     end
 
-    # FIXME: generalize wait/sleep loop
-    found = nil
-    until found
-      puts "Waiting 5s for dns #{long_name} to resolve."
-      sleep 5
-      # Google public DNS...
-      found = Resolv::DNS.open( :nameserver => ns_addr ) do |rvr|
+    sleep 3 # Initial wait
+
+    wait_until( "#{long_name} to resolve", 3.0 ) do
+      Resolv::DNS.open( :nameserver => ns_addr ) do |rvr|
         rvr.getresources( long_name, rtype ).first
       end
     end
@@ -223,9 +235,8 @@ module SyncWrap::AWS
       end
     end.compact
 
-    puts "Terminating instance #{inst.id}"
     inst.terminate
-    sleep 1 while inst.status != :terminated
+    wait_until( "termination of #{inst.id}" ) { inst.status == :terminated }
 
     ebs_volumes = ebs_volumes.map do |vid|
       volume = ec2.volumes[ vid ]
@@ -238,8 +249,9 @@ module SyncWrap::AWS
     end.compact
 
     ebs_volumes.each do |vol|
-      puts "Deleting vol #{vol.id} (#{vol.status})"
-      sleep 1 until vol.status == :available || vol.status == :deleted
+      wait_until( "deletion of vol #{vol.id}" ) do
+        vol.status == :available || vol.status == :deleted
+      end
       vol.delete if vol.status == :available
     end
 
@@ -277,13 +289,9 @@ module SyncWrap::AWS
   end
 
   def wait_for_running( inst )
-    while ( stat = inst.status ) == :pending
-      puts "Waiting 1s for instance to run"
-      sleep 1
-    end
-    unless stat == :running
-      raise "Instance #{inst.id} has status #{stat}"
-    end
+    wait_until( "instance #{inst.id} to run" ) { inst.status != :pending }
+    stat = inst.status
+    raise "Instance #{inst.id} has status #{stat}" unless stat == :running
     nil
   end
 
@@ -420,4 +428,21 @@ module SyncWrap::AWS
     sudo cmd
   end
 
+  # Wait until block returns truthy, sleeping for freq seconds between
+  # attempts. Writes desc and a sequence of DOTs on a single line
+  # until complete.
+  def wait_until( desc, freq = 1.0 )
+    $stdout.write( "Waiting for " + desc )
+    until (ret = yield) do
+      $stdout.write '.'
+      sleep freq
+    end
+    ret
+  ensure
+    puts
+  end
+
+  def dot_terminate( name )
+    ( name =~ /\.$/ ) ? name : ( name + '.' )
+  end
 end
