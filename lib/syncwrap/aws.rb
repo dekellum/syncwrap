@@ -150,6 +150,7 @@ module SyncWrap::AWS
 
       attachments = opts[ :ebs_volumes ].times.map do |i|
         vol = ec2.volumes.create( vopts )
+        sleep 1 while vol.status != :available #FIXME
         vol.attach_to( inst, "/dev/sdh#{i+1}" ) #=> Attachment
       end
 
