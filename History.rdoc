@@ -1,4 +1,11 @@
 === 1.5.2 (TBD)
+* Add check for init, aws_configure only if aws_config_json file
+  exists.
+* Generalize waiting for created/terminated AWS resources, including
+  better diagnostic output.
+* Add missing wait for EBS volume creation.
+* Add default wait for Route53 CNAME creation, using current
+  authoritative Amazon name server.
 
 === 1.5.1 (2013-4-3)
 * Include syncwrap/aws.rb for real.
@@ -22,7 +29,7 @@
   may already be installed)
 
 === 1.3.0 (2012-10-4)
-* Include RHEL/Amazon Linux Postgresql 9.1 config and deploy support
+* Include RHEL/Amazon Linux PostgreSQL 9.1 config and deploy support
   and reorganize for Ubuntu support as well. Default deploy data dir
   is now /pg/data which makes sense for an EBS mount. Config is
   further tuned for EBS.  PostgreSQL::EC2 has been dropped.
