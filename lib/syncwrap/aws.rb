@@ -183,16 +183,23 @@ module SyncWrap::AWS
     zone.rrsets.create( [ iprops[:name], dname ].join('.'), 'CNAME', rs_opts )
   end
 
-  def wait_for_dns_resolve( long_name )
-    #FIXME: generalize wait/sleep loop
+  def wait_for_dns_resolve( long_name,
+                            domain,
+                            rtype = Resolv::DNS::Resource::IN::CNAME )
+
+    ns_addr = Resolv::DNS.open(:nameserver => ['8.8.8.8', '8.8.4.4']) do |rvr|
+      ns_n = rvr.getresource( domain, Resolv::DNS::Resource::IN::SOA ).mname
+      rvr.getaddress( ns_n ).to_s
+    end
+
+    # FIXME: generalize wait/sleep loop
     found = nil
     until found
-      puts "Waiting 3s for dns #{long_name} to resolve."
-      sleep 3
+      puts "Waiting 5s for dns #{long_name} to resolve."
+      sleep 5
       # Google public DNS...
-      found = Resolv::DNS.open(:nameserver => ['8.8.8.8', '8.8.4.4']) do |rvr|
-        rvr.getaddresses( long_name ).first
-        #On sucess: returns #[ <Resolv::IPv4 54.244.208.53> ], fail: []
+      found = Resolv::DNS.open( :nameserver => ns_addr ) do |rvr|
+        rvr.getresources( long_name, rtype ).first
       end
     end
   end
