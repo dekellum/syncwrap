@@ -66,4 +66,14 @@ class TestShell < MiniTest::Unit::TestCase
     end
   end
 
+  def test_shell_special_chars
+    c = Conch.new
+    exit_code, outputs = c.capture( c.sh_args( <<-'SH', verbose: false ) )
+      var=33
+      echo \# "\"$var\"" \$
+    SH
+    assert_equal( 0, exit_code )
+    assert_equal( [[:out, "# \"33\" $\n"]], outputs, outputs )
+  end
+
 end
