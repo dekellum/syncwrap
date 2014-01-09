@@ -54,6 +54,21 @@ class TestShell < MiniTest::Unit::TestCase
                   outputs, outputs )
   end
 
+  def test_capture_output_2
+    c = Conch.new
+    # Note: sleep needed to make the :err vs :out ordering consistent.
+    exit_code, outputs = c.capture( c.sh_args( <<-'SH' ))
+     echo foo && sleep 0.1
+     echo bar
+    SH
+    assert_equal( 0, exit_code )
+    assert_equal( [ [:err, "echo foo && sleep 0.1\n"],
+                    [:out, "foo\n"],
+                    [:err, "echo bar\n"],
+                    [:out, "bar\n"] ],
+                  outputs, outputs )
+  end
+
   def test_capture_multi_error
     c = Conch.new
     # Timing dependent, one or two reads will be received. Regardless,
