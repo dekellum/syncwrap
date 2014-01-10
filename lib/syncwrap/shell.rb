@@ -29,13 +29,13 @@ module SyncWrap::Shell
   end
 
   # Local:
-  # sh -v -e -c STRING
-  # sudo SUDOFLAGS [-u user] sh [-v -e -n] -c STRING
+  # sh -v|-x -e -c STRING
+  # sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
   #
   # Remote:
-  # ssh SSHFLAGS host sh [-v -e -n] -c STRING
-  # ssh SSHFLAGS host sudo SUDOFLAGS [-u user] sh [-v -e -n] -c STRING
-
+  # ssh SSHFLAGS host sh [-v|-x -e -n] -c STRING
+  # ssh SSHFLAGS host sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
+  #
   # typical SSHFLAGS: -i ./key.pem -l ec2-user
   # typical SUDOFLAGS: -H
 
@@ -71,7 +71,9 @@ module SyncWrap::Shell
   def sh_args( command, opts = {} )
     args = [ 'sh' ]
     args << '-e' if opts[ :error ].nil? || opts[ :error ] == :exit
-    args << '-v' unless opts[ :verbose ] == false
+    if opts[ :sh_verbose ]
+      args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
+    end
     args << '-n' if opts[ :dryrun  ]
     args + [ '-c', args_to_command( command ) ]
   end

@@ -57,7 +57,7 @@ class TestShell < MiniTest::Unit::TestCase
   def test_capture_output_2
     c = Conch.new
     # Note: sleep needed to make the :err vs :out ordering consistent.
-    exit_code, outputs = c.capture( c.sh_args( <<-'SH' ))
+    exit_code, outputs = c.capture( c.sh_args( <<-'SH', sh_verbose: :v ))
      echo foo && sleep 0.1
      echo bar
     SH
@@ -83,7 +83,7 @@ class TestShell < MiniTest::Unit::TestCase
 
   def test_shell_special_chars
     c = Conch.new
-    exit_code, outputs = c.capture( c.sh_args( <<-'SH', verbose: false ) )
+    exit_code, outputs = c.capture( c.sh_args( <<-'SH' ) )
       var=33
       echo \# "\"$var\"" \$
     SH
