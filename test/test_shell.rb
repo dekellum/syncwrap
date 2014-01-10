@@ -105,4 +105,12 @@ class TestShell < MiniTest::Unit::TestCase
     assert_equal( [[:err, "true\n"]], outputs, outputs )
   end
 
+  def test_ssh_sudo
+    skip "May require password-less ssh and tty-less sudo access to localhost"
+    cmd = sh.ssh_args( :localhost, 'true', sh_verbose: :v, user: :root )
+    exit_code, outputs = sh.capture3( cmd )
+    assert_equal( 0, exit_code )
+    assert_equal( [[:err, "true\n"]], outputs, outputs )
+  end
+
 end
