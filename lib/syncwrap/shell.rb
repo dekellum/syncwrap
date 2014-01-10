@@ -114,10 +114,10 @@ module SyncWrap::Shell
   # Captures out and err from a command expressed by args
   # array. Returns [ exit_status, [outputs] ] where [outputs] is an
   # array of [:err|:out, buffer] elements. Uses select, non-blocking
-  # I/O to receive buffers in the order they become of available. This
+  # I/O to receive buffers in the order they become available. This
   # is often the same order you would see them in a terminal, but not
-  # always as buffering or timing issues in the underlying
-  # implementation may be at play.
+  # always, as buffering or timing issues in the underlying
+  # implementation may cause some out of order results.
   def capture3( args )
     status = nil
     outputs = []
