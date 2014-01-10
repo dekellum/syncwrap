@@ -20,6 +20,7 @@
 
 require 'syncwrap/base'
 require 'open3'
+require 'term/ansicolor'
 
 # Common utility methods and variables.
 module SyncWrap::Shell
@@ -39,12 +40,35 @@ module SyncWrap::Shell
   # typical SSHFLAGS: -i ./key.pem -l ec2-user
   # typical SUDOFLAGS: -H
 
-  def run( host, command, opts = {} )
+  class CommandFailure < RuntimeError
+  end
+
+  def run_shell!( host, command, opts = {} )
     args = ssh_args( host, command, opts )
     exit_code, outputs = capture3( args )
     if exit_code != 0 || opts[ :verbose ]
-      #Output verbose
+      format_outputs( outputs, opts )
     end
+    if exit_code != 0
+      raise CommandFailure, "exit code: #{exit_code}"
+    end
+  end
+
+  def format_outputs( outputs, opts = {} )
+    clr = Term::ANSIColor
+    newlined = true
+    outputs.each do |stream, buff|
+      case( stream )
+      when :out
+        $stdout.write buff
+      when :err
+        $stdout.write clr.red
+        $stdout.write buff
+        $stdout.write clr.reset
+      end
+      newlined = ( buff[-1] == "\n" )
+    end
+    $stdout.puts unless newlined
   end
 
   def ssh_args( host, command, opts = {} )
