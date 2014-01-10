@@ -31,23 +31,24 @@ class TestShell < MiniTest::Unit::TestCase
     include SyncWrap::Shell
   end
 
+  def sh
+    @shell ||= Conch.new
+  end
+
   def test_capture_noop
-    c = Conch.new
-    exit_code, outputs = c.capture3( %w[sh -c true])
+    exit_code, outputs = sh.capture3( %w[sh -c true])
     assert_equal( 0, exit_code )
     assert_equal( [], outputs )
   end
 
   def test_capture_error
-    c = Conch.new
-    exit_code, outputs = c.capture3( %w[sh -v -c false])
+    exit_code, outputs = sh.capture3( %w[sh -v -c false])
     assert_equal( 1, exit_code )
     assert_equal( [[:err, "false\n"]], outputs, outputs )
   end
 
   def test_capture_output
-    c = Conch.new
-    exit_code, outputs = c.capture3( %w[sh -v -c] << "echo foo")
+    exit_code, outputs = sh.capture3( %w[sh -v -c] << "echo foo")
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo\n"],
                     [:out, "foo\n"] ],
@@ -55,9 +56,8 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_capture_output_2
-    c = Conch.new
     # Note: sleep needed to make the :err vs :out ordering consistent.
-    exit_code, outputs = c.capture3( c.sh_args( <<-'SH', sh_verbose: :v ))
+    exit_code, outputs = sh.capture3( sh.sh_args( <<-'SH', sh_verbose: :v ))
      echo foo && sleep 0.1
      echo bar
     SH
@@ -70,11 +70,10 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_capture_multi_error
-    c = Conch.new
     # Timing dependent, one or two reads will be received. Regardless,
     # capture should combine them to a single read as shown in output
     11.times do
-      exit_code, outputs = c.capture3( %w[sh -v -c] << "echo foo >&2")
+      exit_code, outputs = sh.capture3( %w[sh -v -c] << "echo foo >&2")
       assert_equal( 0, exit_code )
       assert_equal( [[:err, "echo foo >&2\nfoo\n"]],
                     outputs, outputs )
@@ -82,8 +81,7 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_shell_special_chars
-    c = Conch.new
-    exit_code, outputs = c.capture3( c.sh_args( <<-'SH' ) )
+    exit_code, outputs = sh.capture3( sh.sh_args( <<-'SH' ) )
       var=33
       echo \# "\"$var\"" \$
     SH
