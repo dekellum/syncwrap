@@ -41,7 +41,7 @@ module SyncWrap::Shell
 
   def run( host, command, opts = {} )
     args = ssh_args( host, command, opts )
-    exit_code, outputs = capture( args )
+    exit_code, outputs = capture3( args )
     if exit_code != 0 || opts[ :verbose ]
       #Output verbose
     end
@@ -87,7 +87,14 @@ module SyncWrap::Shell
       .join( "\n" )
   end
 
-  def capture( args )
+  # Captures out and err from a command expressed by args
+  # array. Returns [ exit_status, [outputs] ] where [outputs] is an
+  # array of [:err|:out, buffer] elements. Uses select, non-blocking
+  # I/O to receive buffers in the order they become of available. This
+  # is often the same order you would see them in a terminal, but not
+  # always as buffering or timing issues in the underlying
+  # implementation may be at play.
+  def capture3( args )
     status = nil
     outputs = []
     Open3::popen3( *args ) do |inp, out, err, wait_thread|
