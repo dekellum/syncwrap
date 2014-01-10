@@ -89,4 +89,20 @@ class TestShell < MiniTest::Unit::TestCase
     assert_equal( [[:out, "# \"33\" $\n"]], outputs, outputs )
   end
 
+  def test_sudo
+    skip "May require password-less local sudo"
+    cmd = sh.sudo_args( 'echo foo', user: :root )
+    exit_code, outputs = sh.capture3( cmd )
+    assert_equal( 0, exit_code )
+    assert_equal( [[:out, "foo\n"]], outputs, outputs )
+  end
+
+  def test_ssh
+    skip "May require password-less ssh access to localhost"
+    cmd = sh.ssh_args( :localhost, 'true', sh_verbose: :v )
+    exit_code, outputs = sh.capture3( cmd )
+    assert_equal( 0, exit_code )
+    assert_equal( [[:err, "true\n"]], outputs, outputs )
+  end
+
 end
