@@ -28,6 +28,88 @@ require 'syncwrap/shell'
 module SyncWrap
 
   class Component
+    def initialize( opts = {} )
+      super()
+      opts.each do |name,val|
+        send( name.to_s + '=', val )
+      end
+    end
+
+    def host
+      ctx.host
+    end
+
+    def sh( command, opts = {} )
+      ctx.sh( command, opts )
+    end
+
+    # Equivalent to sh( command, user: :root )
+    def sudo( command, opts = {} )
+      sh( command, opts.merge( user: :root ) )
+    end
+
+    # Equivelent to sh( command, user: run_usr )
+    def rudo( command, opts = {} )
+      #FIXME: Our change to RunUser.run_user
+      sh( command, opts.merge( user: user ) )
+    end
+
+    def method_missing( meth, *args, &block )
+      below = false
+      host.components.reverse_each do |comp|
+        if comp == self
+          below = true
+        elsif below
+          if comp.respond_to?( meth )
+            return comp.send( meth, *args, &block )
+          end
+        end
+      end
+      super
+    end
+
+    private
+
+    def ctx
+      Context.current or
+        raise "Called out of SyncWrap::Context"
+    end
+
+  end
+
+  class Context
+    include Shell
+
+    def self.current
+      Thread.current[:syncwrap_context]
+    end
+
+    attr_reader :host
+
+    def initialize( host )
+      @host = host
+      super()
+    end
+
+    def with
+      prior = swap( self )
+      yield
+    ensure
+      swap( prior )
+    end
+
+    def sh( command, opts = {} )
+      run_shell(! host, command, opts )
+    end
+
+    private
+
+    def swap( ctx )
+      old = Context.current
+      Thread.current[:syncwrap_context] = ctx
+      old
+    end
+
   end
 
   class Role
@@ -143,6 +225,20 @@ class TestSync < MiniTest::Unit::TestCase
     assert_equal( [ c1, c2, c2b ], host.components )
     assert_equal( c1, host.component( CompOne ) )
     assert_equal( c2b, host.component( CompTwo ) )
+  end
+
+  def test_context
+    sp = Space.new
+    c1 = CompOne.new
+    c2 = CompTwo.new
+    sp.role( :test ).components = [ c1, c2 ]
+    host = sp.host( 'localhost', :test )
+
+    assert_raises( RuntimeError ) { c2.goo }
+    Context.new( host ).with do
+      assert_equal( 42, c2.goo )
+      assert_raises( NameError ) { c1.unresolved }
+    end
   end
 
 end
