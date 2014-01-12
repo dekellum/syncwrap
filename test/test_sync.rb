@@ -42,17 +42,22 @@ module SyncWrap
 
   class Host
 
+    attr_reader :name
     attr_accessor :roles
 
-    def initialize( name )
+    def initialize( name, roles = [] )
       @name = name
-      @roles = []
+      @roles = roles
     end
 
-    #FIXME: Allow hosts to take components direct?
     def components
+      # FIXME: Allow hosts to take components direct?
       # @components ||= []
-      # FIXME: Sum components in roles?
+      roles.map { |r| r.components }.flatten
+    end
+
+    def component( clz )
+      components.reverse.find { |c| c.kind_of?( clz ) }
     end
 
   end
@@ -62,14 +67,27 @@ module SyncWrap
     def initialize
       @roles = {}
       @hosts = {}
+
+      role( :all )
     end
 
-    def role( name )
-      @roles[ name ] ||= Role.new
+    # Define/access a Role by symbol
+    def role( symbol )
+      @roles[ symbol.to_sym ] ||= Role.new
     end
 
-    def host( name )
-      @hosts[ name ] ||= Host.new( name )
+    # Define/access a Host by name
+    # Additional args are intpreted as Roles or Role symbols.  These
+    # will be appended to the new or existing host's roles.
+    # A final Hash argument is interpreted as and reserved for options
+    # FIXME: Short name, long name, or IP?
+    def host( name, *args )
+      opts = args.pop if args.last.is_a?( Hash )
+      host = @hosts[ name ] ||= Host.new( name, [ role(:all) ] )
+      if !args.empty?
+        host.roles |= args.map { |n| n.is_a?( Role ) ? n : role( n ) }
+      end
+      host
     end
 
   end
@@ -82,20 +100,49 @@ class TestSync < MiniTest::Unit::TestCase
   class CompOne < Component
     def install
     end
+
+    def foo
+      42
+    end
+
+    def unresolved
+      goo
+    end
   end
 
   class CompTwo < Component
     def install
     end
+
+    def goo
+      foo
+    end
   end
 
-  def test
+  def test_host_roles
     sp = Space.new
-    localhost = sp.host( 'localhost' )
-    testrole = sp.role( :test )
-    testrole.components = [ CompOne.new, CompTwo.new ]
-    localhost.roles << testrole
+    sp.host( 'localhost' )
+    assert_equal( 'localhost', sp.host( 'localhost' ).name )
+    assert_equal( [ sp.role(:all) ], sp.host( 'localhost' ).roles )
+    sp.host( 'localhost', :test )
+    assert_equal( [ sp.role(:all), sp.role(:test) ],
+                  sp.host( 'localhost' ).roles )
+  end
 
+  def test_role_components
+    sp = Space.new
+    c1 = CompOne.new
+    c2 = CompTwo.new
+    c2b = CompTwo.new
+    sp.role( :test ).components = [ c1, c2 ]
+    sp.role( :test ).components << c2b
+    assert_equal( [ c1, c2, c2b ], sp.role( :test ).components )
+
+    host = sp.host( 'localhost', :test )
+
+    assert_equal( [ c1, c2, c2b ], host.components )
+    assert_equal( c1, host.component( CompOne ) )
+    assert_equal( c2b, host.component( CompTwo ) )
   end
 
 end
