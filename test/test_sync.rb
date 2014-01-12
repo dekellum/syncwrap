@@ -48,10 +48,10 @@ module SyncWrap
       sh( command, opts.merge( user: :root ) )
     end
 
-    # Equivelent to sh( command, user: run_usr )
+    # Equivalent to sh( command, user: run_user ) where run_user would
+    # typically come from RunUser.
     def rudo( command, opts = {} )
-      #FIXME: Our change to RunUser.run_user
-      sh( command, opts.merge( user: user ) )
+      sh( command, opts.merge( user: run_user ) )
     end
 
     def method_missing( meth, *args, &block )
