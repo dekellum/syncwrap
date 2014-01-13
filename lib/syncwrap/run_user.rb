@@ -23,42 +23,48 @@ class SyncWrap::RunUser < SyncWrap::Component
   # A user for running deployed daemons, jobs (default: 'runr')
   attr_accessor :run_user
 
-  # A group for running (default: 'runr')
+  # A group for running (default: nil -> same as run_user)
   attr_accessor :run_group
 
-  # Root directory for persistent data and logs. (default: /var/local/runr)
-  attr_accessor :run_dir
+  # Root directory for persistent data and logs
+  # (default: /var/local/#{run_user})
+  attr_writer :run_dir
+
+  def run_dir
+    @run_dir || "/var/local/#{run_user}"
+  end
 
   def initialize( opts = {} )
     @run_user    = 'runr'
-    @run_group   = 'runr'
-    @run_dir = '/var/local/runr'
+    @run_group   = nil
+    @run_dir     = nil
+
     super
   end
 
   def install
-    create_user
+    create_run_user
     create_run_dir
   end
 
   # Create run_user if not already present
-  def create_user
-    sudo <<-SH
-      if ! id #{run_user} >/dev/null 2>&1; then
-        groupadd -f #{run_group}
-        useradd -g #{run_group} #{run_user}
-      fi
-    SH
+  def create_run_user
+    sudo( "if ! id #{run_user} >/dev/null 2>&1; then", close: "fi" ) do
+      if run_group && run_group != run_user
+        sudo <<-SH
+          groupadd -f #{run_group}
+          useradd -g #{run_group} #{run_user}
+        SH
+      else
+        sudo "useradd #{run_user}"
+      end
+    end
   end
 
   # Create and set owner/permission of run_dir, such that run_user may
   # create new directories there.
   def create_run_dir
-    sudo <<-SH
-      mkdir -p #{run_dir}
-      chown #{run_user}:#{run_group} #{run_dir}
-      chmod 775 #{run_dir}
-    SH
+    make_dir( run_dir )
   end
 
   def service_dir( sname, instance = nil )
@@ -69,18 +75,20 @@ class SyncWrap::RunUser < SyncWrap::Component
   # run_dir.
   def create_service_dir( sname, instance = nil )
     sdir = service_dir( sname, instance )
-    sudo <<-SH
-      mkdir -p #{sdir}
-      chown #{run_user}:#{run_group} #{sdir}
-      chmod 775 #{sdir}
-    SH
+    make_dir( sdir )
+  end
+
+  def make_dir( dir )
+    sudo "mkdir -p #{dir}"
+    chown_run_user dir
+    sudo "chmod 775 #{dir}"
   end
 
   # Chown to user:run_group where args may be flags and files/directories.
-  # FIXME: Use above or drop?
-  def run_user_chown( *args )
+  def chown_run_user( *args )
     flags, paths = args.partition { |a| a =~ /^-/ }
-    sudo( [ 'chown', flags, "#{run_user}:#{run_group}",
+    sudo( [ 'chown', flags,
+            [ run_user, run_group || run_user ].join(':'),
             paths ].flatten.compact.join( ' ' ) )
   end
 
