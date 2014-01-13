@@ -80,8 +80,16 @@ module SyncWrap
   class Context
     include Shell
 
-    def self.current
-      Thread.current[:syncwrap_context]
+    class << self
+      def current
+        Thread.current[:syncwrap_context]
+      end
+
+      def swap( ctx )
+        old = current
+        Thread.current[:syncwrap_context] = ctx
+        old
+      end
     end
 
     attr_reader :host
@@ -92,22 +100,14 @@ module SyncWrap
     end
 
     def with
-      prior = swap( self )
+      prior = Context.swap( self )
       yield
     ensure
-      swap( prior )
+      Context.swap( prior )
     end
 
     def sh( command, opts = {} )
       run_shell(! host, command, opts )
-    end
-
-    private
-
-    def swap( ctx )
-      old = Context.current
-      Thread.current[:syncwrap_context] = ctx
-      old
     end
 
   end
