@@ -85,6 +85,7 @@ class SyncWrap::Users < SyncWrap::Component
 
   def set_sudoers( user )
     #FIXME: make this a template, Use commons bin for secure_path
+    #Relax, less overrides needed for Ubuntu?
     sudo <<-SH
       echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
       echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
