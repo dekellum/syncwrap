@@ -159,30 +159,24 @@ module SyncWrap
 
   end
 
-  class Role
-
-    attr_accessor :components
-
-    def initialize
-      @components = []
-    end
-
-  end
-
   class Host
 
+    attr_reader :space
     attr_reader :name
     attr_accessor :roles
+    attr_accessor :direct_components
 
-    def initialize( name, roles = [] )
+    # FIXME: Short name, long name, or IP?
+
+    def initialize( space, name, roles = [] )
+      @space = space
       @name = name
-      @roles = roles
+      @roles = roles | [ :all ]
+      @direct_components = []
     end
 
     def components
-      # FIXME: Allow hosts to take components direct?
-      # @components ||= []
-      roles.map { |r| r.components }.flatten
+      ( roles.map { |rs| space.role( rs ) } + @direct_components ).flatten
     end
 
     def component( clz )
@@ -194,28 +188,31 @@ module SyncWrap
   class Space
 
     def initialize
-      @roles = {}
+      @roles = Hash.new { |h,k| h[k] = [] }
       @hosts = {}
-
-      role( :all )
     end
 
     # Define/access a Role by symbol
-    def role( symbol )
-      @roles[ symbol.to_sym ] ||= Role.new
+    # Additional args are interpreted as Components to add to this
+    # role.
+    def role( symbol, *args )
+      @roles[ symbol.to_sym ] += args.flatten.compact
     end
 
     # Define/access a Host by name
-    # Additional args are intpreted as Roles or Role symbols.  These
-    # will be appended to the new or existing host's roles.
-    # A final Hash argument is interpreted as and reserved for options
-    # FIXME: Short name, long name, or IP?
+    # Additional args are interpreted as role symbols or (direct)
+    # Components to add to this Host. Each role will only be added
+    # once. A final Hash argument is interpreted as and reserved for
+    # future options.
     def host( name, *args )
       opts = args.pop if args.last.is_a?( Hash )
-      host = @hosts[ name ] ||= Host.new( name, [ role(:all) ] )
-      if !args.empty?
-        host.roles |= args.map { |n| n.is_a?( Role ) ? n : role( n ) }
+      host = @hosts[ name ] ||= Host.new( self, name )
+      roles, comps = args.partition { |a| a.is_a?( Symbol ) }
+      comps.each do |c|
+        raise "Invalid host arg: #{c.inspect}" unless c.is_a?( Component )
       end
+      host.roles |= roles
+      host.direct_components += comps
       host
     end
 
@@ -252,10 +249,9 @@ class TestSync < MiniTest::Unit::TestCase
     sp = Space.new
     sp.host( 'localhost' )
     assert_equal( 'localhost', sp.host( 'localhost' ).name )
-    assert_equal( [ sp.role(:all) ], sp.host( 'localhost' ).roles )
+    assert_equal( [ :all ], sp.host( 'localhost' ).roles )
     sp.host( 'localhost', :test )
-    assert_equal( [ sp.role(:all), sp.role(:test) ],
-                  sp.host( 'localhost' ).roles )
+    assert_equal( [ :all, :test ], sp.host( 'localhost' ).roles )
   end
 
   def test_role_components
@@ -263,22 +259,37 @@ class TestSync < MiniTest::Unit::TestCase
     c1 = CompOne.new
     c2 = CompTwo.new
     c2b = CompTwo.new
-    sp.role( :test ).components = [ c1, c2 ]
-    sp.role( :test ).components << c2b
-    assert_equal( [ c1, c2, c2b ], sp.role( :test ).components )
+    sp.role( :test, c1, c2 )
+    assert_equal( [ c1, c2 ], sp.role( :test ) )
 
     host = sp.host( 'localhost', :test )
+    sp.role( :test, c2b ) # After assigned to host
+    assert_equal( [ c1, c2, c2b ], sp.role( :test ) )
+    assert_equal( [ c1, c2, c2b ], host.components )
 
+    assert_equal( c1, host.component( CompOne ) )
+    assert_equal( c2b, host.component( CompTwo ) ) #last instance
+  end
+
+  def test_host_direct_components
+    sp = Space.new
+    c1 = CompOne.new
+    c2 = CompTwo.new
+    sp.role( :test, c1, c2 )
+    assert_equal( [ c1, c2 ], sp.role( :test ) )
+
+    c2b = CompTwo.new
+    host = sp.host( 'localhost', :test, c2b )
     assert_equal( [ c1, c2, c2b ], host.components )
     assert_equal( c1, host.component( CompOne ) )
-    assert_equal( c2b, host.component( CompTwo ) )
+    assert_equal( c2b, host.component( CompTwo ) ) #last instance
   end
 
   def test_context_dynamic_binding
     sp = Space.new
     c1 = CompOne.new
     c2 = CompTwo.new
-    sp.role( :test ).components = [ c1, c2 ]
+    sp.role( :test, c1, c2 )
     host = sp.host( 'localhost', :test )
 
     assert_raises( RuntimeError ) { c2.goo }
