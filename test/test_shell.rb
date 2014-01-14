@@ -35,6 +35,11 @@ class TestShell < MiniTest::Unit::TestCase
     @shell ||= Conch.new
   end
 
+  def test_args_to_command
+    cmd = sh.args_to_command( [ "", [ nil, "   a\nb" ], "\n c\n", "d m n\n \n" ] )
+    assert_equal( (%w[a b c] << "d m n").join( "\n" ), cmd )
+  end
+
   def test_capture_noop
     exit_code, outputs = sh.capture3( %w[sh -c true])
     assert_equal( 0, exit_code )
@@ -59,12 +64,13 @@ class TestShell < MiniTest::Unit::TestCase
     # Note: sleep needed to make the :err vs :out ordering consistent.
     exit_code, outputs = sh.capture3( sh.sh_args( <<-'SH', sh_verbose: :v ))
      echo foo && sleep 0.1
+     # comment!
      echo bar
     SH
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo && sleep 0.1\n"],
                     [:out, "foo\n"],
-                    [:err, "echo bar\n"],
+                    [:err, "# comment!\necho bar\n"],
                     [:out, "bar\n"] ],
                   outputs, outputs )
   end
