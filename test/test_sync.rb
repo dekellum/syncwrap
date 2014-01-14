@@ -39,19 +39,23 @@ module SyncWrap
       ctx.host
     end
 
-    def sh( command, opts = {} )
-      ctx.sh( command, opts )
+    def sh( command, opts = {}, &block )
+      ctx.sh( command, opts, block )
     end
 
     # Equivalent to sh( command, user: :root )
-    def sudo( command, opts = {} )
-      sh( command, opts.merge( user: :root ) )
+    def sudo( command, opts = {}, &block )
+      sh( command, opts.merge( user: :root ), block )
     end
 
     # Equivalent to sh( command, user: run_user ) where run_user would
     # typically come from RunUser.
-    def rudo( command, opts = {} )
-      sh( command, opts.merge( user: run_user ) )
+    def rudo( command, opts = {}, &block )
+      sh( command, opts.merge( user: run_user ), block )
+    end
+
+    def flush
+      ctx.flush
     end
 
     def method_missing( meth, *args, &block )
@@ -77,6 +81,9 @@ module SyncWrap
 
   end
 
+  class NestingError < RuntimeError
+  end
+
   class Context
     include Shell
 
@@ -96,18 +103,58 @@ module SyncWrap
 
     def initialize( host )
       @host = host
+      reset_queue
+      @queue_locked = false
       super()
     end
 
     def with
       prior = Context.swap( self )
       yield
+      flush
     ensure
       Context.swap( prior )
     end
 
     def sh( command, opts = {} )
-      run_shell(! host, command, opts )
+      opts = opts.dup
+      close = opts.delete( :close )
+
+      flush if opts != @queued_opts #may still be a no-op
+
+      @queued_cmd << command
+      @queued_opts = opts
+
+      if close
+        prev, @queue_locked = @queue_locked, true
+      end
+
+      begin
+        yield if block_given?
+        @queued_cmd << close if close
+      ensure
+        @queue_locked = prev if close
+      end
+    end
+
+    def flush
+      if @queued_cmd.length > 0
+        begin
+          if @queue_locked
+            raise NestingError, 'Queue at flush: ' + @queued_cmd.join( '\n' )
+          end
+          run_shell!( host.name, @queued_cmd, @queued_opts )
+        ensure
+          reset_queue
+        end
+      end
+    end
+
+    private
+
+    def reset_queue
+      @queued_cmd = []
+      @queued_opts = {}
     end
 
   end
@@ -227,7 +274,7 @@ class TestSync < MiniTest::Unit::TestCase
     assert_equal( c2b, host.component( CompTwo ) )
   end
 
-  def test_context
+  def test_context_dynamic_binding
     sp = Space.new
     c1 = CompOne.new
     c2 = CompTwo.new
@@ -239,6 +286,88 @@ class TestSync < MiniTest::Unit::TestCase
       assert_equal( 42, c2.goo )
       assert_raises( NameError ) { c1.unresolved }
     end
+  end
+
+  class TestContext < Context
+    attr_accessor :run_args
+
+    def run_shell!( host, command, args )
+      @run_args = [ host, command, args ]
+    end
+  end
+
+  def test_context_queue
+    sp = Space.new
+    host = sp.host( 'localhost' )
+    ctx = TestContext.new( host )
+
+    ctx.with do
+      ctx.sh( "c1", user: :root )
+      assert_nil( ctx.run_args )
+      ctx.sh( "c2", user: :root )
+      assert_nil( ctx.run_args )
+      ctx.flush
+      assert_equal( 'localhost', ctx.run_args[0] )
+      assert_equal( %w[c1 c2], ctx.run_args[1] )
+      assert_equal( { user: :root }, ctx.run_args[2] )
+    end
+  end
+
+  def test_context_flush_at_end
+    sp = Space.new
+    host = sp.host( 'localhost' )
+    ctx = TestContext.new( host )
+
+    ctx.with do
+      ctx.sh( "c1", user: :root )
+      ctx.sh( "c2", user: :root )
+      assert_nil( ctx.run_args )
+    end
+    assert_equal( %w[c1 c2], ctx.run_args[1] )
+  end
+
+  def test_context_flush_on_opts_change
+    sp = Space.new
+    host = sp.host( 'localhost' )
+    ctx = TestContext.new( host )
+
+    ctx.with do
+      ctx.sh( "c1", user: :root )
+      assert_nil( ctx.run_args )
+      ctx.sh( "c2" )
+      assert_equal( %w[c1], ctx.run_args[1] )
+    end
+    assert_equal( %w[c2], ctx.run_args[1] )
+  end
+
+  def test_context_with_close
+    sp = Space.new
+    host = sp.host( 'localhost' )
+    ctx = TestContext.new( host )
+
+    ctx.with do
+      ctx.sh( "c1-", close: "-c3" ) do
+        ctx.sh( "c2" )
+        assert_nil( ctx.run_args )
+      end
+      assert_nil( ctx.run_args )
+    end
+    assert_equal( %w[c1- c2 -c3], ctx.run_args[1] )
+  end
+
+  def test_context_nesting_error
+    sp = Space.new
+    host = sp.host( 'localhost' )
+    ctx = TestContext.new( host )
+
+    assert_raises( NestingError ) do
+      ctx.with do
+        ctx.sh( "c1-", close: "-c3" ) do
+          ctx.sh( "c2", user: :root  )
+        end
+      end
+    end
+    assert_nil( ctx.run_args )
   end
 
 end
