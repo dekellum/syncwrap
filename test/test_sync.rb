@@ -163,20 +163,34 @@ module SyncWrap
 
     attr_reader :space
     attr_reader :name
-    attr_accessor :roles
-    attr_accessor :direct_components
 
     # FIXME: Short name, long name, or IP?
 
-    def initialize( space, name, roles = [] )
+    def initialize( space, name )
       @space = space
       @name = name
-      @roles = roles | [ :all ]
-      @direct_components = []
+      @contents = [ :all ]
+    end
+
+    def add( *args )
+      args.each do |arg|
+        case( arg )
+        when Symbol
+          @contents << arg unless @contents.include?( arg )
+        when Component
+          @contents << arg
+        else
+          raise "Invalid host #{name} addition: #{c.inspect}"
+        end
+      end
+    end
+
+    def roles
+      @contents.select { |c| c.is_a?( Symbol ) }
     end
 
     def components
-      ( roles.map { |rs| space.role( rs ) } + @direct_components ).flatten
+      @contents.map { |c| c.is_a?( Symbol ) ? space.role( c ) : c }.flatten
     end
 
     def component( clz )
@@ -207,12 +221,7 @@ module SyncWrap
     def host( name, *args )
       opts = args.pop if args.last.is_a?( Hash )
       host = @hosts[ name ] ||= Host.new( self, name )
-      roles, comps = args.partition { |a| a.is_a?( Symbol ) }
-      comps.each do |c|
-        raise "Invalid host arg: #{c.inspect}" unless c.is_a?( Component )
-      end
-      host.roles |= roles
-      host.direct_components += comps
+      host.add( *args )
       host
     end
 
@@ -249,8 +258,16 @@ class TestSync < MiniTest::Unit::TestCase
     sp = Space.new
     sp.host( 'localhost' )
     assert_equal( 'localhost', sp.host( 'localhost' ).name )
+
+    # :all always first role
     assert_equal( [ :all ], sp.host( 'localhost' ).roles )
+
+    # :all remains first
     sp.host( 'localhost', :test )
+    assert_equal( [ :all, :test ], sp.host( 'localhost' ).roles )
+
+    # Roles only added once
+    sp.host( 'localhost', :test, :all )
     assert_equal( [ :all, :test ], sp.host( 'localhost' ).roles )
   end
 
@@ -275,11 +292,11 @@ class TestSync < MiniTest::Unit::TestCase
     sp = Space.new
     c1 = CompOne.new
     c2 = CompTwo.new
-    sp.role( :test, c1, c2 )
-    assert_equal( [ c1, c2 ], sp.role( :test ) )
+    sp.role( :test, c2 )
+    assert_equal( [ c2 ], sp.role( :test ) )
 
     c2b = CompTwo.new
-    host = sp.host( 'localhost', :test, c2b )
+    host = sp.host( 'localhost', c1, :test, c2b )
     assert_equal( [ c1, c2, c2b ], host.components )
     assert_equal( c1, host.component( CompOne ) )
     assert_equal( c2b, host.component( CompTwo ) ) #last instance
