@@ -28,6 +28,10 @@ require 'syncwrap'
 class TestSync < MiniTest::Unit::TestCase
   include SyncWrap
 
+  def sp
+    @sp ||= Space.new
+  end
+
   class CompOne < Component
     def install
     end
@@ -51,7 +55,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_host_roles
-    sp = Space.new
     sp.host( 'localhost' )
     assert_equal( 'localhost', sp.host( 'localhost' ).name )
 
@@ -68,7 +71,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_role_components
-    sp = Space.new
     c1 = CompOne.new
     c2 = CompTwo.new
     c2b = CompTwo.new
@@ -85,7 +87,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_host_direct_components
-    sp = Space.new
     c1 = CompOne.new
     c2 = CompTwo.new
     sp.role( :test, c2 )
@@ -99,7 +100,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_context_dynamic_binding
-    sp = Space.new
     c1 = CompOne.new
     c2 = CompTwo.new
     sp.role( :test, c1, c2 )
@@ -121,7 +121,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_context_queue
-    sp = Space.new
     host = sp.host( 'localhost' )
     ctx = TestContext.new( host )
 
@@ -138,7 +137,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_context_flush_at_end
-    sp = Space.new
     host = sp.host( 'localhost' )
     ctx = TestContext.new( host )
 
@@ -151,7 +149,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_context_flush_on_opts_change
-    sp = Space.new
     host = sp.host( 'localhost' )
     ctx = TestContext.new( host )
 
@@ -165,7 +162,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_context_with_close
-    sp = Space.new
     host = sp.host( 'localhost' )
     ctx = TestContext.new( host )
 
@@ -180,7 +176,6 @@ class TestSync < MiniTest::Unit::TestCase
   end
 
   def test_context_nesting_error
-    sp = Space.new
     host = sp.host( 'localhost' )
     ctx = TestContext.new( host )
 
