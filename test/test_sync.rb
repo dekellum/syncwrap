@@ -24,6 +24,7 @@ require 'minitest/unit'
 require 'minitest/autorun'
 
 require 'syncwrap/shell'
+require 'syncwrap/rsync'
 
 module SyncWrap
 
@@ -52,6 +53,10 @@ module SyncWrap
     # typically come from RunUser.
     def rudo( command, opts = {}, &block )
       sh( command, opts.merge( user: run_user ), block )
+    end
+
+    def rput( *args )
+      ctx.rput( *args )
     end
 
     def flush
@@ -85,6 +90,7 @@ module SyncWrap
 
   class Context
     include Shell
+    include Rsync
 
     class << self
       def current
@@ -115,6 +121,16 @@ module SyncWrap
       Context.swap( prior )
     end
 
+    # Put files or entire directories to host via
+    # SyncWrap::Rsync::rsync (see details including options).
+    # Any queued commands are flushed beforehand, to avoid ambiguous
+    # order of remote changes.
+    def rput( *args )
+      flush
+      rsync( host.name, *args )
+    end
+
+    # Enqueue a shell command to be run on host.
     def sh( command, opts = {} )
       opts = opts.dup
       close = opts.delete( :close )
