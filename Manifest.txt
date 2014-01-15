@@ -28,9 +28,10 @@ lib/syncwrap/qpid.rb
 lib/syncwrap/remote_task.rb
 lib/syncwrap/rhel.rb
 lib/syncwrap/rsync.rb
+lib/syncwrap/run_user.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/ubuntu.rb
-lib/syncwrap/user_run.rb
+lib/syncwrap/users.rb
 postgresql/rhel/pg_hba.conf
 postgresql/rhel/pg_ident.conf
 postgresql/rhel/postgresql.conf
