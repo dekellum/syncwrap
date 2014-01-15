@@ -50,7 +50,7 @@ module SyncWrap::Shell
       format_outputs( outputs, opts )
     end
     if exit_code != 0
-      raise CommandFailure, "exit code: #{exit_code}"
+      raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
     end
   end
 
