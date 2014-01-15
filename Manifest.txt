@@ -41,9 +41,9 @@ postgresql/ubuntu/pg_ident.conf
 postgresql/ubuntu/postgresql.conf
 postgresql/ubuntu/start.conf
 test/test_context.rb
+test/test_rsync.rb
 test/test_shell.rb
 test/test_space.rb
-test/test_syncwrap.rb
 usr/local/bin/jgem
 usr/local/etc/qpidd.conf
 var/iyyov/jobs.rb

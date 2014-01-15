@@ -133,10 +133,12 @@ module SyncWrap::Rsync
 
     if exit_code == 0
       # Return array of --itemize-changes on standard out.
-      outputs.
+      stdout = outputs.
         select { |o| o[0] == :out }. #stdout only
         map { |o| o[1] }.            #buffers
-        inject(:+).
+        inject(:+) || ""
+
+      stdout.
         split( "\n" ).
         map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
         compact
