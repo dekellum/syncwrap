@@ -13,10 +13,13 @@ lib/syncwrap/base.rb
 lib/syncwrap.rb
 lib/syncwrap/aws.rb
 lib/syncwrap/common.rb
+lib/syncwrap/component.rb
+lib/syncwrap/context.rb
 lib/syncwrap/distro.rb
 lib/syncwrap/ec2.rb
 lib/syncwrap/geminabox.rb
 lib/syncwrap/hashdot.rb
+lib/syncwrap/host.rb
 lib/syncwrap/iyyov.rb
 lib/syncwrap/java.rb
 lib/syncwrap/jruby.rb
@@ -24,6 +27,8 @@ lib/syncwrap/postgresql.rb
 lib/syncwrap/qpid.rb
 lib/syncwrap/remote_task.rb
 lib/syncwrap/rhel.rb
+lib/syncwrap/rsync.rb
+lib/syncwrap/shell.rb
 lib/syncwrap/ubuntu.rb
 lib/syncwrap/user_run.rb
 postgresql/rhel/pg_hba.conf
@@ -35,6 +40,9 @@ postgresql/ubuntu/pg_hba.conf
 postgresql/ubuntu/pg_ident.conf
 postgresql/ubuntu/postgresql.conf
 postgresql/ubuntu/start.conf
+test/test_context.rb
+test/test_shell.rb
+test/test_space.rb
 test/test_syncwrap.rb
 usr/local/bin/jgem
 usr/local/etc/qpidd.conf
