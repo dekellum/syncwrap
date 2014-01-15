@@ -60,7 +60,7 @@ module SyncWrap
 
     def method_missing( meth, *args, &block )
       below = false
-      host.components.reverse_each do |comp|
+      host && host.components.reverse_each do |comp|
         if comp == self
           below = true
         elsif below
@@ -75,8 +75,7 @@ module SyncWrap
     private
 
     def ctx
-      Context.current or
-        raise "Called out of SyncWrap::Context"
+      Context.current or raise "ctx called out of SyncWrap::Context"
     end
 
   end
