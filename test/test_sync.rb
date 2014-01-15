@@ -225,6 +225,14 @@ module SyncWrap
       host
     end
 
+    # FIXME: misc default args for ssh, sudo, i.e:
+    # sudo_flags: ['-H']
+    # ssh_flags: %w[ -i ./key.pem -l ec2-user ]
+    # Option to use example ssh-flags for Users setup only?
+
+    # FIXME: Host name to ssh name strategies go here
+
+    # FIXME: Progamatic interface for execution
   end
 
 end
