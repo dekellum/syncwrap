@@ -18,10 +18,10 @@ require 'syncwrap/component'
 require 'syncwrap/distro'
 require 'thread'
 
-# Customizations for Ubuntu and possibly other Debian/apt packaged
-# derivatives. Specific distros/versions may further specialize.
 module SyncWrap
 
+  # Customizations for Ubuntu and possibly other Debian/apt packaged
+  # derivatives. Specific distros/versions may further specialize.
   class Ubuntu < Component
     include SyncWrap::Distro
 

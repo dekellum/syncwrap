@@ -17,11 +17,11 @@
 require 'syncwrap/component'
 require 'syncwrap/distro'
 
-# Customizations for RedHat Enterprise Linux and derivatives like
-# CentOS and Amazon Linux.  Specific distros/versions may further
-# override these.
 module SyncWrap
 
+  # Customizations for RedHat Enterprise Linux and derivatives like
+  # CentOS and Amazon Linux.  Specific distros/versions may further
+  # override these.
   class RHEL < Component
     include SyncWrap::Distro
 
