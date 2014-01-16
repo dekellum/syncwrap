@@ -14,85 +14,89 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/base'
+require 'syncwrap/component'
 
-# Provission developer user accounts, sudo access, and synchronize
-# home directory files.
-class SyncWrap::Users < SyncWrap::Component
+module SyncWrap
 
-  # The list of user names to install. If nil, home_users will be
-  # determined by the set of home directories in local_home_dir -
-  # exclude_users.
-  attr_accessor :home_users
+  # Provision developer user accounts, sudo access, and synchronize
+  # home directory files.
+  class Users < Component
 
-  # Local set of home directories to be synchronized. (Default: ./home)
-  attr_accessor :local_home_dir
+    # The list of user names to install. If nil, home_users will be
+    # determined by the set of home directories in local_home_dir -
+    # exclude_users.
+    attr_accessor :home_users
 
-  # Set of users to exclude from synchronization (default: [])
-  attr_accessor :exclude_users
+    # Local set of home directories to be synchronized. (Default: ./home)
+    attr_accessor :local_home_dir
 
-  def initialize( opts = {} )
-    @home_users = nil
-    @local_home_dir = "./home"
-    @exclude_users = []
-    super
-  end
+    # Set of users to exclude from synchronization (default: [])
+    attr_accessor :exclude_users
 
-  def install
-    users = home_users
-    users ||= Dir.entries( local_home_dir ).select do |d|
-      ( d !~ /^\./ &&
-        File.directory?( local_home_dir + d ) )
-    end
-    users -= exclude_users
-
-    users.each do |u|
-      sync_home_files( u )
+    def initialize( opts = {} )
+      @home_users = nil
+      @local_home_dir = "./home"
+      @exclude_users = []
+      super
     end
 
-    users.each do |u|
-      create_user( u )
-      fix_home_permissions( u )
-      set_sudoers( u )
+    def install
+      users = home_users
+      users ||= Dir.entries( local_home_dir ).select do |d|
+        ( d !~ /^\./ &&
+          File.directory?( local_home_dir + d ) )
+      end
+      users -= exclude_users
+
+      users.each do |u|
+        sync_home_files( u )
+      end
+
+      users.each do |u|
+        create_user( u )
+        fix_home_permissions( u )
+        set_sudoers( u )
+      end
     end
-  end
 
-  # Create user if not already present
-  def create_user( user )
-    sudo <<-SH
-      if ! id #{user} >/dev/null 2>&1; then
-        useradd #{user}
-      fi
-    SH
-  end
-
-  def sync_home_files( user )
-    if File.directory?( "#{local_home_dir}/#{user}" )
-      rput( "#{local_home_dir}/#{user}", user: user )
-    else
-      false
+    # Create user if not already present
+    def create_user( user )
+      sudo <<-SH
+        if ! id #{user} >/dev/null 2>&1; then
+          useradd #{user}
+        fi
+      SH
     end
-  end
 
-  def fix_home_permissions( user )
-    sudo <<-SH
-      if [ -e '/home/#{user}/.ssh' ]; then
-        chmod 700 /home/#{user}/.ssh
-        chmod -R o-rwx /home/#{user}/.ssh
-      fi
-    SH
-  end
+    def sync_home_files( user )
+      if File.directory?( "#{local_home_dir}/#{user}" )
+        rput( "#{local_home_dir}/#{user}", user: user )
+      else
+        false
+      end
+    end
 
-  def set_sudoers( user )
-    #FIXME: make this a template, Use commons bin for secure_path
-    #Relax, less overrides needed for Ubuntu?
-    sudo <<-SH
-      echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
-      echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
-      echo 'Defaults:#{user} secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin' \
-        >> /etc/sudoers.d/#{user}
-      chmod 440 /etc/sudoers.d/#{user}
-    SH
+    def fix_home_permissions( user )
+      sudo <<-SH
+        if [ -e '/home/#{user}/.ssh' ]; then
+          chmod 700 /home/#{user}/.ssh
+          chmod -R o-rwx /home/#{user}/.ssh
+        fi
+      SH
+    end
+
+    def set_sudoers( user )
+      #FIXME: make this a template, Use commons bin for secure_path
+      #Relax, less overrides needed for Ubuntu?
+      sudo <<-SH
+        echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
+        echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
+        echo 'Defaults:#{user} secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin' \
+          >> /etc/sudoers.d/#{user}
+        chmod 440 /etc/sudoers.d/#{user}
+      SH
+    end
+
   end
 
 end
