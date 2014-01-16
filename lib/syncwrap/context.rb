@@ -61,6 +61,14 @@ module SyncWrap
       rsync( host.name, *args )
     end
 
+    # Capture and return [exit_code, stdout] from command. Does not
+    # raise on non-success.  Any commands queued via #sh are flushed
+    # beforehand, to avoid ambiguous order of remote changes.
+    def capture( command, opts = {} )
+      flush
+      capture_shell( host.name, command, opts )
+    end
+
     # Enqueue a shell command to be run on host.
     def sh( command, opts = {} )
       opts = opts.dup

@@ -30,6 +30,11 @@ module SyncWrap
       ctx.host
     end
 
+    def capture( command, opts = {} )
+      ctx.capture( command, opts )
+    end
+
+    # FIXME: rdoc
     def sh( command, opts = {}, &block )
       ctx.sh( command, opts, block )
     end
@@ -40,11 +45,12 @@ module SyncWrap
     end
 
     # Equivalent to sh( command, user: run_user ) where run_user would
-    # typically come from RunUser.
+    # typically come from the RunUser component.
     def rudo( command, opts = {}, &block )
       sh( command, opts.merge( user: run_user ), block )
     end
 
+    # FIXME: rdoc
     def rput( *args )
       ctx.rput( *args )
     end

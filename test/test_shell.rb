@@ -47,13 +47,13 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_capture_error
-    exit_code, outputs = sh.capture3( %w[sh -v -c false])
-    assert_equal( 1, exit_code )
-    assert_equal( [[:err, "false\n"]], outputs, outputs )
+    exit_code, outputs = sh.capture3( %w[sh -v -c] << "exit 33" )
+    assert_equal( 33, exit_code )
+    assert_equal( [[:err, "exit 33\n"]], outputs, outputs )
   end
 
   def test_capture_output
-    exit_code, outputs = sh.capture3( %w[sh -v -c] << "echo foo")
+    exit_code, outputs = sh.capture3( %w[sh -v -c] << "echo foo" )
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo\n"],
                     [:out, "foo\n"] ],

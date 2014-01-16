@@ -54,6 +54,20 @@ module SyncWrap
       end
     end
 
+    def capture_shell( host, command, opts = {} )
+      args = ssh_args( host, command, opts )
+      exit_code, outputs = capture3( args )
+      format_outputs( outputs, opts ) if opts[ :verbose ]
+      [ exit_code, collect_stream( :out, outputs ) ]
+    end
+
+    def collect_stream( stream, outputs )
+      outputs.
+        select { |o| o[0] == stream }.
+        map { |o| o[1] }. #the buffers
+        inject( "", :+ )
+    end
+
     def format_outputs( outputs, opts = {} )
       clr = Term::ANSIColor
       newlined = true
