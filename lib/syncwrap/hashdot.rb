@@ -14,57 +14,88 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/common'
-require 'syncwrap/distro'
+require 'syncwrap/component'
 
-# Provisions the {Hashdot}[http://hashdot.sourceforge.net/] JVM/script
-# launcher by building it with gcc on the target host.
-module SyncWrap::Hashdot
-  include SyncWrap::Common
-  include SyncWrap::Distro
+module SyncWrap
 
-  # Hashdot version (default: 1.4.0)
-  attr_accessor :hashdot_version
+  # Provision the {Hashdot}[http://hashdot.sourceforge.net/] JVM/script
+  # launcher by building it with gcc on the target host.
+  class Hashdot < Component
 
-  def initialize
-    super
+    # Hashdot version (default: 1.4.0)
+    attr_accessor :hashdot_version
 
-    @hashdot_version = '1.4.0'
-  end
+    def initialize( opts = {} )
+      @hashdot_version = '1.4.0'
 
-  def hashdot_install_system_deps
-    dist_install( %w[ make gcc apr apr-devel ] )
-  end
-
-  # Install hashdot if the binary is not found. If the binary is found
-  # then still attempt to update the profile config files.
-  def hashdot_install
-    if !exist?( "#{local_root}/bin/hashdot" )
-      hashdot_install!
-    else
-      # Just update config as needed.
-      rput( 'src/hashdot/profiles/',
-            "#{local_root}/lib/hashdot/profiles/",
-            :excludes => :dev, :user => 'root' )
+      super
     end
-  end
 
-  def hashdot_install!
-    hashdot_install_system_deps
+    def hashdot_bin_url
+      [ 'http://downloads.sourceforge.net/project/hashdot/hashdot',
+        hashdot_version,
+        "hashdot-#{hashdot_version}-src.tar.gz" ].join( '/' )
+    end
 
-    url = ( "http://downloads.sourceforge.net/project/hashdot/" +
-            "hashdot/#{hashdot_version}/hashdot-#{hashdot_version}-src.tar.gz" )
-    src_root = '/tmp/src'
-    hd_src = "#{src_root}/hashdot-#{hashdot_version}"
+    # Install hashdot if the binary version doesn't match, otherwise
+    # just update the profile config files.
+    def install
+      if !test_hashdot_binary
+        install_system_deps
+        install_hashdot
+      else
+        # Just update config as needed.
+        # FIXME: Should be templates here
+        rput( 'src/hashdot/profiles/',
+              "#{local_root}/lib/hashdot/profiles/",
+              :excludes => :dev, :user => 'root' )
+      end
+    end
 
-    run <<-SH
-      mkdir -p #{src_root}
-      rm -rf #{hd_src}
-      curl -sSL #{url} | tar -C #{src_root} -zxf -
-    SH
-    rput( 'src/hashdot/', "#{hd_src}/", :excludes => :dev )
-    run  "cd #{hd_src} && make"
-    sudo "cd #{hd_src} && make install"
+    def install_system_deps
+      dist_install( %w[ make gcc apr apr-devel ] )
+    end
+
+    def test_hashdot_binary
+      binary = "#{local_root}/bin/hashdot"
+      code,_ = capture <<-SH
+        if [ -x #{binary} ]; then
+          cver="$(#{binary} 2>&1 | grep -o -E '([0-9]\.?){2,}')"
+          if [ "$cver" = "#{hashdot_version}" ]; then
+            exit 0
+          fi
+          exit 92
+        fi
+        exit 91
+      SH
+
+      case code
+      when 0
+        true
+      when 91, 92
+        false
+      else
+        raise CommandFailure, "exit code #{code}"
+      end
+    end
+
+    def install_hashdot
+      src_root = '/tmp/src/hashdot'
+      src = "#{src_root}/hashdot-#{hashdot_version}"
+
+      sudo "rm -rf #{src_root}"
+
+      sh <<-SH
+        mkdir -p #{src_root}
+        curl -sSL #{hashdot_bin_url} | tar -C #{src_root} -zxf -
+      SH
+
+      # FIXME: Should be templates here
+      rput( 'src/hashdot/', "#{src}/", :excludes => :dev )
+      sh "cd #{src} && make"
+      sudo "cd #{src} && make install"
+    end
+
   end
 
 end
