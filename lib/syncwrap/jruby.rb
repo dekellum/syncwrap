@@ -39,12 +39,12 @@ module SyncWrap::JRuby
   end
 
   def jruby_gemrc_path
-    "#{common_prefix}/lib/jruby/jruby-#{jruby_version}/etc"
+    "#{local_root}/lib/jruby/jruby-#{jruby_version}/etc"
   end
 
   # Install jruby if the jruby_version is not already present.
   def jruby_install
-    unless exist?( "#{common_prefix}/lib/jruby/jruby-#{jruby_version}" )
+    unless exist?( "#{local_root}/lib/jruby/jruby-#{jruby_version}" )
       jruby_install!
     end
     jruby_install_gemrc
@@ -61,14 +61,14 @@ module SyncWrap::JRuby
     url = ( "http://jruby.org.s3.amazonaws.com/downloads/#{jruby_version}/" +
             "jruby-bin-#{jruby_version}.tar.gz" )
 
-    root = "#{common_prefix}/lib/jruby"
+    root = "#{local_root}/lib/jruby"
 
     sudo <<-SH
       mkdir -p #{root}
       mkdir -p #{root}/gems
       curl -sSL #{url} | tar -C #{root} -zxf -
       cd #{root} && ln -sfn jruby-#{jruby_version} jruby
-      cd #{common_prefix}/bin && ln -sf ../lib/jruby/jruby/bin/jirb .
+      cd #{local_root}/bin && ln -sf ../lib/jruby/jruby/bin/jirb .
     SH
 
     rput( 'usr/local/bin/', :excludes => :dev, :user => 'root' )

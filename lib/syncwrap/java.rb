@@ -43,7 +43,7 @@ module SyncWrap::Java
   end
 
   def java_install
-    java_install! unless exist?( "#{common_prefix}/lib/#{java_jdk_name}" )
+    java_install! unless exist?( "#{local_root}/lib/#{java_jdk_name}" )
   end
 
   def java_install!
@@ -52,9 +52,9 @@ module SyncWrap::Java
       join( ' ' )
 
     sudo <<-SH
-      curl -sSL #{java_jdk_url} | tar -C #{common_prefix}/lib -zxf -
-      cd #{common_prefix}/lib && ln -sfn #{java_jdk_name} java
-      cd #{common_prefix}/bin && ln -sfn #{bins} .
+      curl -sSL #{java_jdk_url} | tar -C #{local_root}/lib -zxf -
+      cd #{local_root}/lib && ln -sfn #{java_jdk_name} java
+      cd #{local_root}/bin && ln -sfn #{bins} .
     SH
 
   end

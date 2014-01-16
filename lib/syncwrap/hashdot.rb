@@ -39,12 +39,12 @@ module SyncWrap::Hashdot
   # Install hashdot if the binary is not found. If the binary is found
   # then still attempt to update the profile config files.
   def hashdot_install
-    if !exist?( "#{common_prefix}/bin/hashdot" )
+    if !exist?( "#{local_root}/bin/hashdot" )
       hashdot_install!
     else
       # Just update config as needed.
       rput( 'src/hashdot/profiles/',
-            "#{common_prefix}/lib/hashdot/profiles/",
+            "#{local_root}/lib/hashdot/profiles/",
             :excludes => :dev, :user => 'root' )
     end
   end

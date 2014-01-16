@@ -19,14 +19,19 @@ require 'syncwrap/base'
 # Support for distro specializations.
 module SyncWrap::Distro
 
+  # The root directory for local, non-distro installs
+  # (default: /usr/local)
+  attr_accessor :local_root
+
   # A Hash of internal/common package names to distro specific package
-  # names.  Here defined as empty.
+  # names.
   attr_reader :packages_map
 
-  def initialize
-    super
-
+  def initialize( *args )
+    @local_root = '/usr/local'
     @packages_map = {}
+
+    super( *args )
   end
 
   # Map internal/common names and return distro-specific names. If a
