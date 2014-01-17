@@ -34,13 +34,16 @@ module SyncWrap
     # jobs.rb. Returns true if iyyov was installed/upgraded and should
     # be restarted.
     def install
-      install_run_dir
+      # Short-circuit install if the right process is already running
+      dtest = "iyyov-#{iyyov_version}-java/init/iyyov"
+      code,_ = capture( "pgrep -f #{dtest}", accept:[0,1] )
 
-      if install_iyyov_gem
+      if code == 1
+        install_run_dir
+        install_iyyov_gem
         install_iyyov_init
+        iyyov_restart
         true
-      else
-        false
       end
     end
 
@@ -80,10 +83,12 @@ module SyncWrap
       gem_count = jruby_install_gem( 'iyyov', version: "=#{iyyov_version}",
                                      minimize: true, check: true )
       ( gem_count > 0 )
+      # FIXME may not need to check
     end
 
     # Install iyyov daemon init.d script and add to init daemons
     def install_iyyov_init
+      # FIXME: Templatize for version or pull out of gem sample
       rput( 'etc/init.d/iyyov', user: :root )
 
       # Add to init.d
