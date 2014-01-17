@@ -15,7 +15,6 @@ lib/syncwrap/aws.rb
 lib/syncwrap/component.rb
 lib/syncwrap/context.rb
 lib/syncwrap/distro.rb
-lib/syncwrap/ec2.rb
 lib/syncwrap/geminabox.rb
 lib/syncwrap/hashdot.rb
 lib/syncwrap/host.rb
