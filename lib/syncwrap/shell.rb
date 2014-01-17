@@ -57,6 +57,10 @@ module SyncWrap
     def capture_shell( host, command, opts = {} )
       args = ssh_args( host, command, opts )
       exit_code, outputs = capture3( args )
+      if opts[ :accept ] and !opts[ :accept ].include?( exit_code )
+        format_outputs( outputs, opts )
+        raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
+      end
       format_outputs( outputs, opts ) if opts[ :verbose ]
       [ exit_code, collect_stream( :out, outputs ) ]
     end

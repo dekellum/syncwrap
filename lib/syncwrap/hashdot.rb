@@ -58,7 +58,7 @@ module SyncWrap
 
     def test_hashdot_binary
       binary = "#{local_root}/bin/hashdot"
-      code,_ = capture <<-SH
+      code,_ = capture( <<-SH, accept: [0,91,92] )
         if [ -x #{binary} ]; then
           cver="$(#{binary} 2>&1 | grep -o -E '([0-9]\.?){2,}')"
           if [ "$cver" = "#{hashdot_version}" ]; then
@@ -68,15 +68,7 @@ module SyncWrap
         fi
         exit 91
       SH
-
-      case code
-      when 0
-        true
-      when 91, 92
-        false
-      else
-        raise CommandFailure, "exit code #{code}"
-      end
+      (code == 0)
     end
 
     def install_hashdot
