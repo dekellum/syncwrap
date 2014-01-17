@@ -84,44 +84,49 @@ module SyncWrap
       rput( 'usr/local/bin/', excludes: :dev, user: :root )
     end
 
-    # Return true if gem is already installed.
-    # ==== Options
-    # :version:: Version specifier array, like in spec. files
-    #            (default: none, i.e. latest)
-    # :user_install:: If true, perform check as the current user, else
-    #                 system install with sudo (default: false )
-    def jruby_check_gem( gems, opts = {} )
-      query = [ jruby_gem_command, 'query', '-i',
-                jruby_gem_version_flags( opts[ :version ] ),
-                '-n', gems, '>/dev/null' ].flatten.compact
-
-      # FIXME: exec_conditional? Alternative to send?, join ' '
-      status = exec_conditional do
-        send( opts[ :user_install ] ? :run : :sudo, query )
-      end
-      ( status == 0 )
-    end
-
-    # Install the specified gem(s)
+    # Install the specified gem.
+    #
     # ==== Options
     # :version:: Version specifier array, like in spec. files
     #            (default: none, i.e. latest)
     # :user_install:: If true, perform a --user-install as the current
-    #                 user, else system install with sudo (default:
-    #                 false )
-    def jruby_install_gem( gems, opts = {} )
-      if opts[ :check ] && jruby_check_gem( gems, opts )
-        false
+    #                 user, else system install with sudo (the default)
+    # :check:: If true, captures output and returns the number of gems
+    #          actually installed.  Combine with :minimize to only
+    #          install what is required, and short circuit when zero
+    #          gems installed.
+    # :minimize:: Use --conservative and --minimal-deps (rubygems
+    #             2.1.5+) flags to reduce installs to the minimum
+    #             required to satisfy the version requirments.
+    def jruby_install_gem( gem, opts = {} )
+      cmd = [ jruby_gem_command, 'install',
+              jruby_gem_install_args,
+              ( '--user-install' if opts[ :user_install ] ),
+              ( '--conservative' if opts[ :minimize] ),
+              ( '--minimal-deps' if opts[ :minimize] && min_deps_supported? ),
+              jruby_gem_version_flags( opts[ :version ] ),
+              gem ].flatten.compact.join( ' ' )
+
+      shopts = opts[ :user_install ] ? {} : {user: :root}
+
+      if opts[ :check ]
+        _,out = capture( cmd, shopts.merge!( accept: 0 ) )
+
+        count = 0
+        out.split( "\n" ).each do |oline|
+          if oline =~ /^\s+(\d+)\s+gem(s)?\s+installed/
+            count = $1.to_i
+          end
+        end
+        count
       else
-        cmd = [ jruby_gem_command, 'install',
-                jruby_gem_install_args,
-                ( '--user-install' if opts[ :user_install ] ),
-                jruby_gem_version_flags( opts[ :version ] ),
-                gems ].flatten.compact
-        # FIXME: Alternative to send?, join ' '
-        send( opts[ :user_install ] ? :run : :sudo, cmd )
-        true
+        sh( cmd, shopts )
       end
+    end
+
+    def min_deps_supported?
+      varray = version.split('.').map { |n| n.to_i }
+      ( varry <=> [1, 7, 5] ) >= 0
     end
 
     def jruby_gem_version_flags( reqs )
