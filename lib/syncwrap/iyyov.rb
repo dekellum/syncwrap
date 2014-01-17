@@ -44,28 +44,11 @@ module SyncWrap
       end
     end
 
-    # Install then (re-)start Iyyov if needed, yield to block if given
-    # for daemon gem or other setup, then finally update remote
-    # (user_run) var/iyyov/jobs.rb; which will trigger any necessary
-    # restarts.
-    # === Options
-    # :install:: If true, run iyyov_install first and make sure iyyov is
-    # running (default: false)
-    def iyyov_install_jobs( opts = {} )
-
-      restart = opts[ :install ] && install
-      if restart
-        iyyov_restart
-        flush #FIXME
-        sleep 15
-      elsif opts[ :install ] && !exist?( "#{iyyov_run_dir}/iyyov.pid" )
-        iyyov_start
-        flush
-        sleep 15
-      end
-
-      # FIXME: Need a better solution to wait on Iyyov than an arbitrary
-      # sleep.
+    # Update remote (run_user) var/iyyov/jobs.rb; which will trigger
+    # any necessary restarts.  For backward compatibility, yields to
+    # block if given for daemon install, etc. However, this can more
+    # simply be done beforehand.
+    def iyyov_install_jobs
 
       # Any Iyyov restart completes *before* job changes
       yield if block_given?
