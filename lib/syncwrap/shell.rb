@@ -186,6 +186,7 @@ module SyncWrap
         status = wait_thread.value if wait_thread
       end
 
+      #FIXME: Only if jruby?
       status ||= $?
 
       [ status && status.exitstatus, outputs ]
