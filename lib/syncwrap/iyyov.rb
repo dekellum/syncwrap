@@ -80,10 +80,7 @@ module SyncWrap
     # Ensure install of same gem version as init.d/iyyov script
     # Return true if installed
     def install_iyyov_gem
-      gem_count = jruby_install_gem( 'iyyov', version: "=#{iyyov_version}",
-                                     minimize: true, check: true )
-      ( gem_count > 0 )
-      # FIXME may not need to check
+      jruby_install_gem( 'iyyov', version: "=#{iyyov_version}", minimize: true )
     end
 
     # Install iyyov daemon init.d script and add to init daemons
