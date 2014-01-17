@@ -34,9 +34,9 @@ module SyncWrap
     # jobs.rb. Returns true if iyyov was installed/upgraded and should
     # be restarted.
     def install
-      # Short-circuit install if the right process is already running
-      dtest = "iyyov-#{iyyov_version}-java/init/iyyov"
-      code,_ = capture( "pgrep -f #{dtest}", accept:[0,1] )
+      # Short-circuit if the correct versioned process is already running
+      dpat = "iyyov-#{iyyov_version}-java/init/iyyov"
+      code,_ = capture( "pgrep -f #{dpat}", accept:[0,1] )
 
       if code == 1
         install_run_dir
