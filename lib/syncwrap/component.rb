@@ -59,19 +59,31 @@ module SyncWrap
       ctx.flush
     end
 
+    # Dynamically send missing methods to in-context, same host
+    # Components, that were added before self (lower in the stack).
     def method_missing( meth, *args, &block )
-      if meth != :to_ary && ctx = Context.current
-        below = false
-        ctx.host.components.reverse_each do |comp|
-          if comp == self
-            below = true
-          elsif below
-            if comp.respond_to?( meth )
-              return comp.send( meth, *args, &block )
+      ctx = Context.current
+
+      # Guard and no-op if reentrant or calling out of context.
+      if ctx && mm_lock?
+        begin
+          unlocked = false
+          below = false
+          ctx.host.components.reverse_each do |comp|
+            if comp == self
+              below = true
+            elsif below
+              if comp.respond_to?( meth )
+                unlocked = mm_unlock
+                return comp.send( meth, *args, &block )
+              end
             end
           end
+        ensure
+          mm_unlock unless unlocked
         end
       end
+
       super
     end
 
@@ -79,6 +91,20 @@ module SyncWrap
 
     def ctx
       Context.current or raise "ctx called out of SyncWrap::Context"
+    end
+
+    def mm_lock?
+      if Thread.current[:syncwrap_component_mm]
+        false
+      else
+        Thread.current[:syncwrap_component_mm] = true
+        true
+      end
+    end
+
+    def mm_unlock
+      Thread.current[:syncwrap_component_mm] = false
+      true
     end
 
   end
