@@ -36,18 +36,18 @@ module SyncWrap
 
     # FIXME: rdoc
     def sh( command, opts = {}, &block )
-      ctx.sh( command, opts, block )
+      ctx.sh( command, opts, &block )
     end
 
     # Equivalent to sh( command, user: :root )
     def sudo( command, opts = {}, &block )
-      sh( command, opts.merge( user: :root ), block )
+      sh( command, opts.merge( user: :root ), &block )
     end
 
     # Equivalent to sh( command, user: run_user ) where run_user would
     # typically come from the RunUser component.
     def rudo( command, opts = {}, &block )
-      sh( command, opts.merge( user: run_user ), block )
+      sh( command, opts.merge( user: run_user ), &block )
     end
 
     # FIXME: rdoc
