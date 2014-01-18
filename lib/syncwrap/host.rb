@@ -47,7 +47,14 @@ module SyncWrap
     end
 
     def components
-      @contents.map { |c| c.is_a?( Symbol ) ? space.role( c ) : c }.flatten
+      @contents.inject([]) do |m,c|
+        if c.is_a?( Symbol )
+          m += space.role( c )
+        else
+          m << c
+        end
+        m
+      end
     end
 
     def component( clz )
