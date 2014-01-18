@@ -91,8 +91,13 @@ module SyncWrap
         args = [ 'ssh' ]
         args += opts[ :ssh_flags ] if opts[ :ssh_flags ]
         args << host.to_s
+        sargs = sudo_args( command, opts )
+        cmd = sargs.pop
+        args += sargs
+        args << ( '"' + shell_escape_cmd( cmd ) + '"' )
+      else
+        sudo_args( command, opts )
       end
-      args + sudo_args( command, opts )
     end
 
     def sudo_args( command, opts = {} )
@@ -114,6 +119,10 @@ module SyncWrap
       end
       args << '-n' if opts[ :dryrun  ]
       args + [ '-c', args_to_command( command ) ]
+    end
+
+    def shell_escape_cmd( cmd )
+      cmd.gsub( /["$`\\]/ ) { |c| '\\' + c }
     end
 
     def args_to_command( args )

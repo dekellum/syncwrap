@@ -89,10 +89,13 @@ class TestShell < MiniTest::Unit::TestCase
   def test_shell_special_chars
     exit_code, outputs = sh.capture3( sh.sh_args( <<-'SH' ) )
       var=33
-      echo \# "\"$var\"" \$
+      echo \# "!var" "\"$var\"" "\$" "#"
+      echo \$ '!var' '"$var"' '$' '#'
     SH
     assert_equal( 0, exit_code )
-    assert_equal( [[:out, "# \"33\" $\n"]], outputs, outputs )
+    assert_equal( [[:out, ( "# !var \"33\" $ #\n" +
+                            "$ !var \"$var\" $ #\n" )]],
+                  outputs, outputs )
   end
 
   def test_sudo
@@ -105,18 +108,34 @@ class TestShell < MiniTest::Unit::TestCase
 
   def test_ssh
     skip "May require password-less ssh access to localhost"
-    cmd = sh.ssh_args( :localhost, 'true', sh_verbose: :v )
+    cmd = sh.ssh_args( :localhost, 'echo foo', sh_verbose: :v )
     exit_code, outputs = sh.capture3( cmd )
     assert_equal( 0, exit_code )
-    assert_equal( [[:err, "true\n"]], outputs, outputs )
+    assert_equal( [ [:err, "echo foo\n"],
+                    [:out, "foo\n"] ], outputs, outputs )
   end
 
   def test_ssh_sudo
     skip "May require password-less ssh and tty-less sudo access to localhost"
-    cmd = sh.ssh_args( :localhost, 'true', sh_verbose: :v, user: :root )
+    cmd = sh.ssh_args( :localhost, 'echo foo', sh_verbose: :v, user: :root )
     exit_code, outputs = sh.capture3( cmd )
     assert_equal( 0, exit_code )
-    assert_equal( [[:err, "true\n"]], outputs, outputs )
+    assert_equal( [ [:err, "echo foo\n"],
+                    [:out, "foo\n" ] ], outputs, outputs )
+  end
+
+  def test_ssh_sudo_escape
+    skip "May require password-less ssh and tty-less sudo access to localhost"
+    cmd = sh.ssh_args( :localhost, <<-'SH', user: :root )
+      var=33
+      echo \# "!var" "\"$var\"" "\$" "#"
+      echo \$ '!var' '"$var"' '$' '#'
+    SH
+    exit_code, outputs = sh.capture3( cmd )
+    assert_equal( 0, exit_code )
+    assert_equal( [[:out, ( "# !var \"33\" $ #\n" +
+                            "$ !var \"$var\" $ #\n" )]],
+                  outputs, outputs )
   end
 
 end
