@@ -2,6 +2,7 @@ History.rdoc
 Manifest.txt
 README.rdoc
 Rakefile
+bin/syncwrap
 etc/gemrc
 etc/corosync/corosync.conf
 etc/corosync/uidgid.d/qpid

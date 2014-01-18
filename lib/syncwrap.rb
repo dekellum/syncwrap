@@ -15,7 +15,6 @@
 #++
 
 require 'syncwrap/base'
-
 require 'syncwrap/component'
 require 'syncwrap/context'
 require 'syncwrap/host'
@@ -62,6 +61,37 @@ module SyncWrap
     # FIXME: Host name to ssh name strategies go here
 
     # FIXME: Progamatic interface for execution
+
+    def component_classes( hsts = hosts )
+      hsts.
+        map { |h| h.components }.
+        flatten.
+        map { |comp| comp.class }.
+        uniq
+    end
+
+    def hosts
+      @hosts.values
+    end
+
+    class << self
+      attr_accessor :current
+    end
+
+  end
+
+  module Main
+
+    private
+
+    def role( *args )
+      Space.current.role( *args )
+    end
+
+    def host( *args )
+      Space.current.host( *args )
+    end
+
   end
 
 end

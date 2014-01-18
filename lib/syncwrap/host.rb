@@ -20,6 +20,7 @@ module SyncWrap
 
     attr_reader :space
     attr_reader :name
+    attr_reader :contents
 
     # FIXME: Short name, long name, or IP?
 
