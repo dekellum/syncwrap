@@ -37,7 +37,7 @@ class Runner
     @list_hosts = false
     @list_roles = false
     @list_components = false
-    @components = []
+    @component_plan = []
     @roles = []
     @host_patterns = []
     Space.current = @space = Space.new
@@ -89,24 +89,24 @@ class Runner
       end
 
     end
-    @components = opts.parse!( args )
+    @component_plan = opts.parse!( args )
   end
 
   def run( args )
     parse_cmd( args )
     load( @sw_file, true )
     resolve_hosts
-    lookup_components
+    lookup_component_plan
     resolve_components
 
     lists = [ @list_components, @list_roles, @list_hosts ].count( true )
-    list_components( @comp_classes, lists > 1 ) if @list_components
+    list_components( component_classes, lists > 1 ) if @list_components
     list_roles( @hosts, lists > 1) if @list_roles
     list_hosts( @hosts, lists > 1) if @list_hosts
 
     exit( 0 ) if lists > 0
 
-    #Do it!
+    @space.execute( @hosts, @component_plan )
   end
 
   def list_components( comp_classes, multi )
@@ -157,8 +157,8 @@ class Runner
     cls.name.sub(/^SyncWrap::/,'')
   end
 
-  def lookup_components
-    @components.map! do |comp|
+  def lookup_component_plan
+    @component_plan.map! do |comp|
       name, meth = comp.split( '.' )
       nameparts = name.split( '::' )
       cls = class_lookup( nameparts )
@@ -166,13 +166,20 @@ class Runner
     end
   end
 
-  def resolve_components
-    if @components.empty?
-      @comp_classes = @space.component_classes( @hosts )
+  def component_classes
+    if @component_plan.empty?
+      @space.component_classes( @hosts )
     else
-      @comp_classes = @components.map { |a| a[0] }
+      @component_plan.map { |a| a[0] }
+    end
+  end
+
+  def resolve_components
+    if ! @component_plan.empty?
       @hosts.select! do |host|
-        host.components.any? { |c| @comp_classes.include?( c.class ) }
+        host.components.any? do |comp|
+          component_classes.any? { |cc| comp.is_a?( cc ) }
+        end
       end
     end
   end

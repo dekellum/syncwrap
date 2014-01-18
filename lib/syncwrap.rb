@@ -53,6 +53,11 @@ module SyncWrap
       host
     end
 
+    # All hosts, in order added.
+    def hosts
+      @hosts.values
+    end
+
     # FIXME: misc default args for ssh, sudo, i.e:
     # sudo_flags: ['-H']
     # ssh_flags: %w[ -i ./key.pem -l ec2-user ]
@@ -60,18 +65,34 @@ module SyncWrap
 
     # FIXME: Host name to ssh name strategies go here
 
-    # FIXME: Progamatic interface for execution
+    def execute( hs = hosts, component_plan = [] )
+      threads = hs.map do |h|
+        Thread.new( h ) do |host|
+          Context.new( host ).with do
+            host.components.each do |comp|
+              if !component_plan.empty?
+                found,method = component_plan.find { |pr| comp.is_a?( pr[0] ) }
+                next unless found
+              else
+                method = :install
+                next unless comp.respond_to?( method )
+              end
+              comp.send( method )
+            end
+          end
+        end
+      end
+      threads.each { |t| t.join }
+    end
 
-    def component_classes( hsts = hosts )
-      hsts.
+    # Find the ordered, unique set of component classes, direct or via
+    # roles, currently contained by the specified hosts or all hosts.
+    def component_classes( hs = hosts )
+      hs.
         map { |h| h.components }.
         flatten.
         map { |comp| comp.class }.
         uniq
-    end
-
-    def hosts
-      @hosts.values
     end
 
     class << self
