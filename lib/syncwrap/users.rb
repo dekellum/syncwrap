@@ -42,7 +42,8 @@ module SyncWrap
 
     def install
       users = home_users
-      users ||= Dir.entries( local_home_dir ).select do |d|
+      users ||= File.directory?( local_home_dir ) &&
+                Dir.entries( local_home_dir ).select do |d|
         ( d !~ /^\./ &&
           File.directory?( local_home_dir + d ) )
       end
