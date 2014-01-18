@@ -54,6 +54,15 @@ class TestSpace < MiniTest::Unit::TestCase
     end
   end
 
+  class CompThree < Component
+    def install
+    end
+
+    def bar
+      goo
+    end
+  end
+
   def test_host_roles
     sp.host( 'localhost' )
     assert_equal( 'localhost', sp.host( 'localhost' ).name )
@@ -102,14 +111,16 @@ class TestSpace < MiniTest::Unit::TestCase
   def test_component_dynamic_binding
     c1 = CompOne.new
     c2 = CompTwo.new
-    sp.role( :test, c1, c2 )
+    c3 = CompThree.new
+    sp.role( :test, c1, c2, c3 )
     host = sp.host( 'localhost', :test )
 
-    assert_raises( RuntimeError ) { c2.goo }
     Context.new( host ).with do
-      assert_equal( 42, c2.goo )
-      assert_raises( NameError ) { c1.unresolved }
+      assert_equal( 42, c3.bar )
+      assert_raises( NameError, NoMethodError ) { c1.unresolved }
     end
+
+    assert_raises( NameError, NoMethodError ) { c2.goo }
   end
 
 end
