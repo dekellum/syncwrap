@@ -12,10 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.  See the License for the specific language governing
 # permissions and limitations under the License.
-#
-# The non-blocking implementation of capture below was derived from
-# rake-remote_task, MIT License:
-# Copyright (c) Ryan Davis, RubyHitSquad
 #++
 
 require 'syncwrap/base'
