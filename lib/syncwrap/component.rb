@@ -55,7 +55,8 @@ module SyncWrap
 
     def method_missing( meth, *args, &block )
       below = false
-      host && host.components.reverse_each do |comp|
+      ctx = Context.current
+      ctx && ctx.host.components.reverse_each do |comp|
         if comp == self
           below = true
         elsif below
