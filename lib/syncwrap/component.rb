@@ -60,14 +60,15 @@ module SyncWrap
     end
 
     def method_missing( meth, *args, &block )
-      below = false
-      ctx = Context.current
-      ctx && ctx.host.components.reverse_each do |comp|
-        if comp == self
-          below = true
-        elsif below
-          if comp.respond_to?( meth )
-            return comp.send( meth, *args, &block )
+      if meth != :to_ary && ctx = Context.current
+        below = false
+        ctx.host.components.reverse_each do |comp|
+          if comp == self
+            below = true
+          elsif below
+            if comp.respond_to?( meth )
+              return comp.send( meth, *args, &block )
+            end
           end
         end
       end
