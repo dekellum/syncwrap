@@ -25,7 +25,23 @@ require 'minitest/autorun'
 
 require 'syncwrap/shell'
 
+begin
+  require_relative 'options.rb'
+rescue LoadError
+  module TestOptions
+    # Set true is local password-less sudo works
+    SAFE_SUDO = false
+
+    # Set to host name for safe (non-modifying) SSH tests
+    SAFE_SSH = false
+
+    # Set true if SAFE_SSH also supports pasword-less sudo
+    SAFE_SSH_SUDO = false
+  end
+end
+
 class TestShell < MiniTest::Unit::TestCase
+  include TestOptions
 
   class Conch
     include SyncWrap::Shell
@@ -99,7 +115,7 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_sudo
-    skip "May require password-less local sudo"
+    skip unless SAFE_SUDO
     cmd = sh.sudo_args( 'echo foo', user: :root )
     exit_code, outputs = sh.capture3( cmd )
     assert_equal( 0, exit_code )
@@ -107,8 +123,8 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_ssh
-    skip "May require password-less ssh access to localhost"
-    cmd = sh.ssh_args( :localhost, 'echo foo', sh_verbose: :v )
+    skip unless SAFE_SSH
+    cmd = sh.ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v )
     exit_code, outputs = sh.capture3( cmd )
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo\n"],
@@ -116,8 +132,8 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_ssh_sudo
-    skip "May require password-less ssh and tty-less sudo access to localhost"
-    cmd = sh.ssh_args( :localhost, 'echo foo', sh_verbose: :v, user: :root )
+    skip unless SAFE_SSH && SAFE_SSH_SUDO
+    cmd = sh.ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v, user: :root )
     exit_code, outputs = sh.capture3( cmd )
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo\n"],
@@ -125,8 +141,8 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_ssh_sudo_escape
-    skip "May require password-less ssh and tty-less sudo access to localhost"
-    cmd = sh.ssh_args( :localhost, <<-'SH', user: :root )
+    skip unless SAFE_SSH && SAFE_SSH_SUDO
+    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', user: :root )
       var=33
       echo \# "!var" "\"$var\"" "\$" "#"
       echo \$ '!var' '"$var"' '$' '#'
