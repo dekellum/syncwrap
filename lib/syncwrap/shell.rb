@@ -107,7 +107,7 @@ module SyncWrap
     end
 
     def sh_args( command, opts = {} )
-      args = [ 'sh' ]
+      args = [ 'bash' ]
       args << '-e' if opts[ :error ].nil? || opts[ :error ] == :exit
       if opts[ :sh_verbose ]
         args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
