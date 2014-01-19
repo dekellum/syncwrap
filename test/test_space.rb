@@ -63,6 +63,9 @@ class TestSpace < MiniTest::Unit::TestCase
     end
   end
 
+  class Turnip
+  end
+
   def test_host_roles
     sp.host( 'localhost' )
     assert_equal( 'localhost', sp.host( 'localhost' ).name )
@@ -121,6 +124,39 @@ class TestSpace < MiniTest::Unit::TestCase
     end
 
     assert_raises( NameError, NoMethodError ) { c2.goo }
+  end
+
+  def test_component_custom_binding
+    c1 = CompOne.new
+    c2 = CompTwo.new
+    sp.role( :test, c1, c2 )
+    host = sp.host( 'localhost', :test )
+
+    Context.new( host ).with do
+      t = Turnip.new
+      b = c2.send( :custom_binding,
+                   { x: 1,
+                     str: "yep",
+                     bool: true,
+                     a: [2, "nest"],
+                     obj: t,
+                     mth: c1.method(:foo),
+                     unresolved: "was" } )
+      assert_equal( 1, b.eval( "x" ) )
+      assert_equal( "yep", b.eval( "str" ) )
+      assert_equal( true,  b.eval( "bool" ) )
+      assert_equal( [2, "nest"],  b.eval( "a" ) )
+      assert_equal( t, b.eval( "obj" ) )
+      assert_equal( 42, b.eval( "mth.call" ) )
+      assert_equal( 42, b.eval( "goo" ) ) #dynamic
+      assert_equal( "was", b.eval( "unresolved" ) ) #extra, override
+      assert_equal( 'localhost', b.eval( "host.name" ) )    #host
+      assert_raises( NameError ) { b.eval( "extra_vars" ) } #junk
+
+      # No residual side effects on next call
+      b2 = c2.send( :custom_binding )
+      assert_raises( NameError ) { b2.eval( "x" ) }
+    end
   end
 
 end

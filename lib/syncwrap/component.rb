@@ -111,6 +111,21 @@ module SyncWrap
       true
     end
 
+    def custom_binding( extra_vars = {} )
+      extra_vars.inject( clean_binding ) do |b,(k,v)|
+        ks = k.to_sym.to_s
+        # Can't yet rely on ruby 2.1 Binding#local_variable_set, so
+        # use this eval trick instead, to be able to set arbitrary value
+        # types.
+        b.eval("#{ks}=nil; lambda { |v| #{ks}=v }").call(v)
+        b
+      end
+    end
+
+    def clean_binding
+      Kernel.binding
+    end
+
   end
 
 end
