@@ -79,9 +79,9 @@ class TestShell < MiniTest::Unit::TestCase
   def test_capture_output_2
     # Note: sleep needed to make the :err vs :out ordering consistent.
     exit_code, outputs = sh.capture3( sh.sh_args( <<-'SH', sh_verbose: :v ))
-     echo foo && sleep 0.1
-     # comment!
-     echo bar
+      echo foo && sleep 0.1
+      # comment!
+      echo bar
     SH
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo && sleep 0.1\n"],
@@ -90,6 +90,23 @@ class TestShell < MiniTest::Unit::TestCase
                     [:out, "bar\n"] ],
                   outputs, outputs )
   end
+
+  def test_capture_output_coalesce
+    cmd = sh.sh_args( <<-'SH', sh_verbose: :x, coalesce: true )
+      echo foo
+      # comment!
+      echo bar
+    SH
+    exit_code, outputs = sh.capture3( cmd )
+    assert_equal( 0, exit_code )
+    assert_equal( [ [:out, <<-OUT] ], outputs, outputs )
++ echo foo
+foo
++ echo bar
+bar
+    OUT
+  end
+
 
   def test_capture_multi_error
     # Timing dependent, one or two reads will be received. Regardless,
@@ -131,6 +148,23 @@ class TestShell < MiniTest::Unit::TestCase
                     [:out, "foo\n"] ], outputs, outputs )
   end
 
+  def test_ssh_coalesce
+    skip unless SAFE_SSH
+    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :x, coalesce: true )
+      echo foo
+      # comment!
+      echo bar
+    SH
+    exit_code, outputs = sh.capture3( cmd )
+    assert_equal( 0, exit_code )
+    assert_equal( [ [:out, <<-OUT] ], outputs, outputs )
++ echo foo
+foo
++ echo bar
+bar
+    OUT
+  end
+
   def test_ssh_sudo
     skip unless SAFE_SSH && SAFE_SSH_SUDO
     cmd = sh.ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v, user: :root )
@@ -138,6 +172,23 @@ class TestShell < MiniTest::Unit::TestCase
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo\n"],
                     [:out, "foo\n" ] ], outputs, outputs )
+  end
+
+  def test_ssh_sudo_coalesce
+    skip unless SAFE_SSH && SAFE_SSH_SUDO
+    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :x, coalesce: true, user: :root )
+      echo foo
+      # comment!
+      echo bar
+    SH
+    exit_code, outputs = sh.capture3( cmd )
+    assert_equal( 0, exit_code )
+    assert_equal( [ [:out, <<-OUT] ], outputs, outputs )
++ echo foo
+foo
++ echo bar
+bar
+    OUT
   end
 
   def test_ssh_sudo_escape

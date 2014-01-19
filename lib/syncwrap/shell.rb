@@ -88,6 +88,8 @@ module SyncWrap
     def ssh_args( host, command, opts = {} )
       args = []
       if host != 'localhost'
+        opts = opts.dup
+        coalesce = opts.delete( :coalesce )
         args = [ 'ssh' ]
         args += opts[ :ssh_flags ] if opts[ :ssh_flags ]
         args << host.to_s
@@ -95,6 +97,8 @@ module SyncWrap
         cmd = sargs.pop
         args += sargs
         args << ( '"' + shell_escape_cmd( cmd ) + '"' )
+        args << '2>&1' if coalesce
+        args
       else
         sudo_args( command, opts )
       end
@@ -114,11 +118,26 @@ module SyncWrap
     def sh_args( command, opts = {} )
       args = [ 'bash' ]
       args << '-e' if opts[ :error ].nil? || opts[ :error ] == :exit
-      if opts[ :sh_verbose ]
-        args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
+      args << '-n' if opts[ :dryrun ]
+
+      if opts[ :coalesce ]
+        args << '-c'
+        cmd = "exec 2>&1\n"
+        if opts[ :sh_verbose ]
+          cmd += "set "
+          cmd += opts[ :sh_verbose ] == :x ? '-x' : '-v'
+          cmd += "\n"
+        end
+        cmd += args_to_command( command )
+        args << cmd
+      else
+        if opts[ :sh_verbose ]
+          args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
+        end
+        args << '-c'
+        args << args_to_command( command )
       end
-      args << '-n' if opts[ :dryrun  ]
-      args + [ '-c', args_to_command( command ) ]
+      args
     end
 
     def shell_escape_cmd( cmd )
