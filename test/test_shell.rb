@@ -42,17 +42,10 @@ end
 
 class TestShell < MiniTest::Unit::TestCase
   include TestOptions
-
-  class Conch
-    include SyncWrap::Shell
-  end
-
-  def sh
-    @shell ||= Conch.new
-  end
+  include SyncWrap::Shell
 
   def test_command_lines_cleanup
-    cmd = sh.command_lines_cleanup( [ "", "  a\nb", "\n c\n", "d m n \n \n" ] )
+    cmd = command_lines_cleanup( [ "", "  a\nb", "\n c\n", "d m n \n \n" ] )
     assert_equal( (%w[a b c] << "d m n").join( "\n" ), cmd )
 
     cmd = <<-SH
@@ -70,24 +63,24 @@ class TestShell < MiniTest::Unit::TestCase
                  "  echo huh",
                  "fi" ].join( "\n" )
 
-    assert_equal( expected, sh.command_lines_cleanup( cmd ) )
-    assert_equal( expected, sh.command_lines_cleanup( expected ) )
+    assert_equal( expected, command_lines_cleanup( cmd ) )
+    assert_equal( expected, command_lines_cleanup( expected ) )
   end
 
   def test_capture_noop
-    exit_code, outputs = sh.capture3( %w[sh -c true])
+    exit_code, outputs = capture3( %w[sh -c true])
     assert_equal( 0, exit_code )
     assert_equal( [], outputs )
   end
 
   def test_capture_error
-    exit_code, outputs = sh.capture3( %w[sh -v -c] << "exit 33" )
+    exit_code, outputs = capture3( %w[sh -v -c] << "exit 33" )
     assert_equal( 33, exit_code )
     assert_equal( [[:err, "exit 33\n"]], outputs, outputs )
   end
 
   def test_capture_output
-    exit_code, outputs = sh.capture3( %w[sh -v -c] << "echo foo" )
+    exit_code, outputs = capture3( %w[sh -v -c] << "echo foo" )
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo\n"],
                     [:out, "foo\n"] ],
@@ -95,24 +88,24 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_capture_output_interleaved
-    exit_code, outputs = sh.capture3( sh.sh_args( <<-'SH', sh_verbose: :v ))
+    exit_code, outputs = capture3( sh_args( <<-'SH', sh_verbose: :v ))
       echo foo
       echo bar
     SH
     assert_equal( 0, exit_code )
     assert_equal( "echo foo\necho bar\n",
-                  sh.collect_stream( :err, outputs ) )
+                  collect_stream( :err, outputs ) )
     assert_equal( "foo\nbar\n",
-                  sh.collect_stream( :out, outputs ) )
+                  collect_stream( :out, outputs ) )
   end
 
   def test_capture_output_coalesce
-    cmd = sh.sh_args( <<-'SH', sh_verbose: :v, coalesce: true )
+    cmd = sh_args( <<-'SH', sh_verbose: :v, coalesce: true )
       echo foo
       echo bar
     SH
     unmerged = []
-    exit_code, merged = sh.capture3( cmd ) do |stream, chunk|
+    exit_code, merged = capture3( cmd ) do |stream, chunk|
       unmerged << [ stream, chunk ]
     end
     assert_equal( 0, exit_code )
@@ -126,7 +119,7 @@ class TestShell < MiniTest::Unit::TestCase
     # Timing dependent, one or two reads will be received. Regardless,
     # capture3 should combine them to a single read as shown
     11.times do
-      exit_code, outputs = sh.capture3( %w[sh -v -c] << "echo foo >&2")
+      exit_code, outputs = capture3( %w[sh -v -c] << "echo foo >&2")
       assert_equal( 0, exit_code )
       assert_equal( [[:err, "echo foo >&2\nfoo\n"]],
                     outputs, outputs )
@@ -134,7 +127,7 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_shell_special_chars
-    exit_code, outputs = sh.capture3( sh.sh_args( <<-'SH' ) )
+    exit_code, outputs = capture3( sh_args( <<-'SH' ) )
       var=33
       echo \# "!var" "\"$var\"" "\$" "#"
       echo \$ '!var' '"$var"' '$' '#'
@@ -147,16 +140,16 @@ class TestShell < MiniTest::Unit::TestCase
 
   def test_sudo
     skip unless SAFE_SUDO
-    cmd = sh.sudo_args( 'echo foo', user: :root )
-    exit_code, outputs = sh.capture3( cmd )
+    cmd = sudo_args( 'echo foo', user: :root )
+    exit_code, outputs = capture3( cmd )
     assert_equal( 0, exit_code )
     assert_equal( [[:out, "foo\n"]], outputs, outputs )
   end
 
   def test_ssh
     skip unless SAFE_SSH
-    cmd = sh.ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v )
-    exit_code, outputs = sh.capture3( cmd )
+    cmd = ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v )
+    exit_code, outputs = capture3( cmd )
     assert_equal( 0, exit_code )
     # Timing dependend order:
     assert_equal( [ [:err, "echo foo\n"],
@@ -166,12 +159,12 @@ class TestShell < MiniTest::Unit::TestCase
 
   def test_ssh_coalesce
     skip unless SAFE_SSH
-    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :v, coalesce: true )
+    cmd = ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :v, coalesce: true )
       echo foo
       echo bar
     SH
     unmerged = []
-    exit_code, merged = sh.capture3( cmd ) do |stream, chunk|
+    exit_code, merged = capture3( cmd ) do |stream, chunk|
       unmerged << [ stream, chunk ]
     end
     assert_equal( 0, exit_code )
@@ -183,8 +176,8 @@ class TestShell < MiniTest::Unit::TestCase
 
   def test_ssh_sudo
     skip unless SAFE_SSH && SAFE_SSH_SUDO
-    cmd = sh.ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v, user: :root )
-    exit_code, outputs = sh.capture3( cmd )
+    cmd = ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v, user: :root )
+    exit_code, outputs = capture3( cmd )
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo\n"],
                     [:out, "foo\n" ] ],
@@ -193,12 +186,12 @@ class TestShell < MiniTest::Unit::TestCase
 
   def test_ssh_sudo_coalesce
     skip unless SAFE_SSH && SAFE_SSH_SUDO
-    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :v, coalesce: true, user: :root )
+    cmd = ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :v, coalesce: true, user: :root )
       echo foo
       echo bar
     SH
     unmerged = []
-    exit_code, merged = sh.capture3( cmd ) do |stream, chunk|
+    exit_code, merged = capture3( cmd ) do |stream, chunk|
       unmerged << [ stream, chunk ]
     end
     assert_equal( 0, exit_code )
@@ -210,12 +203,12 @@ class TestShell < MiniTest::Unit::TestCase
 
   def test_ssh_sudo_escape
     skip unless SAFE_SSH && SAFE_SSH_SUDO
-    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', user: :root )
+    cmd = ssh_args( SAFE_SSH, <<-'SH', user: :root )
       var=33
       echo \# "!var" "\"$var\"" "\$" "#"
       echo \$ '!var' '"$var"' '$' '#'
     SH
-    exit_code, outputs = sh.capture3( cmd )
+    exit_code, outputs = capture3( cmd )
     assert_equal( 0, exit_code )
     assert_equal( [[:out, ( "# !var \"33\" $ #\n" +
                             "$ !var \"$var\" $ #\n" )]],

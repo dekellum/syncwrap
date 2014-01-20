@@ -20,70 +20,12 @@
 
 require 'syncwrap/base'
 require 'open3'
-require 'term/ansicolor'
 
 module SyncWrap
 
-  class CommandFailure < RuntimeError
-  end
-
   module Shell
 
-    def initialize
-      super
-    end
-
-    # Local:
-    # sh -v|-x -e -c STRING
-    # sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
-    #
-    # Remote:
-    # ssh SSHFLAGS host sh [-v|-x -e -n] -c STRING
-    # ssh SSHFLAGS host sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
-    #
-    # typical SSHFLAGS: -i ./key.pem -l ec2-user
-    # typical SUDOFLAGS: -H
-    def run_shell!( host, command, opts = {} )
-      args = ssh_args( host, command, opts )
-      exit_code, outputs = capture3( args )
-      if exit_code != 0 || opts[ :verbose ]
-        format_outputs( outputs, opts )
-      end
-      if exit_code != 0
-        raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
-      end
-    end
-
-    def capture_shell( host, command, opts = {} )
-      args = ssh_args( host, command, opts )
-      exit_code, outputs = capture3( args )
-      format_outputs( outputs, opts ) if opts[ :verbose ]
-      [ exit_code, collect_stream( :out, outputs ) ]
-    end
-
-    def collect_stream( stream, outputs )
-      outputs.
-        select { |o| o[0] == stream }.
-        map { |o| o[1] }. #the buffers
-        inject( "", :+ )
-    end
-
-    def format_outputs( outputs, opts = {} )
-      clr = Term::ANSIColor
-      newlined = true
-      outputs.each do |stream, buff|
-        case( stream )
-        when :out
-          $stdout.write buff
-        when :err
-          $stdout.write clr.red
-          $stdout.write buff
-          $stdout.write clr.reset
-        end
-        newlined = ( buff[-1] == "\n" )
-      end
-      $stdout.puts unless newlined
-    end
+    private
 
     def ssh_args( host, command, opts = {} )
       args = []
@@ -167,6 +109,13 @@ module SyncWrap
         line.rstrip!
         line
       end
+    end
+
+    def collect_stream( stream, outputs )
+      outputs.
+        select { |o| o[0] == stream }.
+        map { |o| o[1] }. #the buffers
+        inject( "", :+ )
     end
 
     # Captures out and err from a command expressed by args

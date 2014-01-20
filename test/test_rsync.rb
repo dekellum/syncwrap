@@ -26,68 +26,62 @@ require 'minitest/autorun'
 require 'syncwrap/rsync'
 
 class TestRsync < MiniTest::Unit::TestCase
-  include SyncWrap
+  include SyncWrap::Rsync
 
-  class TestWrapper
-    include SyncWrap::Rsync
+  attr_reader :last_args
 
-    attr_reader :last_args
-
-    def capture3( args )
-      @last_args = args
-      [ 0, [] ]
-    end
-
+  def capture3( args )
+    @last_args = args
+    [ 0, [] ]
   end
 
   def test_rsync_args
-    w = TestWrapper.new
     cargs = %w[rsync -i -r -l -p -c -b]
 
-    w.rsync( 'testhost', 'other/lang.sh', '/etc/' )
+    rsync( 'testhost', 'other/lang.sh', '/etc/' )
 
     assert_equal( cargs + [ 'other/lang.sh',
                             'testhost:/etc/' ],
-                  w.last_args )
+                  last_args )
 
-    w.rsync( 'testhost', 'etc/profile.d/lang.sh' )
+    rsync( 'testhost', 'etc/profile.d/lang.sh' )
 
     assert_equal( cargs + [ 'etc/profile.d/lang.sh',
                             'testhost:/etc/profile.d/' ],
-                  w.last_args )
+                  last_args )
 
-    w.rsync( 'testhost', 'etc/profile.d/' )
+    rsync( 'testhost', 'etc/profile.d/' )
 
     assert_equal( cargs + [ 'etc/profile.d/',
                             'testhost:/etc/profile.d/' ],
-                  w.last_args )
+                  last_args )
 
-    w.rsync( 'testhost', 'etc/profile.d' )
+    rsync( 'testhost', 'etc/profile.d' )
 
     assert_equal( cargs + [ 'etc/profile.d',
                             'testhost:/etc/' ],
-                  w.last_args )
+                  last_args )
 
-    w.rsync( 'testhost', 'etc/profile.d/lang.sh', :user => 'root' )
+    rsync( 'testhost', 'etc/profile.d/lang.sh', :user => 'root' )
 
     assert_equal( cargs + [ '--rsync-path=sudo rsync',
                             'etc/profile.d/lang.sh',
                             'testhost:/etc/profile.d/'],
-                  w.last_args )
+                  last_args )
 
-    w.rsync( 'testhost', 'etc/profile.d/lang.sh', :user => 'runr' )
+    rsync( 'testhost', 'etc/profile.d/lang.sh', :user => 'runr' )
 
     assert_equal( cargs + [ '--rsync-path=sudo -u runr rsync',
                             'etc/profile.d/lang.sh',
                             'testhost:/etc/profile.d/'],
-                  w.last_args )
+                  last_args )
 
-    w.rsync( 'testhost', 'etc/profile.d/lang.sh', :excludes => :dev )
+    rsync( 'testhost', 'etc/profile.d/lang.sh', :excludes => :dev )
 
     assert_equal( cargs + [ '--cvs-exclude',
                             'etc/profile.d/lang.sh',
                             'testhost:/etc/profile.d/' ],
-                  w.last_args )
+                  last_args )
   end
 
 end
