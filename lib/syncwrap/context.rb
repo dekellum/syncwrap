@@ -67,7 +67,7 @@ module SyncWrap
     # beforehand, to avoid ambiguous order of remote changes.
     def capture( command, opts = {} )
       flush
-      capture_shell( host.name, command, opts )
+      capture_shell( command, opts )
     end
 
     # Enqueue a shell command to be run on host.
@@ -98,7 +98,7 @@ module SyncWrap
           if @queue_locked
             raise NestingError, 'Queue at flush: ' + @queued_cmd.join( '\n' )
           end
-          run_shell!( host.name, @queued_cmd, @queued_opts )
+          run_shell!( @queued_cmd, @queued_opts )
         ensure
           reset_queue
         end
@@ -122,8 +122,8 @@ module SyncWrap
     #
     # typical SSHFLAGS: -i ./key.pem -l ec2-user
     # typical SUDOFLAGS: -H
-    def run_shell!( host, command, opts = {} )
-      args = ssh_args( host, command, opts )
+    def run_shell!( command, opts = {} )
+      args = ssh_args( host.name, command, opts )
       exit_code, outputs = capture3( args )
       if exit_code != 0 || opts[ :verbose ]
         format_outputs( outputs, opts )
@@ -133,8 +133,8 @@ module SyncWrap
       end
     end
 
-    def capture_shell( host, command, opts = {} )
-      args = ssh_args( host, command, opts )
+    def capture_shell( command, opts = {} )
+      args = ssh_args( host.name, command, opts )
       exit_code, outputs = capture3( args )
       format_outputs( outputs, opts ) if opts[ :verbose ]
       [ exit_code, collect_stream( :out, outputs ) ]
