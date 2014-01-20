@@ -92,19 +92,21 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_capture_output_coalesce
-    cmd = sh.sh_args( <<-'SH', sh_verbose: :x, coalesce: true )
-      echo foo
-      # comment!
+    #warning: sleep needed to ensure multiple chunks
+    cmd = sh.sh_args( <<-'SH', sh_verbose: :v, coalesce: true )
+      echo foo && sleep 0.3
       echo bar
     SH
-    exit_code, outputs = sh.capture3( cmd )
+    unmerged = []
+    exit_code, merged = sh.capture3( cmd ) do |stream, chunk|
+      unmerged << [ stream, chunk ]
+    end
     assert_equal( 0, exit_code )
-    assert_equal( [ [:out, <<-OUT] ], outputs, outputs )
-+ echo foo
-foo
-+ echo bar
-bar
-    OUT
+    assert_equal( [[:out, "echo foo && sleep 0.3\nfoo\necho bar\nbar\n"]],
+                  merged, merged )
+    assert_operator( unmerged.length, :>, 1, "unmerged chunks" )
+    post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
+    assert_equal( merged[0][1], post_merged )
   end
 
 
@@ -150,19 +152,19 @@ bar
 
   def test_ssh_coalesce
     skip unless SAFE_SSH
-    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :x, coalesce: true )
+    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :v, coalesce: true )
       echo foo
-      # comment!
       echo bar
     SH
-    exit_code, outputs = sh.capture3( cmd )
+    unmerged = []
+    exit_code, merged = sh.capture3( cmd ) do |stream, chunk|
+      unmerged << [ stream, chunk ]
+    end
     assert_equal( 0, exit_code )
-    assert_equal( [ [:out, <<-OUT] ], outputs, outputs )
-+ echo foo
-foo
-+ echo bar
-bar
-    OUT
+    assert_equal( [[:out, "echo foo\nfoo\necho bar\nbar\n"]],
+                  merged, merged )
+    post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
+    assert_equal( merged[0][1], post_merged )
   end
 
   def test_ssh_sudo
@@ -176,19 +178,19 @@ bar
 
   def test_ssh_sudo_coalesce
     skip unless SAFE_SSH && SAFE_SSH_SUDO
-    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :x, coalesce: true, user: :root )
+    cmd = sh.ssh_args( SAFE_SSH, <<-'SH', sh_verbose: :v, coalesce: true, user: :root )
       echo foo
-      # comment!
       echo bar
     SH
-    exit_code, outputs = sh.capture3( cmd )
+    unmerged = []
+    exit_code, merged = sh.capture3( cmd ) do |stream, chunk|
+      unmerged << [ stream, chunk ]
+    end
     assert_equal( 0, exit_code )
-    assert_equal( [ [:out, <<-OUT] ], outputs, outputs )
-+ echo foo
-foo
-+ echo bar
-bar
-    OUT
+    assert_equal( [[:out, "echo foo\nfoo\necho bar\nbar\n"]],
+                  merged, merged )
+    post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
+    assert_equal( merged[0][1], post_merged )
   end
 
   def test_ssh_sudo_escape

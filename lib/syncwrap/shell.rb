@@ -164,7 +164,7 @@ module SyncWrap
       status = nil
       outputs = []
       Open3::popen3( *args ) do |inp, out, err, wait_thread|
-        inp.sync = true
+        inp.close rescue nil
 
         streams = [ err, out ]
 
@@ -181,20 +181,18 @@ module SyncWrap
             chunk = stream.readpartial( 8192 )
             marker = (stream == out) ? :out : :err
 
-            yield( marker, chunk, inp ) if block_given?
+            yield( marker, chunk ) if block_given?
 
             # Merge chunks from the same stream
             l = outputs.last
             if l && l[0] == marker
-              l[1] << chunk
+              l[1] += chunk
             else
               outputs << [ marker, chunk ]
             end
 
           end
         end
-
-        inp.close rescue nil
 
         # Older jruby (even in 1.9+ mode) doesn't provide wait_thread but
         # does return the status in $? instead (see workaround below)
