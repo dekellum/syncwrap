@@ -76,25 +76,21 @@ class TestShell < MiniTest::Unit::TestCase
                   outputs.sort ) #order uncertain
   end
 
-  def test_capture_output_verbose
-    #warning: sleep needed to make the :err vs :out ordering consistent.
+  def test_capture_output_interleaved
     exit_code, outputs = sh.capture3( sh.sh_args( <<-'SH', sh_verbose: :v ))
-      echo foo && sleep 0.3
-      # comment!
+      echo foo
       echo bar
     SH
     assert_equal( 0, exit_code )
-    assert_equal( [ [:err, "echo foo && sleep 0.3\n"],
-                    [:out, "foo\n"],
-                    [:err, "# comment!\necho bar\n"],
-                    [:out, "bar\n"] ],
-                  outputs, outputs )
+    assert_equal( "echo foo\necho bar\n",
+                  sh.collect_stream( :err, outputs ) )
+    assert_equal( "foo\nbar\n",
+                  sh.collect_stream( :out, outputs ) )
   end
 
   def test_capture_output_coalesce
-    #warning: sleep needed to ensure multiple chunks
     cmd = sh.sh_args( <<-'SH', sh_verbose: :v, coalesce: true )
-      echo foo && sleep 0.3
+      echo foo
       echo bar
     SH
     unmerged = []
@@ -102,16 +98,15 @@ class TestShell < MiniTest::Unit::TestCase
       unmerged << [ stream, chunk ]
     end
     assert_equal( 0, exit_code )
-    assert_equal( [[:out, "echo foo && sleep 0.3\nfoo\necho bar\nbar\n"]],
+    assert_equal( [[:out, "echo foo\nfoo\necho bar\nbar\n"]],
                   merged, merged )
-    assert_operator( unmerged.length, :>, 1, "unmerged chunks" )
     post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
     assert_equal( merged[0][1], post_merged )
   end
 
   def test_capture_multi_error
     # Timing dependent, one or two reads will be received. Regardless,
-    # capture3 should combine them to a single read as shown in output
+    # capture3 should combine them to a single read as shown
     11.times do
       exit_code, outputs = sh.capture3( %w[sh -v -c] << "echo foo >&2")
       assert_equal( 0, exit_code )
