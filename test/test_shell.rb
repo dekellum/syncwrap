@@ -51,9 +51,27 @@ class TestShell < MiniTest::Unit::TestCase
     @shell ||= Conch.new
   end
 
-  def test_args_to_command
-    cmd = sh.args_to_command( [ "", [ nil, "   a\nb" ], "\n c\n", "d m n\n \n" ] )
+  def test_command_lines_cleanup
+    cmd = sh.command_lines_cleanup( [ "", "  a\nb", "\n c\n", "d m n \n \n" ] )
     assert_equal( (%w[a b c] << "d m n").join( "\n" ), cmd )
+
+    cmd = <<-SH
+      if true; then
+
+        echo yep
+      else
+        echo huh
+      fi
+    SH
+
+    expected = [ "if true; then",
+                 "  echo yep",
+                 "else",
+                 "  echo huh",
+                 "fi" ].join( "\n" )
+
+    assert_equal( expected, sh.command_lines_cleanup( cmd ) )
+    assert_equal( expected, sh.command_lines_cleanup( expected ) )
   end
 
   def test_capture_noop

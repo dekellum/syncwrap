@@ -128,14 +128,14 @@ module SyncWrap
           cmd += opts[ :sh_verbose ] == :x ? '-x' : '-v'
           cmd += "\n"
         end
-        cmd += args_to_command( command )
+        cmd += command_lines_cleanup( command )
         args << cmd
       else
         if opts[ :sh_verbose ]
           args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
         end
         args << '-c'
-        args << args_to_command( command )
+        args << command_lines_cleanup( command )
       end
       args
     end
@@ -144,13 +144,29 @@ module SyncWrap
       cmd.gsub( /["$`\\]/ ) { |c| '\\' + c }
     end
 
-    def args_to_command( args )
-      Array( args ).flatten.compact
-        .map { |arg| arg.split( $/ ) }
+    def command_lines_cleanup( commands )
+      Array( commands )
+        .map { |cmd| block_trim_padding( cmd.split( $/ ) ) }
         .flatten
-        .map { |l| l.strip }
-        .reject { |l| l.empty? }
         .join( "\n" )
+    end
+
+    # Left strip lines, but preserve increased indentation in
+    # subsequent lines. Also right strip and drop blank lines
+    def block_trim_padding( lines )
+      pad = nil
+      lines
+        .reject { |l| l =~ /^\s*$/ } #blank lines
+        .map do |line|
+        line = line.dup
+        unless pad && line.gsub!(/^(\s{,#{pad}})/, '')
+          prior = line.length
+          line.gsub!(/^(\s*)/, '')
+          pad = prior - line.length
+        end
+        line.rstrip!
+        line
+      end
     end
 
     # Captures out and err from a command expressed by args
