@@ -17,124 +17,129 @@
 require 'syncwrap/base'
 require 'syncwrap/shell'
 
-module SyncWrap::Rsync
-  include SyncWrap::Shell
+module SyncWrap
 
-  # Put files or entire directories to remote
-  #
-  #   rsync( host, src..., dest, {options} )
-  #   rsync( host, src, {options} )
-  #
-  # A trailing hash is interpreted as options, see below.
-  #
-  # After the host, if there are two or more remaining arguments, the last is
-  # interpreted as the remote destination.  If there is a single
-  # remaining argument, the destination is implied by finding its base
-  # directory and prepending '/'. Thus for example:
-  #
-  #   rsync( 'foohost', 'etc/gemrc', user: :root )
-  #
-  # has an implied destination of: `/etc/`. The src and destination
-  # are intrepreted as by `rsync`: glob patterns are expanded and
-  # trailing '/' is significant.
-  #
-  # On success, returns an array of format [ [change_code, file_name] ]
-  # for files changed, as parsed from the rsync --itemize-changes to
-  # standard out.
-  #
-  # On failure, raises CommandFailure.
-  #
-  # ==== Options
-  #
-  # :user::      Files should be owned on destination by a user other
-  #              than installer (ex: 'root') (implies sudo)
-  # :perms::     Permissions to set for synchronized files. If just true,
-  #              use local permissions (-p). (default: true)
-  # :ssh_flags:: Array of flags to give to ssh via rsync -e
-  # :excludes::  One or more rsync compatible --filter excludes, or
-  #              :dev which excludes common developmoent tree droppings
-  #              like '*~'
-  # :dryrun::    Don't actually make any changes (but report files that
-  #              would be changed) (default: false)
-  # :recursive:: Recurse into subdirectories (default: true)
-  # :links::     Recreate symlinks on the destination (default: true)
-  # :checksum::  Use MD5 to determine changes; not just size,time
-  #              (default: true)
-  # :backup::    Make backup files on remote (default: true)
-  # :verbose::   Output stdout/stderr from rsync (default: false)
-  #
-  def rsync( host, *args )
-    opts = args.last.is_a?( Hash ) && args.pop || {}
+  module Rsync
+    include Shell
 
-    if args.length == 1
-      abspath = "/" + args.first
-      abspath = File.dirname( abspath ) + '/' unless abspath =~ %r{/$}
-    else
-      abspath = args.pop
-    end
+    private
 
-    # -i --itemize-changes, used for counting changed files
-    flags = %w[ -i ]
+    # Put files or entire directories to remote
+    #
+    #   rsync( host, src..., dest, {options} )
+    #   rsync( host, src, {options} )
+    #
+    # A trailing hash is interpreted as options, see below.
+    #
+    # After the host, if there are two or more remaining arguments, the last is
+    # interpreted as the remote destination.  If there is a single
+    # remaining argument, the destination is implied by finding its base
+    # directory and prepending '/'. Thus for example:
+    #
+    #   rsync( 'foohost', 'etc/gemrc', user: :root )
+    #
+    # has an implied destination of: `/etc/`. The src and destination
+    # are intrepreted as by `rsync`: glob patterns are expanded and
+    # trailing '/' is significant.
+    #
+    # On success, returns an array of format [ [change_code, file_name] ]
+    # for files changed, as parsed from the rsync --itemize-changes to
+    # standard out.
+    #
+    # On failure, raises CommandFailure.
+    #
+    # ==== Options
+    #
+    # :user::      Files should be owned on destination by a user other
+    #              than installer (ex: 'root') (implies sudo)
+    # :perms::     Permissions to set for synchronized files. If just true,
+    #              use local permissions (-p). (default: true)
+    # :ssh_flags:: Array of flags to give to ssh via rsync -e
+    # :excludes::  One or more rsync compatible --filter excludes, or
+    #              :dev which excludes common developmoent tree droppings
+    #              like '*~'
+    # :dryrun::    Don't actually make any changes (but report files that
+    #              would be changed) (default: false)
+    # :recursive:: Recurse into subdirectories (default: true)
+    # :links::     Recreate symlinks on the destination (default: true)
+    # :checksum::  Use MD5 to determine changes; not just size,time
+    #              (default: true)
+    # :backup::    Make backup files on remote (default: true)
+    # :verbose::   Output stdout/stderr from rsync (default: false)
+    def rsync( host, *args )
+      opts = args.last.is_a?( Hash ) && args.pop || {}
 
-    # -r --recursive
-    flags << '-r' unless opts[:recursive] == false
-
-    # -l --links (recreate symlinks on the destination)
-    flags << '-l' unless opts[:links] == false
-
-    # -p --perms (set destination to source permissions)
-    flags << '-p' unless opts[:perms] == false
-
-    # -c --checksum (to determine changes; not just size,time)
-    flags << '-c' unless opts[:checksum] == false
-
-    # -b --backup (make backups)
-    flags << '-b' unless opts[:backup] == false
-
-    # Pass ssh options via -e (--rsh) flag
-    flags += [ '-e', "ssh #{opts[:ssh_flags]}" ] if opts[:ssh_flags]
-
-    if opts[ :user ]
-      # Use sudo to place files at remote.
-      user = opts[ :user ].to_s
-      flags << ( if user != 'root'
-                   "--rsync-path=sudo -u #{user} rsync"
-                 else
-                   "--rsync-path=sudo rsync"
-                 end )
-    end
-
-    if opts[ :perms ] && opts[ :perms ].is_a?( String )
-      flags << "--chmod=#{opts[ :perms ]}"
-    end
-
-    excludes = Array( opts[ :excludes ] )
-    flags += excludes.map do |e|
-      if e == :dev
-        '--cvs-exclude'
+      if args.length == 1
+        abspath = "/" + args.first
+        abspath = File.dirname( abspath ) + '/' unless abspath =~ %r{/$}
       else
-        "--filter=#{e}"
+        abspath = args.pop
       end
-    end
 
-    flags << '-n' if opts[ :dryrun ]
+      # -i --itemize-changes, used for counting changed files
+      flags = %w[ -i ]
 
-    args = [ 'rsync', flags, args, [ host, abspath ].join(':') ].flatten.compact
-    exit_code, outputs = capture3( args )
+      # -r --recursive
+      flags << '-r' unless opts[:recursive] == false
 
-    if exit_code != 0 || opts[ :verbose ]
-      fout = [ [ :err, ( args.join( ' ' ) + "\n" ) ] ] + outputs
-      format_outputs( fout, opts )
-    end
+      # -l --links (recreate symlinks on the destination)
+      flags << '-l' unless opts[:links] == false
 
-    if exit_code == 0
-      # Return array of --itemize-changes on standard out.
-      collect_stream( :out, outputs ).
-        split( "\n" ).
-        map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
-        compact
-    else
-      raise CommandFailure, "rsync exit code: #{exit_code}"
+      # -p --perms (set destination to source permissions)
+      flags << '-p' unless opts[:perms] == false
+
+      # -c --checksum (to determine changes; not just size,time)
+      flags << '-c' unless opts[:checksum] == false
+
+      # -b --backup (make backups)
+      flags << '-b' unless opts[:backup] == false
+
+      # Pass ssh options via -e (--rsh) flag
+      flags += [ '-e', "ssh #{opts[:ssh_flags]}" ] if opts[:ssh_flags]
+
+      if opts[ :user ]
+        # Use sudo to place files at remote.
+        user = opts[ :user ].to_s
+        flags << ( if user != 'root'
+                     "--rsync-path=sudo -u #{user} rsync"
+                   else
+                     "--rsync-path=sudo rsync"
+                   end )
+      end
+
+      if opts[ :perms ] && opts[ :perms ].is_a?( String )
+        flags << "--chmod=#{opts[ :perms ]}"
+      end
+
+      excludes = Array( opts[ :excludes ] )
+      flags += excludes.map do |e|
+        if e == :dev
+          '--cvs-exclude'
+        else
+          "--filter=#{e}"
+        end
+      end
+
+      flags << '-n' if opts[ :dryrun ]
+
+      args = [ 'rsync', flags, args, [ host, abspath ].join(':') ].flatten.compact
+      exit_code, outputs = capture3( args )
+
+      if exit_code != 0 || opts[ :verbose ]
+        fout = [ [ :err, ( args.join( ' ' ) + "\n" ) ] ] + outputs
+        format_outputs( fout, opts )
+      end
+
+      if exit_code == 0
+        # Return array of --itemize-changes on standard out.
+        collect_stream( :out, outputs ).
+          split( "\n" ).
+          map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
+          compact
+      else
+        raise CommandFailure, "rsync exit code: #{exit_code}"
+      end
+
     end
 
   end

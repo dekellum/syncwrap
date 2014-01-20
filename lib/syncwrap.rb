@@ -22,6 +22,9 @@ require 'syncwrap/host'
 
 module SyncWrap
 
+  class CommandFailure < RuntimeError
+  end
+
   class NestingError < RuntimeError
   end
 

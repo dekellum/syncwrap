@@ -35,8 +35,8 @@ class TestContext < MiniTest::Unit::TestCase
   class TestContext < Context
     attr_accessor :run_args
 
-    def run_shell!( host, command, args )
-      @run_args = [ host, command, args ]
+    def run_shell!( command, args )
+      @run_args = [ command, args ]
     end
   end
 
@@ -50,9 +50,8 @@ class TestContext < MiniTest::Unit::TestCase
       ctx.sh( "c2", user: :root )
       assert_nil( ctx.run_args )
       ctx.flush
-      assert_equal( 'localhost', ctx.run_args[0] )
-      assert_equal( %w[c1 c2], ctx.run_args[1] )
-      assert_equal( { user: :root }, ctx.run_args[2] )
+      assert_equal( %w[c1 c2], ctx.run_args[0] )
+      assert_equal( { user: :root }, ctx.run_args[1] )
     end
   end
 
@@ -65,7 +64,7 @@ class TestContext < MiniTest::Unit::TestCase
       ctx.sh( "c2", user: :root )
       assert_nil( ctx.run_args )
     end
-    assert_equal( %w[c1 c2], ctx.run_args[1] )
+    assert_equal( %w[c1 c2], ctx.run_args[0] )
   end
 
   def test_context_flush_on_opts_change
@@ -76,9 +75,9 @@ class TestContext < MiniTest::Unit::TestCase
       ctx.sh( "c1", user: :root )
       assert_nil( ctx.run_args )
       ctx.sh( "c2" )
-      assert_equal( %w[c1], ctx.run_args[1] )
+      assert_equal( %w[c1], ctx.run_args[0] )
     end
-    assert_equal( %w[c2], ctx.run_args[1] )
+    assert_equal( %w[c2], ctx.run_args[0] )
   end
 
   def test_context_with_close
@@ -92,7 +91,7 @@ class TestContext < MiniTest::Unit::TestCase
       end
       assert_nil( ctx.run_args )
     end
-    assert_equal( %w[c1- c2 -c3], ctx.run_args[1] )
+    assert_equal( %w[c1- c2 -c3], ctx.run_args[0] )
   end
 
   def test_context_nesting_error

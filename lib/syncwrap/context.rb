@@ -16,6 +16,7 @@
 
 require 'syncwrap/shell'
 require 'syncwrap/rsync'
+require 'term/ansicolor'
 
 module SyncWrap
 
@@ -66,7 +67,7 @@ module SyncWrap
     # beforehand, to avoid ambiguous order of remote changes.
     def capture( command, opts = {} )
       flush
-      capture_shell( host.name, command, opts )
+      capture_shell( command, opts )
     end
 
     # Enqueue a shell command to be run on host.
@@ -97,7 +98,7 @@ module SyncWrap
           if @queue_locked
             raise NestingError, 'Queue at flush: ' + @queued_cmd.join( '\n' )
           end
-          run_shell!( host.name, @queued_cmd, @queued_opts )
+          run_shell!( @queued_cmd, @queued_opts )
         ensure
           reset_queue
         end
@@ -109,6 +110,55 @@ module SyncWrap
     def reset_queue
       @queued_cmd = []
       @queued_opts = {}
+    end
+
+    # Local:
+    # sh -v|-x -e -c STRING
+    # sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
+    #
+    # Remote:
+    # ssh SSHFLAGS host sh [-v|-x -e -n] -c STRING
+    # ssh SSHFLAGS host sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
+    #
+    # typical SSHFLAGS: -i ./key.pem -l ec2-user
+    # typical SUDOFLAGS: -H
+    def run_shell!( command, opts = {} )
+      args = ssh_args( host.name, command, opts )
+      exit_code, outputs = capture3( args )
+      if exit_code != 0 || opts[ :verbose ]
+        format_outputs( outputs, opts )
+      end
+      if exit_code != 0
+        raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
+      end
+    end
+
+    def capture_shell( command, opts = {} )
+      args = ssh_args( host.name, command, opts )
+      exit_code, outputs = capture3( args )
+      if opts[ :accept ] and !opts[ :accept ].include?( exit_code )
+        format_outputs( outputs, opts )
+        raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
+      end
+      format_outputs( outputs, opts ) if opts[ :verbose ]
+      [ exit_code, collect_stream( :out, outputs ) ]
+    end
+
+    def format_outputs( outputs, opts = {} )
+      clr = Term::ANSIColor
+      newlined = true
+      outputs.each do |stream, buff|
+        case( stream )
+        when :out
+          $stdout.write buff
+        when :err
+          $stdout.write clr.red
+          $stdout.write buff
+          $stdout.write clr.reset
+        end
+        newlined = ( buff[-1] == "\n" )
+      end
+      $stdout.puts unless newlined
     end
 
   end

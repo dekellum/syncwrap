@@ -20,78 +20,18 @@
 
 require 'syncwrap/base'
 require 'open3'
-require 'term/ansicolor'
 
 module SyncWrap
 
-  class CommandFailure < RuntimeError
-  end
-
   module Shell
 
-    def initialize
-      super
-    end
-
-    # Local:
-    # sh -v|-x -e -c STRING
-    # sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
-    #
-    # Remote:
-    # ssh SSHFLAGS host sh [-v|-x -e -n] -c STRING
-    # ssh SSHFLAGS host sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
-    #
-    # typical SSHFLAGS: -i ./key.pem -l ec2-user
-    # typical SUDOFLAGS: -H
-    def run_shell!( host, command, opts = {} )
-      args = ssh_args( host, command, opts )
-      exit_code, outputs = capture3( args )
-      if exit_code != 0 || opts[ :verbose ]
-        format_outputs( outputs, opts )
-      end
-      if exit_code != 0
-        raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
-      end
-    end
-
-    def capture_shell( host, command, opts = {} )
-      args = ssh_args( host, command, opts )
-      exit_code, outputs = capture3( args )
-      if opts[ :accept ] and !opts[ :accept ].include?( exit_code )
-        format_outputs( outputs, opts )
-        raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
-      end
-      format_outputs( outputs, opts ) if opts[ :verbose ]
-      [ exit_code, collect_stream( :out, outputs ) ]
-    end
-
-    def collect_stream( stream, outputs )
-      outputs.
-        select { |o| o[0] == stream }.
-        map { |o| o[1] }. #the buffers
-        inject( "", :+ )
-    end
-
-    def format_outputs( outputs, opts = {} )
-      clr = Term::ANSIColor
-      newlined = true
-      outputs.each do |stream, buff|
-        case( stream )
-        when :out
-          $stdout.write buff
-        when :err
-          $stdout.write clr.red
-          $stdout.write buff
-          $stdout.write clr.reset
-        end
-        newlined = ( buff[-1] == "\n" )
-      end
-      $stdout.puts unless newlined
-    end
+    private
 
     def ssh_args( host, command, opts = {} )
       args = []
       if host != 'localhost'
+        opts = opts.dup
+        coalesce = opts.delete( :coalesce )
         args = [ 'ssh' ]
         args += opts[ :ssh_flags ] if opts[ :ssh_flags ]
         args << host.to_s
@@ -99,6 +39,8 @@ module SyncWrap
         cmd = sargs.pop
         args += sargs
         args << ( '"' + shell_escape_cmd( cmd ) + '"' )
+        args << '2>&1' if coalesce
+        args
       else
         sudo_args( command, opts )
       end
@@ -118,24 +60,62 @@ module SyncWrap
     def sh_args( command, opts = {} )
       args = [ 'bash' ]
       args << '-e' if opts[ :error ].nil? || opts[ :error ] == :exit
-      if opts[ :sh_verbose ]
-        args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
+      args << '-n' if opts[ :dryrun ]
+
+      if opts[ :coalesce ]
+        args << '-c'
+        cmd = "exec 2>&1\n"
+        if opts[ :sh_verbose ]
+          cmd += "set "
+          cmd += opts[ :sh_verbose ] == :x ? '-x' : '-v'
+          cmd += "\n"
+        end
+        cmd += command_lines_cleanup( command )
+        args << cmd
+      else
+        if opts[ :sh_verbose ]
+          args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
+        end
+        args << '-c'
+        args << command_lines_cleanup( command )
       end
-      args << '-n' if opts[ :dryrun  ]
-      args + [ '-c', args_to_command( command ) ]
+      args
     end
 
     def shell_escape_cmd( cmd )
       cmd.gsub( /["$`\\]/ ) { |c| '\\' + c }
     end
 
-    def args_to_command( args )
-      Array( args ).flatten.compact
-        .map { |arg| arg.split( $/ ) }
+    def command_lines_cleanup( commands )
+      Array( commands )
+        .map { |cmd| block_trim_padding( cmd.split( $/ ) ) }
         .flatten
-        .map { |l| l.strip }
-        .reject { |l| l.empty? }
         .join( "\n" )
+    end
+
+    # Left strip lines, but preserve increased indentation in
+    # subsequent lines. Also right strip and drop blank lines
+    def block_trim_padding( lines )
+      pad = nil
+      lines
+        .reject { |l| l =~ /^\s*$/ } #blank lines
+        .map do |line|
+        line = line.dup
+        unless pad && line.gsub!(/^(\s{,#{pad}})/, '')
+          prior = line.length
+          line.gsub!(/^(\s*)/, '')
+          pad = prior - line.length
+        end
+        line.rstrip!
+        line
+      end
+    end
+
+    def collect_stream( stream, outputs )
+      outputs.
+        select { |o| o[0] == stream }.
+        map { |o| o[1] }. #the buffers
+        inject( "", :+ )
     end
 
     # Captures out and err from a command expressed by args
@@ -149,7 +129,7 @@ module SyncWrap
       status = nil
       outputs = []
       Open3::popen3( *args ) do |inp, out, err, wait_thread|
-        inp.sync = true
+        inp.close rescue nil
 
         streams = [ err, out ]
 
@@ -166,20 +146,18 @@ module SyncWrap
             chunk = stream.readpartial( 8192 )
             marker = (stream == out) ? :out : :err
 
-            yield( marker, chunk, inp ) if block_given?
+            yield( marker, chunk ) if block_given?
 
             # Merge chunks from the same stream
             l = outputs.last
             if l && l[0] == marker
-              l[1] << chunk
+              l[1] += chunk
             else
               outputs << [ marker, chunk ]
             end
 
           end
         end
-
-        inp.close rescue nil
 
         # Older jruby (even in 1.9+ mode) doesn't provide wait_thread but
         # does return the status in $? instead (see workaround below)
