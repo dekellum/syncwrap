@@ -14,54 +14,54 @@
 # permissions and limitations under the License.
 #++
 
+require 'syncwrap/component'
 require 'syncwrap/distro'
 
-# Customizations for RedHat Enterprise Linux and derivatives like
-# CentOS and Amazon Linux.  Specific distros/versions may further
-# override these.
-module SyncWrap::RHEL
-  include SyncWrap::Distro
+module SyncWrap
 
-  def initialize
-    super
+  # Customizations for RedHat Enterprise Linux and derivatives like
+  # CentOS and Amazon Linux.  Specific distros/versions may further
+  # override these.
+  class RHEL < Component
+    include SyncWrap::Distro
 
-    packages_map.merge!( 'emacs' => 'emacs-nox',
-                         'postgresql' => 'postgresql-server' )
-  end
+    def initialize( opts = {} )
+      super
 
-  # Generate command to install packages. The last argument is
-  # interpreted as a options if it is a Hash.
-  # === Options
-  # :succeed:: Always succeed (useful for local rpms which might
-  # already be installed.
-  def dist_install_s( *args )
-    if args.last.is_a?( Hash )
-      args = args.dup
-      opts = args.pop
-    else
-      opts = {}
+      packages_map.merge!( 'emacs' => 'emacs-nox',
+                           'postgresql' => 'postgresql-server' )
     end
 
-    args = dist_map_packages( args )
+    # Install packages.
+    # A trailing hash is interpreted as options, see below.
+    #
+    # ==== Options
+    # :succeed:: Always succeed (useful for local rpm files which
+    # might already be installed.)
+    def dist_install( *pkgs )
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
+      pkgs = dist_map_packages( pkgs )
 
-    if opts[ :succeed ]
-      "yum install -q -y #{args.join ' '} || true"
-    else
-      "yum install -q -y #{args.join ' '}"
+      if opts[ :succeed ]
+        sudo "yum install -q -y #{pkgs.join( ' ' )} || true"
+      else
+        sudo "yum install -q -y #{pkgs.join( ' ' )}"
+      end
     end
-  end
 
-  def dist_uninstall_s( *args )
-    args = dist_map_packages( args )
-    "yum remove -q -y #{args.join ' '}"
-  end
+    def dist_uninstall( *pkgs )
+      pkgs = dist_map_packages( pkgs )
+      sudo "yum remove -q -y #{pkgs.join( ' ' )}"
+    end
 
-  def dist_install_init_service_s( name )
-    "/sbin/chkconfig --add #{name}"
-  end
+    def dist_install_init_service( name )
+      sudo "/sbin/chkconfig --add #{name}"
+    end
 
-  def dist_service_s( *args )
-    "/sbin/service #{args.join ' '}"
+    def dist_service( *args )
+      sudo( [ '/sbin/service', *args ].join( ' ' ) )
+    end
+
   end
 
 end

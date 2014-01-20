@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2013 David Kellum
+# Copyright (c) 2011-2014 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -14,105 +14,125 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/common'
+require 'syncwrap/component'
 
-# Provisions JRuby by direct download from public S3 repo. Includes
-# utility methods for checking and installing JRuby gems.
-module SyncWrap::JRuby
-  include SyncWrap::Common
+module SyncWrap
 
-  # JRuby version to install (default: 1.6.8)
-  attr_accessor :jruby_version
+  # Provision JRuby by direct download from public S3 repo. Includes
+  # utility methods for checking and installing JRuby gems.
+  class JRuby < Component
 
-  # The name of the gem command to be installed/used (default: jgem)
-  attr_accessor :jruby_gem_command
+    # JRuby version to install (default: 1.6.8)
+    attr_accessor :jruby_version
 
-  # Default gem install arguments (default: --no-rdoc, --no-ri)
-  attr_accessor :jruby_gem_install_args
+    # The name of the gem command to be installed/used (default: jgem)
+    attr_accessor :jruby_gem_command
 
-  def initialize
-    super
+    # Default gem install arguments (default: --no-rdoc, --no-ri)
+    attr_accessor :jruby_gem_install_args
 
-    @jruby_version = '1.6.8'
-    @jruby_gem_command = 'jgem'
-    @jruby_gem_install_args = %w[ --no-rdoc --no-ri ]
-  end
+    def initialize( opts = {} )
+      @jruby_version = '1.6.8'
+      @jruby_gem_command = 'jgem'
+      @jruby_gem_install_args = %w[ --no-rdoc --no-ri ]
 
-  def jruby_gemrc_path
-    "#{common_prefix}/lib/jruby/jruby-#{jruby_version}/etc"
-  end
-
-  # Install jruby if the jruby_version is not already present.
-  def jruby_install
-    unless exist?( "#{common_prefix}/lib/jruby/jruby-#{jruby_version}" )
-      jruby_install!
+      super
     end
-    jruby_install_gemrc
-  end
 
-  # Install gemrc file to jruby_gemrc_path
-  def jruby_install_gemrc
-    sudo "mkdir -p #{jruby_gemrc_path}"
-    rput( 'etc/gemrc', jruby_gemrc_path, :user => 'root' )
-  end
-
-  # Install jruby, including usr/local/bin local contents
-  def jruby_install!
-    url = ( "http://jruby.org.s3.amazonaws.com/downloads/#{jruby_version}/" +
-            "jruby-bin-#{jruby_version}.tar.gz" )
-
-    root = "#{common_prefix}/lib/jruby"
-
-    sudo <<-SH
-      mkdir -p #{root}
-      mkdir -p #{root}/gems
-      curl -sSL #{url} | tar -C #{root} -zxf -
-      cd #{root} && ln -sfn jruby-#{jruby_version} jruby
-      cd #{common_prefix}/bin && ln -sf ../lib/jruby/jruby/bin/jirb .
-    SH
-
-    rput( 'usr/local/bin/', :excludes => :dev, :user => 'root' )
-  end
-
-  # Return true if gem is already installed.
-  # ==== Options
-  # :version:: Version specifier array, like in spec. files
-  #            (default: none, i.e. latest)
-  # :user:: If true, perform a --user-install as current user, else
-  #         system install with sudo (default: false )
-  def jruby_check_gem( gems, opts = {} )
-    query = [ jruby_gem_command, 'query', '-i',
-              jruby_gem_version_flags( opts[ :version ] ),
-              '-n', gems, '>/dev/null' ].flatten.compact
-
-    status = exec_conditional do
-      send( opts[ :user ] ? :run : :sudo, query )
+    def jruby_dist_path
+      "#{local_root}/lib/jruby/jruby-#{jruby_version}"
     end
-    ( status == 0 )
-  end
 
-  # Install the specified gem(s)
-  # ==== Options
-  # :version:: Version specifier array, like in spec. files
-  #            (default: none, i.e. latest)
-  # :user:: If true, perform a --user-install as current user, else
-  #         system install with sudo (default: false )
-  def jruby_install_gem( gems, opts = {} )
-    if opts[ :check ] && jruby_check_gem( gems, opts )
-      false
-    else
+    def jruby_gemrc_path
+      "#{jruby_dist_path}/etc"
+    end
+
+    # Install jruby if the jruby_version is not already present.
+    def install
+      jruby_install
+      jruby_install_gemrc
+    end
+
+    # Install gemrc file to jruby_gemrc_path
+    def jruby_install_gemrc
+      rput( 'etc/gemrc', jruby_gemrc_path, user: :root )
+    end
+
+    def jruby_bin_url
+      [ 'http://jruby.org.s3.amazonaws.com/downloads',
+        jruby_version,
+        "jruby-bin-#{jruby_version}.tar.gz" ].join( '/' )
+    end
+
+    # Install jruby, including usr/local/bin local contents
+    def jruby_install
+
+      root = "#{local_root}/lib/jruby"
+
+      sudo <<-SH
+        if [ ! -d #{jruby_dist_path} ]; then
+          mkdir -p #{root}
+          mkdir -p #{root}/gems
+          curl -sSL #{jruby_bin_url} | tar -C #{root} -zxf -
+          mkdir -p #{jruby_gemrc_path}
+          cd #{root} && ln -sfn jruby-#{jruby_version} jruby
+          cd #{local_root}/bin && ln -sf ../lib/jruby/jruby/bin/jirb .
+        fi
+      SH
+
+      # FIXME: Assumes /usr/local. Move to jruby/bin/*
+      rput( 'usr/local/bin/', excludes: :dev, user: :root )
+    end
+
+    # Install the specified gem.
+    #
+    # ==== Options
+    # :version:: Version specifier array, like in spec. files
+    #            (default: none, i.e. latest)
+    # :user_install:: If true, perform a --user-install as the current
+    #                 user, else system install with sudo (the default)
+    # :check:: If true, captures output and returns the number of gems
+    #          actually installed.  Combine with :minimize to only
+    #          install what is required, and short circuit when zero
+    #          gems installed.
+    # :minimize:: Use --conservative and --minimal-deps (rubygems
+    #             2.1.5+) flags to reduce installs to the minimum
+    #             required to satisfy the version requirments.
+    def jruby_install_gem( gem, opts = {} )
       cmd = [ jruby_gem_command, 'install',
               jruby_gem_install_args,
-              ( '--user-install' if opts[ :user ] ),
+              ( '--user-install' if opts[ :user_install ] ),
+              ( '--conservative' if opts[ :minimize] ),
+              ( '--minimal-deps' if opts[ :minimize] && min_deps_supported? ),
               jruby_gem_version_flags( opts[ :version ] ),
-              gems ].flatten.compact
-      send( opts[ :user ] ? :run : :sudo, cmd )
-      true
-    end
-  end
+              gem ].flatten.compact.join( ' ' )
 
-  def jruby_gem_version_flags( reqs )
-    Array( reqs ).flatten.compact.map { |req| "-v'#{req}'" }
+      shopts = opts[ :user_install ] ? {} : {user: :root}
+
+      if opts[ :check ]
+        _,out = capture( cmd, shopts.merge!( accept: 0 ) )
+
+        count = 0
+        out.split( "\n" ).each do |oline|
+          if oline =~ /^\s+(\d+)\s+gem(s)?\s+installed/
+            count = $1.to_i
+          end
+        end
+        count
+      else
+        sh( cmd, shopts )
+      end
+    end
+
+    def min_deps_supported?
+      varray = version.split('.').map { |n| n.to_i }
+      ( varry <=> [1, 7, 5] ) >= 0
+    end
+
+    def jruby_gem_version_flags( reqs )
+      Array( reqs ).flatten.compact.map { |req| "-v'#{req}'" }
+    end
+
   end
 
 end

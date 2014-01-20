@@ -19,61 +19,48 @@ require 'syncwrap/base'
 # Support for distro specializations.
 module SyncWrap::Distro
 
+  # The root directory for local, non-distro installs
+  # (default: /usr/local)
+  attr_accessor :local_root
+
   # A Hash of internal/common package names to distro specific package
-  # names.  Here defined as empty.
+  # names.
   attr_reader :packages_map
 
-  def initialize
-    super
-
+  def initialize( *args )
+    @local_root = '/usr/local'
     @packages_map = {}
+
+    super( *args )
   end
 
   # Map internal/common names and return distro-specific names. If a
-  # mapping does not exist, assume internal name is a common name.
+  # mapping does not exist, return the original name.
   def dist_map_packages( *pkgs )
     pkgs.flatten.compact.map { |pkg| packages_map[ pkg ] || pkg }
   end
 
   # Install the specified packages using distro-specific mapped
-  # package names and command via dist_install_s. The last argument is
-  # interpreted as options if it is a Hash.
-  # === Options
+  # package names. A trailing hash is interpreted as options, see
+  # below.
+  #
+  # ==== Options
   # :succeed:: Always succeed (useful for local rpms which might
   # already be installed.
   # :minimal:: Avoid additional "optional" packages when possible.
-  def dist_install( *args )
-    sudo( dist_install_s( *args ) )
-  end
-
-  # Generate command to install the specified packages using
-  # distro-specific mapped package names. The last argument is
-  # interpreted as options if it is a Hash.
-  def dist_install_s( *args )
+  def dist_install( *pkgs )
     raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
   end
 
   # Uninstall specified packages using distro-specific mapped
   # package names and command.
-  def dist_uninstall( *args )
-    sudo( dist_uninstall_s( *args ) )
-  end
-
-  # Return command to uninstall specified packages using
-  # distro-specific mapped package names.
-  def dist_uninstall_s( *args )
+  def dist_uninstall( *pkgs )
     raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
   end
 
   # Install a System V style init.d script (already placed at remote
   # /etc/init.d/<name>) via distro-specific command
   def dist_install_init_service( name )
-    sudo( dist_install_init_service_s( name ) )
-  end
-
-  # Return command to install a System V style init.d script (already
-  # placed at remote /etc/init.d/<name>).
-  def dist_install_init_service_s( name )
     raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
   end
 
@@ -81,11 +68,6 @@ module SyncWrap::Distro
   # command, typically supporting 'start', 'stop', 'restart',
   # 'status', etc. arguments.
   def dist_service( *args )
-    sudo( dist_service_s( *args ) )
-  end
-
-  # Return the System V style, distro specific `service` command.
-  def dist_service_s( *args )
     raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
   end
 

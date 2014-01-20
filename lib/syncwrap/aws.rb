@@ -445,4 +445,14 @@ module SyncWrap::AWS
   def dot_terminate( name )
     ( name =~ /\.$/ ) ? name : ( name + '.' )
   end
+
+  def deep_merge_hashes( h1, h2 )
+    h1.merge( h2 ) do |key, v1, v2|
+      if v1.is_a?( Hash ) && v2.is_a?( Hash )
+        deep_merge_hashes( v1, v2 )
+      else
+        v2
+      end
+    end
+  end
 end

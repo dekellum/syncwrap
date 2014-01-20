@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2013 David Kellum
+# Copyright (c) 2011-2014 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -14,26 +14,36 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/user_run'
-require 'syncwrap/jruby'
+require 'syncwrap/component'
 
-# Provisions the
-# {boxed-geminabox}[https://github.com/dekellum/boxed-geminabox/]
-# gem server.
-module SyncWrap::Geminabox
-  include SyncWrap::UserRun
-  include SyncWrap::JRuby
+module SyncWrap
 
-  attr_accessor :geminabox_version
+  # Provision the
+  # {boxed-geminabox}[https://github.com/dekellum/boxed-geminabox/]
+  # gem server.
+  # Component dependencies: jruby, iyyov, run_user
+  class Geminabox < Component
 
-  def initialize
-    super
-    @geminabox_version = '1.0.0'
-  end
+    attr_accessor :geminabox_version
 
-  def geminabox_install
-    jruby_install_gem( 'boxed-geminabox', :version => "=#{geminabox_version}" )
-    user_run_service_dir_setup( 'boxed-geminabox' )
+    def initialize( opts = {} )
+      @geminabox_version = '1.0.0'
+
+      super
+    end
+
+    def install
+      # Short-circuit if the correct versioned process is already running
+      dpat = "boxed-geminabox-#{geminabox_version}-java/init/boxed-geminabox"
+      code,_ = capture( "pgrep -f #{dpat}", accept:[0,1] )
+
+      if code == 1
+        jruby_install_gem( 'boxed-geminabox', version: "=#{geminabox_version}" )
+        create_service_dir( 'boxed-geminabox' )
+        iyyov_install_jobs
+      end
+    end
+
   end
 
 end
