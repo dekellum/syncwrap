@@ -47,6 +47,7 @@ module SyncWrap
         ( d !~ /^\./ &&
           File.directory?( local_home_dir + d ) )
       end
+      users ||= []
       users -= exclude_users
 
       users.each do |u|
