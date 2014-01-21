@@ -53,7 +53,7 @@ class Runner
         @sw_file = f
       end
       opts.on( "-v", "--verbose",
-               "Show details of remote command execution." ) do
+               "Show details of local/remote command execution." ) do
         @verbose = true
       end
 
@@ -106,7 +106,7 @@ class Runner
 
     exit( 0 ) if lists > 0
 
-    @space.execute( @hosts, @component_plan )
+    @space.execute( @hosts, @component_plan, verbose: @verbose )
   end
 
   def list_components( comp_classes, multi )

@@ -30,9 +30,8 @@ class TestRsync < MiniTest::Unit::TestCase
 
   attr_reader :last_args
 
-  def capture3( args )
-    @last_args = args
-    [ 0, [] ]
+  def rsync( *args )
+    @last_args = rsync_args( *args )
   end
 
   def test_rsync_args

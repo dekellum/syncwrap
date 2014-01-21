@@ -18,6 +18,7 @@ require 'syncwrap/base'
 require 'syncwrap/component'
 require 'syncwrap/context'
 require 'syncwrap/host'
+require 'syncwrap/formatter'
 
 module SyncWrap
 
@@ -29,9 +30,23 @@ module SyncWrap
 
   class Space
 
+    # FIXME: document?
+    # sudo_flags: ['-H']
+    # ssh_flags: %w[ -i ./key.pem -l ec2-user ]
+    # FIXME: Option to use example ssh-flags for Users setup only?
+    attr_reader :default_opts
+
+    attr_reader :formatter
+
     def initialize
       @roles = Hash.new { |h,k| h[k] = [] }
       @hosts = {}
+      @default_opts = { coalesce: true, sh_verbose: :v }
+      @formatter = Formatter.new
+    end
+
+    def merge_default_options( opts )
+      @default_opts.merge!( opts )
     end
 
     # Define/access a Role by symbol
@@ -58,34 +73,44 @@ module SyncWrap
       @hosts.values
     end
 
-    # FIXME: misc default args for ssh, sudo, i.e:
-    # sudo_flags: ['-H']
-    # ssh_flags: %w[ -i ./key.pem -l ec2-user ]
-    # Option to use example ssh-flags for Users setup only?
-
-    # FIXME: Host name to ssh name strategies go here
-
-    def execute( hs = hosts, component_plan = [] )
-      threads = hs.map do |h|
-        Thread.new( h ) do |host|
-          Context.new( host ).with do
-            host.components.each do |comp|
-              if !component_plan.empty?
-                found,method = component_plan.find { |pr| comp.is_a?( pr[0] ) }
-                next unless found
-              else
-                method = :install
-                next unless comp.respond_to?( method )
-              end
-              comp.send( method )
-            end
-          end
+    def execute( hs = hosts, component_plan = [], opts = {} )
+      opts = default_opts.merge( opts )
+      threads = hs.map do |host|
+        Thread.new( host, component_plan, opts ) do |h, c, o|
+          execute_host( h, c, o )
         end
       end
       threads.each { |t| t.join }
     end
 
-    # Find the ordered, unique set of component classes, direct or via
+    def execute_host( host, component_plan = [], opts = {} )
+      Context.new( host, opts ).with do
+        host.components.each do |comp|
+          if !component_plan.empty?
+            found,method = component_plan.find { |pr| comp.is_a?( pr[0] ) }
+            next unless found
+          else
+            method = :install
+            next unless comp.respond_to?( method )
+          end
+          formatter.sync do
+            formatter.write_component( host, comp, method )
+          end
+          comp.send( method )
+          formatter.sync do
+            formatter.write_component( host, comp, method, "complete" )
+          end
+
+        end
+      end
+    end
+
+    # FIXME: Host name to ssh name strategies go here
+    def ssh_host_name( host )
+      host.name
+    end
+
+    # Return an ordered, unique set of component classes, direct or via
     # roles, currently contained by the specified hosts or all hosts.
     def component_classes( hs = hosts )
       hs.
@@ -111,6 +136,10 @@ module SyncWrap
 
     def host( *args )
       Space.current.host( *args )
+    end
+
+    def options( opts )
+      Space.current.merge_default_options( opts )
     end
 
   end

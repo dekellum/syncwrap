@@ -66,7 +66,7 @@ module SyncWrap
     #              (default: true)
     # :backup::    Make backup files on remote (default: true)
     # :verbose::   Output stdout/stderr from rsync (default: false)
-    def rsync( host, *args )
+    def rsync_args( host, *args )
       opts = args.last.is_a?( Hash ) && args.pop || {}
 
       if args.length == 1
@@ -122,24 +122,7 @@ module SyncWrap
 
       flags << '-n' if opts[ :dryrun ]
 
-      args = [ 'rsync', flags, args, [ host, abspath ].join(':') ].flatten.compact
-      exit_code, outputs = capture3( args )
-
-      if exit_code != 0 || opts[ :verbose ]
-        fout = [ [ :err, ( args.join( ' ' ) + "\n" ) ] ] + outputs
-        format_outputs( fout, opts )
-      end
-
-      if exit_code == 0
-        # Return array of --itemize-changes on standard out.
-        collect_stream( :out, outputs ).
-          split( "\n" ).
-          map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
-          compact
-      else
-        raise CommandFailure, "rsync exit code: #{exit_code}"
-      end
-
+      [ 'rsync', flags, args, [ host, abspath ].join(':') ].flatten.compact
     end
 
   end

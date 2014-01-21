@@ -38,10 +38,12 @@ module SyncWrap
 
     attr_reader :host
 
-    def initialize( host )
+    def initialize( host, opts = {} )
       @host = host
       reset_queue
       @queue_locked = false
+      @default_opts = opts
+
       super()
     end
 
@@ -54,25 +56,29 @@ module SyncWrap
     end
 
     # Put files or entire directories to host via
-    # SyncWrap::Rsync::rsync (see details including options).
-    # Any queued commands are flushed beforehand, to avoid ambiguous
-    # order of remote changes.
+    # SyncWrap::Rsync::rsync (see details including options).  Any
+    # commands quued via #sh are flushed beforehand, to avoid
+    # ambiguous order of remote changes.
     def rput( *args )
+      opts = @default_opts.merge( coalesce: false )
+      opts = opts.merge( args.pop ) if args.last.is_a?( Hash )
+
       flush
-      rsync( host.name, *args )
+      rsync( *args, opts )
     end
 
     # Capture and return [exit_code, stdout] from command. Does not
     # raise on non-success.  Any commands queued via #sh are flushed
     # beforehand, to avoid ambiguous order of remote changes.
     def capture( command, opts = {} )
+      opts = @default_opts.merge( coalesce: false ).merge( opts )
       flush
       capture_shell( command, opts )
     end
 
     # Enqueue a shell command to be run on host.
     def sh( command, opts = {} )
-      opts = opts.dup
+      opts = @default_opts.merge( opts )
       close = opts.delete( :close )
 
       flush if opts != @queued_opts #may still be a no-op
@@ -107,6 +113,10 @@ module SyncWrap
 
     private
 
+    def ssh_host_name
+      host.space.ssh_host_name( host )
+    end
+
     def reset_queue
       @queued_cmd = []
       @queued_opts = {}
@@ -123,10 +133,15 @@ module SyncWrap
     # typical SSHFLAGS: -i ./key.pem -l ec2-user
     # typical SUDOFLAGS: -H
     def run_shell!( command, opts = {} )
-      args = ssh_args( host.name, command, opts )
+      args = ssh_args( ssh_host_name, command, opts )
+      f = host.space.formatter
       exit_code, outputs = capture3( args )
       if exit_code != 0 || opts[ :verbose ]
-        format_outputs( outputs, opts )
+        f.sync do
+          f.write_header( host, :sh, opts )
+          f.write_command_outputs( outputs )
+          f.write_result( "Exit 0 (Success)" ) if exit_code == 0
+        end
       end
       if exit_code != 0
         raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
@@ -134,31 +149,46 @@ module SyncWrap
     end
 
     def capture_shell( command, opts = {} )
-      args = ssh_args( host.name, command, opts )
+      args = ssh_args( ssh_host_name, command, opts )
+      f = host.space.formatter
       exit_code, outputs = capture3( args )
-      if opts[ :accept ] and !opts[ :accept ].include?( exit_code )
-        format_outputs( outputs, opts )
-        raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
+      failed = opts[ :accept ] && !opts[ :accept ].include?( exit_code )
+      if failed || opts[ :verbose ]
+        f.sync do
+          f.write_header( host, :capture, opts )
+          f.write_command_outputs( outputs )
+          f.write_result( "Exit #{exit_code}" ) unless failed
+        end
       end
-      format_outputs( outputs, opts ) if opts[ :verbose ]
+      raise CommandFailure, "#{args[0]} exit code: #{exit_code}" if failed
       [ exit_code, collect_stream( :out, outputs ) ]
     end
 
-    def format_outputs( outputs, opts = {} )
-      clr = Term::ANSIColor
-      newlined = true
-      outputs.each do |stream, buff|
-        case( stream )
-        when :out
-          $stdout.write buff
-        when :err
-          $stdout.write clr.red
-          $stdout.write buff
-          $stdout.write clr.reset
+    def rsync( *args )
+      opts = args.last.is_a?( Hash ) && args.pop || {}
+      args = rsync_args( ssh_host_name, *args, opts )
+      f = host.space.formatter
+      exit_code, outputs = capture3( args )
+
+      if exit_code != 0 || opts[ :verbose ]
+        f.sync do
+          f.write_header( host, :rsync, opts )
+          f.write_command_output( :cmd, args.join( ' ' ) + "\n" )
+          f.write_command_outputs( outputs )
+          f.write_result( "Exit 0 (Success)" ) if exit_code == 0
         end
-        newlined = ( buff[-1] == "\n" )
       end
-      $stdout.puts unless newlined
+
+      if exit_code == 0
+        # Return array of --itemize-changes on standard out.
+        collect_stream( :out, outputs ).
+          split( "\n" ).
+          map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
+          compact
+      else
+        raise CommandFailure, "rsync exit code: #{exit_code}"
+      end
+
     end
 
   end
