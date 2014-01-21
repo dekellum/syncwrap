@@ -64,7 +64,14 @@ module SyncWrap
       opts = opts.merge( args.pop ) if args.last.is_a?( Hash )
 
       flush
-      rsync( args, opts )
+      args = rsync_args( ssh_host_name, *args, opts )
+      exit_code, outputs = capture_stream( args, host, :rsync, opts )
+
+      # Return array of --itemize-changes on standard out.
+      collect_stream( :out, outputs ).
+        split( "\n" ).
+        map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
+        compact
     end
 
     # Capture and return [exit_code, stdout] from command. Does not
@@ -136,17 +143,6 @@ module SyncWrap
       args = ssh_args( ssh_host_name, command, opts )
       exit_code, outputs = capture_stream( args, host, :capture, opts )
       [ exit_code, collect_stream( opts[ :coalesce ] ? :err : :out, outputs ) ]
-    end
-
-    def rsync( args, opts )
-      args = rsync_args( ssh_host_name, *args, opts )
-      exit_code, outputs = capture_stream( args, host, :rsync, opts )
-
-      # Return array of --itemize-changes on standard out.
-      collect_stream( :out, outputs ).
-        split( "\n" ).
-        map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
-        compact
     end
 
     def capture_stream( args, host, mode, opts )
