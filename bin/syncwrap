@@ -86,7 +86,7 @@ class Runner
 
       opts.on( "-x", "--expand-shell",
                "Use -x (expand) instead of -v shell verbose output",
-               "(sh_verbose: :x, typically combined with -v" ) do
+               "(sh_verbose: :x, typically combined with -v)" ) do
         @options[ :sh_verbose ] = :x
       end
 
