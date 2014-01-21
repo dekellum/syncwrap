@@ -14,6 +14,8 @@
 # permissions and limitations under the License.
 #++
 
+require 'thread'
+
 require 'syncwrap/base'
 require 'syncwrap/component'
 require 'syncwrap/context'
@@ -84,7 +86,8 @@ module SyncWrap
     end
 
     def execute_host( host, component_plan = [], opts = {} )
-      Context.new( host, opts ).with do
+      ctx = Context.new( host, opts )
+      ctx.with do
         host.components.each do |comp|
           if !component_plan.empty?
             found,method = component_plan.find { |pr| comp.is_a?( pr[0] ) }
@@ -97,6 +100,7 @@ module SyncWrap
             formatter.write_component( host, comp, method )
           end
           comp.send( method )
+          ctx.flush if opts[ :flush_component ]
           formatter.sync do
             formatter.write_component( host, comp, method, "complete" )
           end

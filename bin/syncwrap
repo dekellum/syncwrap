@@ -47,6 +47,11 @@ class Runner
     opts = OptionParser.new do |opts|
       opts.banner = "Usage: syncwrap {options} [Component[.method]] ..."
 
+      opts.on( "-e", "--each-component",
+               "Flush shell commands after each component method" ) do
+        @options[ :flush_component ] = true
+      end
+
       opts.on( "-f", "--file FILE",
                "Load FILE for role/host/component definitions",
                "(default: './sync.rb')" ) do |f|
