@@ -57,7 +57,7 @@ module SyncWrap
 
     # Put files or entire directories to host via
     # SyncWrap::Rsync::rsync (see details including options).  Any
-    # commands quued via #sh are flushed beforehand, to avoid
+    # commands queued via #sh are flushed beforehand, to avoid
     # ambiguous order of remote changes.
     def rput( *args )
       opts = @default_opts.merge( coalesce: false )
