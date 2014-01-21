@@ -60,10 +60,12 @@ module SyncWrap
     # commands queued via #sh are flushed beforehand, to avoid
     # ambiguous order of remote changes.
     def rput( *args )
-      opts = @default_opts.merge( coalesce: false )
+      opts = @default_opts
       opts = opts.merge( args.pop ) if args.last.is_a?( Hash )
+      opts = opts.merge( coalesce: false )
 
       flush
+
       args = rsync_args( ssh_host_name, *args, opts )
       exit_code, outputs = capture_stream( args, host, :rsync, opts )
 
