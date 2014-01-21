@@ -40,7 +40,7 @@ module SyncWrap
     # Install hashdot if the binary version doesn't match, otherwise
     # just update the profile config files.
     def install
-      if !test_hashdot_binary
+      if !test_hashdot_binary || dryrun?
         install_system_deps
         install_hashdot
       else

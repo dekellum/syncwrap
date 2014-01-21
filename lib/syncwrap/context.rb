@@ -71,9 +71,14 @@ module SyncWrap
     # raise on non-success.  Any commands queued via #sh are flushed
     # beforehand, to avoid ambiguous order of remote changes.
     def capture( command, opts = {} )
-      opts = @default_opts.merge( coalesce: false ).merge( opts )
+      opts = @default_opts.merge( coalesce: false, dryrun: false ).merge( opts )
       flush
       capture_shell( command, opts )
+    end
+
+    # Return true if being executed in dryrun mode.
+    def dryrun?
+      @default_opts[ :dryrun ]
     end
 
     # Enqueue a shell command to be run on host.

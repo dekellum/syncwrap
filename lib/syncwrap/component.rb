@@ -34,6 +34,10 @@ module SyncWrap
       ctx.capture( command, opts )
     end
 
+    def dryrun?
+      ctx.dryrun?
+    end
+
     # FIXME: rdoc
     def sh( command, opts = {}, &block )
       ctx.sh( command, opts, &block )

@@ -42,6 +42,7 @@ module SyncWrap
       olist = []
       olist << "-#{opts[:sh_verbose]}" if opts[:sh_verbose] && mode != :rsync
       olist << 'coalesce' if opts[:coalesce] && mode != :rsync
+      olist << 'dryrun' if opts[:dryrun]
       olist << "accept:#{opts[:accept].join ','}" if opts[:accept]
       olist << "user:#{opts[:user]}" if opts[:user]
 
