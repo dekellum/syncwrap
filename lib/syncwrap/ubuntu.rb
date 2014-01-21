@@ -46,7 +46,7 @@ module SyncWrap
       args = dist_map_packages( args )
       args.unshift "--no-install-recommends" if opts[ :minimal ]
 
-      sudo( "apt-get -yq update" ) if first_apt?
+      sudo( "apt-get -yqq update" ) if first_apt?
       sudo( "apt-get -yq install #{args.join ' '}" )
     end
 
