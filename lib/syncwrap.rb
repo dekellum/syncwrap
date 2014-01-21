@@ -75,11 +75,27 @@ module SyncWrap
       @hosts.values
     end
 
-    def execute( hs = hosts, component_plan = [], opts = {} )
+    def execute( host_list = hosts, component_plan = [], opts = {} )
       opts = default_opts.merge( opts )
-      threads = hs.map do |host|
-        Thread.new( host, component_plan, opts ) do |h, c, o|
-          execute_host( h, c, o )
+      if opts[ :threads ] && host_list.length > opts[ :threads ]
+        queue = Queue.new
+        host_list.each { |host| queue.push( host ) }
+        threads = opts[ :threads ].times.map do
+          Thread.new( queue, component_plan, opts ) do |q, c, o|
+            begin
+              while host = q.pop( true ) # non-block
+                execute_host( host, c, o )
+              end
+            rescue ThreadError
+              #exit, from queue being empty
+            end
+          end
+        end
+      else
+        threads = host_list.map do |host|
+          Thread.new( host, component_plan, opts ) do |h, c, o|
+            execute_host( h, c, o )
+          end
         end
       end
       threads.each { |t| t.join }

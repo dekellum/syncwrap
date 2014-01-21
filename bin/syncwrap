@@ -78,6 +78,13 @@ class Runner
         @options[ :coalesce ] = false
       end
 
+      opts.on( "-t", "--threads N",
+               "Specify the number of hosts to process concurrently",
+               "(default: all hosts)",
+                Integer ) do |n|
+        @options[ :threads ] = n
+      end
+
       opts.on( "-v", "--verbose",
                "Show details of local/remote command execution" ) do
         @options[ :verbose ] = true
