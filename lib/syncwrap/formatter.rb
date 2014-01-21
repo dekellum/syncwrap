@@ -37,14 +37,14 @@ module SyncWrap
 
     def write_component( host, comp, method, state="start" )
       io.puts yellow( "== #{host.name} " +
-                      "#{short_cn( comp.class )}.#{method}: #{state}" )
+                      "#{short_cn( comp.class )}##{method}: #{state}" )
       flush
     end
 
     def write_header( host, mode, opts, streaming = false )
       olist = []
       olist << "-#{opts[:sh_verbose]}" if opts[:sh_verbose] && mode != :rsync
-      olist << 'coalesce' if opts[:coalesce] && mode != :rsync
+      olist << 'coalesce' if opts[:coalesce]
       olist << 'dryrun' if opts[:dryrun]
       olist << "accept:#{opts[:accept].join ','}" if opts[:accept]
       olist << "user:#{opts[:user]}" if opts[:user]

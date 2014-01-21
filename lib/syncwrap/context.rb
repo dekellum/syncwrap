@@ -64,7 +64,7 @@ module SyncWrap
       opts = opts.merge( args.pop ) if args.last.is_a?( Hash )
 
       flush
-      rsync( *args, opts )
+      rsync( args, opts )
     end
 
     # Capture and return [exit_code, stdout] from command. Does not
@@ -127,101 +127,85 @@ module SyncWrap
       @queued_opts = {}
     end
 
-    # Local:
-    # sh -v|-x -e -c STRING
-    # sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
-    #
-    # Remote:
-    # ssh SSHFLAGS host sh [-v|-x -e -n] -c STRING
-    # ssh SSHFLAGS host sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
-    #
-    # typical SSHFLAGS: -i ./key.pem -l ec2-user
-    # typical SUDOFLAGS: -H
     def run_shell!( command, opts = {} )
       args = ssh_args( ssh_host_name, command, opts )
-      f = host.space.formatter
+      capture_stream( args, host, :sh, opts )
+    end
+
+    def capture_shell( command, opts = {} )
+      args = ssh_args( ssh_host_name, command, opts )
+      exit_code, outputs = capture_stream( args, host, :capture, opts )
+      [ exit_code, collect_stream( :out, outputs ) ]
+    end
+
+    def rsync( args, opts )
+      args = rsync_args( ssh_host_name, *args, opts )
+      exit_code, outputs = capture_stream( args, host, :rsync, opts )
+
+      # Return array of --itemize-changes on standard out.
+      collect_stream( :out, outputs ).
+        split( "\n" ).
+        map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
+        compact
+    end
+
+    def capture_stream( args, host, mode, opts )
+      if mode == :capture
+        accept = opts[:accept]
+        success = "accepted"
+      else
+        accept = [ 0 ]
+        success = "success"
+      end
 
       # When :verbose -> nil -> try_lock
       stream_output = opts[ :verbose ] ? nil : false
+      fmt = host.space.formatter
+      do_color = !opts[ :coalesce ]
 
       begin
         exit_code, outputs = capture3( args ) do |stream, chunk|
           if stream_output.nil?
-            if f.lock.try_lock
+            if fmt.lock.try_lock
               stream_output = true
-              f.write_header( host, :sh, opts, :stream )
+              fmt.write_header( host, mode, opts, :stream )
+              if mode == :rsync
+                fmt.write_command_output( :cmd,
+                                          args.join(' ') + "\n", do_color )
+              end
             else
               stream_output = false
             end
           end
 
           if stream_output
-            f.write_command_output( stream, chunk, !opts[ :coalesce ])
-            f.flush
+            fmt.write_command_output( stream, chunk, do_color )
+            fmt.flush
           end
         end
+        failed = accept && !accept.include?( exit_code )
+
         if stream_output
-          f.output_terminate
-          f.write_result( "Exit 0 (success)" ) if exit_code == 0
+          fmt.output_terminate
+          fmt.write_result( "Exit #{exit_code} (#{success})" ) unless failed
         end
       ensure
-        f.lock.unlock if stream_output
+        fmt.lock.unlock if stream_output
       end
 
-      if !stream_output && ( exit_code != 0 || opts[ :verbose ] )
-        f.sync do
-          f.write_header( host, :sh, opts )
-          f.write_command_outputs( outputs, !opts[ :coalesce ] )
-          f.write_result( "Exit 0 (success)" ) if exit_code == 0
+      if !stream_output && ( failed || opts[ :verbose ] )
+        fmt.sync do
+          fmt.write_header( host, mode, opts )
+          if mode == :rsync
+            fmt.write_command_output( :cmd, args.join(' ') + "\n", do_color )
+          end
+          fmt.write_command_outputs( outputs, do_color )
+          fmt.write_result( "Exit #{exit_code} (#{success})" ) unless failed
         end
       end
 
-      if exit_code != 0
-        raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
-      end
-    end
-
-    def capture_shell( command, opts = {} )
-      args = ssh_args( ssh_host_name, command, opts )
-      f = host.space.formatter
-      exit_code, outputs = capture3( args )
-      failed = opts[ :accept ] && !opts[ :accept ].include?( exit_code )
-      if failed || opts[ :verbose ]
-        f.sync do
-          f.write_header( host, :capture, opts )
-          f.write_command_outputs( outputs, !opts[ :coalesce ] )
-          f.write_result( "Exit #{exit_code} (accepted)" ) unless failed
-        end
-      end
       raise CommandFailure, "#{args[0]} exit code: #{exit_code}" if failed
-      [ exit_code, collect_stream( :out, outputs ) ]
-    end
-
-    def rsync( *args )
-      opts = args.last.is_a?( Hash ) && args.pop || {}
-      args = rsync_args( ssh_host_name, *args, opts )
-      f = host.space.formatter
-      exit_code, outputs = capture3( args )
-
-      if exit_code != 0 || opts[ :verbose ]
-        f.sync do
-          f.write_header( host, :rsync, opts )
-          f.write_command_output( :cmd, args.join( ' ' ) + "\n" )
-          f.write_command_outputs( outputs )
-          f.write_result( "Exit 0 (success)" ) if exit_code == 0
-        end
-      end
-
-      if exit_code == 0
-        # Return array of --itemize-changes on standard out.
-        collect_stream( :out, outputs ).
-          split( "\n" ).
-          map { |l| l =~ /^(\S{11})\s(.+)$/ && [$1, $2] }. #itemize-changes
-          compact
-      else
-        raise CommandFailure, "rsync exit code: #{exit_code}"
-      end
-
+      [ exit_code, outputs ]
     end
 
   end

@@ -23,6 +23,16 @@ require 'open3'
 
 module SyncWrap
 
+  # Local:
+  # sh -v|-x -e -c STRING
+  # sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
+  #
+  # Remote:
+  # ssh SSHFLAGS host sh [-v|-x -e -n] -c STRING
+  # ssh SSHFLAGS host sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
+  #
+  # typical SSHFLAGS: -i ./key.pem -l ec2-user
+  # typical SUDOFLAGS: -H
   module Shell
 
     private
