@@ -20,7 +20,6 @@ require 'syncwrap/shell'
 module SyncWrap
 
   module Rsync
-    include Shell
 
     private
 
