@@ -49,7 +49,7 @@ module SyncWrap
         cmd = sargs.pop
         args += sargs
         args << ( '"' + shell_escape_cmd( cmd ) + '"' )
-        args << '2>&1' if coalesce
+        args << '1>&2' if coalesce
         args
       else
         sudo_args( command, opts )
@@ -74,7 +74,7 @@ module SyncWrap
 
       if opts[ :coalesce ]
         args << '-c'
-        cmd = "exec 2>&1\n"
+        cmd = "exec 1>&2\n"
         if opts[ :sh_verbose ]
           cmd += "set "
           cmd += opts[ :sh_verbose ] == :x ? '-x' : '-v'

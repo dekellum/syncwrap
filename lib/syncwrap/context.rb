@@ -135,7 +135,7 @@ module SyncWrap
     def capture_shell( command, opts = {} )
       args = ssh_args( ssh_host_name, command, opts )
       exit_code, outputs = capture_stream( args, host, :capture, opts )
-      [ exit_code, collect_stream( :out, outputs ) ]
+      [ exit_code, collect_stream( opts[ :coalesce ] ? :err : :out, outputs ) ]
     end
 
     def rsync( args, opts )

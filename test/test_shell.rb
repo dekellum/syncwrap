@@ -109,7 +109,7 @@ class TestShell < MiniTest::Unit::TestCase
       unmerged << [ stream, chunk ]
     end
     assert_equal( 0, exit_code )
-    assert_equal( [[:out, "echo foo\nfoo\necho bar\nbar\n"]],
+    assert_equal( [[:err, "echo foo\nfoo\necho bar\nbar\n"]],
                   merged, merged )
     post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
     assert_equal( merged[0][1], post_merged )
@@ -168,7 +168,7 @@ class TestShell < MiniTest::Unit::TestCase
       unmerged << [ stream, chunk ]
     end
     assert_equal( 0, exit_code )
-    assert_equal( [[:out, "echo foo\nfoo\necho bar\nbar\n"]],
+    assert_equal( [[:err, "echo foo\nfoo\necho bar\nbar\n"]],
                   merged, merged )
     post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
     assert_equal( merged[0][1], post_merged )
@@ -195,7 +195,7 @@ class TestShell < MiniTest::Unit::TestCase
       unmerged << [ stream, chunk ]
     end
     assert_equal( 0, exit_code )
-    assert_equal( [[:out, "echo foo\nfoo\necho bar\nbar\n"]],
+    assert_equal( [[:err, "echo foo\nfoo\necho bar\nbar\n"]],
                   merged, merged )
     post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
     assert_equal( merged[0][1], post_merged )
