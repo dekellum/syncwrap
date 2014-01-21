@@ -140,14 +140,42 @@ module SyncWrap
     def run_shell!( command, opts = {} )
       args = ssh_args( ssh_host_name, command, opts )
       f = host.space.formatter
-      exit_code, outputs = capture3( args )
-      if exit_code != 0 || opts[ :verbose ]
+
+      # When :verbose -> nil -> try_lock
+      stream_output = opts[ :verbose ] ? nil : false
+
+      begin
+        exit_code, outputs = capture3( args ) do |stream, chunk|
+          if stream_output.nil?
+            if f.lock.try_lock
+              stream_output = true
+              f.write_header( host, :sh, opts, :stream )
+            else
+              stream_output = false
+            end
+          end
+
+          if stream_output
+            f.write_command_output( stream, chunk, !opts[ :coalesce ])
+            f.flush
+          end
+        end
+        if stream_output
+          f.output_terminate
+          f.write_result( "Exit 0 (success)" ) if exit_code == 0
+        end
+      ensure
+        f.lock.unlock if stream_output
+      end
+
+      if !stream_output && ( exit_code != 0 || opts[ :verbose ] )
         f.sync do
           f.write_header( host, :sh, opts )
-          f.write_command_outputs( outputs )
-          f.write_result( "Exit 0 (Success)" ) if exit_code == 0
+          f.write_command_outputs( outputs, !opts[ :coalesce ] )
+          f.write_result( "Exit 0 (success)" ) if exit_code == 0
         end
       end
+
       if exit_code != 0
         raise CommandFailure, "#{args[0]} exit code: #{exit_code}"
       end
@@ -161,8 +189,8 @@ module SyncWrap
       if failed || opts[ :verbose ]
         f.sync do
           f.write_header( host, :capture, opts )
-          f.write_command_outputs( outputs )
-          f.write_result( "Exit #{exit_code}" ) unless failed
+          f.write_command_outputs( outputs, !opts[ :coalesce ] )
+          f.write_result( "Exit #{exit_code} (accepted)" ) unless failed
         end
       end
       raise CommandFailure, "#{args[0]} exit code: #{exit_code}" if failed
@@ -180,7 +208,7 @@ module SyncWrap
           f.write_header( host, :rsync, opts )
           f.write_command_output( :cmd, args.join( ' ' ) + "\n" )
           f.write_command_outputs( outputs )
-          f.write_result( "Exit 0 (Success)" ) if exit_code == 0
+          f.write_result( "Exit 0 (success)" ) if exit_code == 0
         end
       end
 

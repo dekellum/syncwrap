@@ -20,6 +20,7 @@ require 'term/ansicolor'
 module SyncWrap
 
   class Formatter
+    include Term::ANSIColor
 
     attr_reader :io
     attr_reader :lock
@@ -27,62 +28,72 @@ module SyncWrap
     def initialize( io = $stdout )
       @io = io
       @lock = Mutex.new
+      @newlined = true
     end
 
     def sync( &block )
       @lock.synchronize( &block )
     end
 
-    def write_component( host, comp, method, state="begin" )
-      io.puts clr.yellow( "== #{host.name} #{short_cn( comp.class )} " +
-                          "#{method}: #{state}" )
-      io.flush
+    def write_component( host, comp, method, state="start" )
+      io.puts yellow( "== #{host.name} " +
+                      "#{short_cn( comp.class )}.#{method}: #{state}" )
+      flush
     end
-    def write_header( host, mode, opts )
+
+    def write_header( host, mode, opts, streaming = false )
       olist = []
       olist << "-#{opts[:sh_verbose]}" if opts[:sh_verbose] && mode != :rsync
       olist << 'coalesce' if opts[:coalesce] && mode != :rsync
       olist << 'dryrun' if opts[:dryrun]
       olist << "accept:#{opts[:accept].join ','}" if opts[:accept]
       olist << "user:#{opts[:user]}" if opts[:user]
+      olist << "stream" if streaming
 
-      io.puts clr.yellow( "--- #{mode} #{host.name} (#{olist.join ' '})" )
-      io.flush
+      io.puts yellow( "<-- #{mode} #{host.name} (#{olist.join ' '})" )
+      flush
     end
 
     def write_result( result )
-      io.puts clr.yellow( result )
-      io.flush
+      io.puts yellow( "--> " + result )
+      flush
     end
 
-    def write_command_outputs( outputs )
-      newlined = true
+    def write_command_outputs( outputs, color = true )
       outputs.each do |stream, buff|
-        newlined = write_command_output( stream, buff )
+        write_command_output( stream, buff, color )
       end
-      io.puts unless newlined
+      output_terminate
+      flush
+    end
+
+    def output_terminate
+      unless @newlined
+        io.puts
+        @newlined = true
+      end
+    end
+
+    def write_command_output( stream, buff, color = true )
+      unless buff.empty?
+        if stream == :err && color
+          io.write red
+          io.write buff
+          io.write clear
+        else
+          io.write buff
+        end
+        @newlined = ( buff[-1] == "\n" )
+      end
+    end
+
+    def flush
       io.flush
     end
 
-    def write_command_output( stream, buff )
-      case( stream )
-      when :out, :cmd
-        io.write buff
-      when :err
-        io.write clr.red
-        io.write buff
-        io.write clr.clear
-      end
-      ( buff[-1] == "\n" )
+    def short_cn( cls )
+      cls.name.sub(/^SyncWrap::/,'')
     end
-
-     def clr
-       Term::ANSIColor
-     end
-
-     def short_cn( cls )
-       cls.name.sub(/^SyncWrap::/,'')
-     end
 
   end
 
