@@ -112,13 +112,19 @@ module SyncWrap
             method = :install
             next unless comp.respond_to?( method )
           end
-          formatter.sync do
-            formatter.write_component( host, comp, method )
+
+          if opts[ :flush_component ]
+            formatter.sync do
+              formatter.write_component( host, comp, method, "start" )
+            end
           end
+
           comp.send( method )
+
           ctx.flush if opts[ :flush_component ]
           formatter.sync do
-            formatter.write_component( host, comp, method, "complete" )
+            formatter.write_component( host, comp, method,
+               opts[ :flush_component ] ? "complete" : "queued" )
           end
 
         end

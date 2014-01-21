@@ -35,7 +35,7 @@ module SyncWrap
       @lock.synchronize( &block )
     end
 
-    def write_component( host, comp, method, state="start" )
+    def write_component( host, comp, method, state )
       io.puts yellow( "== #{host.name} " +
                       "#{short_cn( comp.class )}##{method}: #{state}" )
       flush
