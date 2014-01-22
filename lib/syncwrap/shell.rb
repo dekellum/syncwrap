@@ -13,8 +13,8 @@
 # implied.  See the License for the specific language governing
 # permissions and limitations under the License.
 #
-# The non-blocking implementation of capture below was derived from
-# rake-remote_task, MIT License:
+# The non-blocking aspects of Shell::capture3 below were partially
+# derived from rake-remote_task, released under MIT License:
 # Copyright (c) Ryan Davis, RubyHitSquad
 #++
 
@@ -24,15 +24,15 @@ require 'open3'
 module SyncWrap
 
   # Local:
-  # sh -v|-x -e -c STRING
-  # sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
+  # sh [-v|-x -e -n] -c STRING
+  # sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
   #
   # Remote:
-  # ssh SSHFLAGS host sh [-v|-x -e -n] -c STRING
-  # ssh SSHFLAGS host sudo SUDOFLAGS [-u user] sh [-v|-x -e -n] -c STRING
+  # ssh :ssh_flags host sh [-v|-x -e -n] -c STRING
+  # ssh :ssh_flags host sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
   #
-  # typical SSHFLAGS: -i ./key.pem -l ec2-user
-  # typical SUDOFLAGS: -H
+  # Example ssh_flags: -i ./key.pem -l ec2-user
+  # Example sudo_flags: -H
   module Shell
 
     private
@@ -62,7 +62,6 @@ module SyncWrap
         args = [ 'sudo' ]
         args += opts[ :sudo_flags ] if opts[ :sudo_flags ]
         args += [ '-u', opts[ :user ] ] unless opts[ :user ] == :root
-        #FIXME: Also handle special :runr?
       end
       args + sh_args( command, opts )
     end
@@ -96,6 +95,8 @@ module SyncWrap
       cmd.gsub( /["$`\\]/ ) { |c| '\\' + c }
     end
 
+    # Given one or an Array of commands, apply #block_trim_padding to
+    # each and join all with newlines.
     def command_lines_cleanup( commands )
       Array( commands )
         .map { |cmd| block_trim_padding( cmd.split( $/ ) ) }
@@ -119,13 +120,6 @@ module SyncWrap
         line.rstrip!
         line
       end
-    end
-
-    def collect_stream( stream, outputs )
-      outputs.
-        select { |o| o[0] == stream }.
-        map { |o| o[1] }. #the buffers
-        inject( "", :+ )
     end
 
     # Captures out and err from a command expressed by args
@@ -178,6 +172,15 @@ module SyncWrap
       status ||= $?
 
       [ status && status.exitstatus, outputs ]
+    end
+
+    # Select and merge the output buffers of the specific stream from
+    # outputs (as returned by #capture3)
+    def collect_stream( stream, outputs )
+      outputs.
+        select { |o| o[0] == stream }.
+        map { |o| o[1] }. #the buffers
+        inject( "", :+ )
     end
 
   end

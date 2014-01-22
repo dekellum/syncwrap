@@ -25,62 +25,7 @@ module SyncWrap
 
     private
 
-    # Put files or entire directories to remote
-    #
-    #   rsync( host, src..., dest, {options} )
-    #   rsync( host, src, {options} )
-    #
-    # A trailing hash is interpreted as options, see below.
-    #
-    # After the host, if there are two or more remaining arguments, the last is
-    # interpreted as the remote destination.  If there is a single
-    # remaining argument, the destination is implied by finding its base
-    # directory and prepending '/'. Thus for example:
-    #
-    #   rsync( 'foohost', 'etc/gemrc', user: :root )
-    #
-    # has an implied destination of: `/etc/`. The src and destination
-    # are intrepreted as by `rsync`: glob patterns are expanded and
-    # trailing '/' is significant.
-    #
-    # On success, returns an array of format [ [change_code, file_name] ]
-    # for files changed, as parsed from the rsync --itemize-changes to
-    # standard out.
-    #
-    # On failure, raises CommandFailure.
-    #
-    # ==== Options
-    #
-    # :user::      Files should be owned on destination by a user other
-    #              than installer (ex: 'root') (implies sudo)
-    # :perms::     Permissions to set for synchronized files. If just true,
-    #              use local permissions (-p). (default: true)
-    # :ssh_flags:: Array of flags to give to ssh via rsync -e
-    # :excludes::  One or more rsync compatible --filter excludes, or
-    #              :dev which excludes common developmoent tree droppings
-    #              like '*~'
-    # :dryrun::    Don't actually make any changes (but report files that
-    #              would be changed) (default: false)
-    # :recursive:: Recurse into subdirectories (default: true)
-    # :links::     Recreate symlinks on the destination (default: true)
-    # :checksum::  Use MD5 to determine changes; not just size,time
-    #              (default: true)
-    # :backup::    Make backup files on remote (default: true)
-    # :src_roots:: Array of one or more local directories in which to
-    #              find source files.
-    #
-    # :verbose::   Output stdout/stderr from rsync (default: false)
-    def rsync_args( host, *args )
-      opts = args.last.is_a?( Hash ) && args.pop || {}
-
-      if args.length == 1
-        abspath = "/" + args.first
-        abspath = File.dirname( abspath ) + '/' unless abspath =~ %r{/$}
-      else
-        abspath = args.pop
-      end
-
-      srcs = resolve_sources( args, Array( opts[ :src_roots ] ) )
+    def rsync_args( host, srcs, target, opts = {} )
 
       # -i --itemize-changes, used for counting changed files
       flags = %w[ -i ]
@@ -113,6 +58,7 @@ module SyncWrap
                    end )
       end
 
+      #FIXME: Switch default to -E --executability ?
       if opts[ :perms ] && opts[ :perms ].is_a?( String )
         flags << "--chmod=#{opts[ :perms ]}"
       end
@@ -122,37 +68,72 @@ module SyncWrap
         if e == :dev
           '--cvs-exclude'
         else
-          "--filter=#{e}"
+          "--exclude=#{e}"
         end
       end
 
       flags << '-n' if opts[ :dryrun ]
 
-      [ 'rsync', flags, srcs, [ host, abspath ].join(':') ].flatten.compact
+      #FIXME: Add similar support for localhost, test in sudo case?
+
+      [ 'rsync', flags, srcs, [ host, target ].join(':') ].flatten.compact
     end
 
+    def expand_implied_target( srcs )
+      #FIXME: Honor absolute arg paths?
+      if srcs.length == 1
+        target = "/" + srcs.first
+        target = File.dirname( target ) + '/' unless target =~ %r{/$}
+      else
+        target = srcs.pop
+      end
+      [ srcs, target ]
+    end
+
+    # Preserves any trailing '/'.
     def resolve_sources( args, src_roots )
+      #FIXME: Honor absolute arg paths?
       args.map do |path|
         path = path.strip
         found = src_roots.
           map { |r| File.join( r, path ) }.
           find { |src| File.exist?( src ) }
-        if found
-          relativize( found )
-        else
+        # File.exist? only matches directories when trailing '/' is found.
+        unless found
           raise SourceNotFound,
                 "#{path.inspect} not found in roots #{src_roots.inspect}"
         end
+        relativize( found )
       end
     end
 
+    # Return path relative to PWD if the result is shorter, otherwise
+    # return input path. Preserves any trailing '/'.
     def relativize( path )
       p = Pathname.new( path )
       unless p.relative?
         p = p.relative_path_from( Pathname.pwd ).to_s
+        p += '/' if path[-1] == '/'
         path = p if p.length < path.length
       end
       path
+    end
+
+    def find_source_erbs( sources )
+      Array( sources ).inject([]) do |list, src|
+        if File.directory?( src )
+          list += find_source_erbs( expand_entries( src ) )
+        elsif src =~ /\.erb$/
+          list << src
+        end
+        list
+      end
+    end
+
+    def expand_entries( src )
+      Dir.entries( src ).
+        reject { |e| e =~ /^\.+$/ }.
+        map { |e| File.join( src, e ) }
     end
 
   end

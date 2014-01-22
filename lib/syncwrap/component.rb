@@ -56,7 +56,10 @@ module SyncWrap
 
     # FIXME: rdoc
     def rput( *args )
-      ctx.rput( *args )
+      opts = args.last.is_a?( Hash ) && args.pop || {}
+      opts = opts.dup
+      opts[ :erb_binding ] = custom_binding( opts[ :erb_vars ] || {} )
+      ctx.rput( *args, opts )
     end
 
     def flush

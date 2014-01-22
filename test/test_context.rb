@@ -35,7 +35,7 @@ class TestContext < MiniTest::Unit::TestCase
   class TestContext < Context
     attr_accessor :run_args
 
-    def run_shell!( command, args )
+    def run_shell( command, args )
       @run_args = [ command, args ]
     end
   end
