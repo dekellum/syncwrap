@@ -80,7 +80,7 @@ module SyncWrap
         abspath = args.pop
       end
 
-      srcs = resolve_sources( args, opts )
+      srcs = resolve_sources( args, Array( opts[ :src_roots ] ) )
 
       # -i --itemize-changes, used for counting changed files
       flags = %w[ -i ]
@@ -131,14 +131,18 @@ module SyncWrap
       [ 'rsync', flags, srcs, [ host, abspath ].join(':') ].flatten.compact
     end
 
-    def resolve_sources( args, opts = {} )
-      src_roots = Array( opts[ :src_roots ] )
+    def resolve_sources( args, src_roots )
       args.map do |path|
         path = path.strip
         found = src_roots.
           map { |r| File.join( r, path ) }.
           find { |src| File.exist?( src ) }
-        found && relativize( found )
+        if found
+          relativize( found )
+        else
+          raise SourceNotFound,
+                "#{path.inspect} not found in roots #{src_roots.inspect}"
+        end
       end
     end
 

@@ -36,7 +36,7 @@ class TestRsync < MiniTest::Unit::TestCase
       @last_args = rsync_args( *args )
     end
 
-    def resolve_sources( args, opts = {} )
+    def resolve_sources( args, src_roots )
       args #No-op
     end
   end
@@ -97,6 +97,16 @@ class TestRsync < MiniTest::Unit::TestCase
                             'etc/profile.d/lang.sh',
                             'testhost:/etc/profile.d/' ],
                   last_args )
+  end
+
+  def gem_sync
+    [ File.join( SyncWrap::GEM_ROOT, 'sync' ) ]
+  end
+
+  def test_resolve_sources
+    t = Tester.new
+    src = t.resolve_sources( [ 'src/hashdot' ], gem_sync ).first
+    assert( src && File.directory?( src ) )
   end
 
 end

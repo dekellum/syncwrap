@@ -30,6 +30,9 @@ module SyncWrap
   class NestingError < RuntimeError
   end
 
+  class SourceNotFound < RuntimeError
+  end
+
   class Space
 
     # FIXME: document?
