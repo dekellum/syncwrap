@@ -26,12 +26,28 @@ require 'minitest/autorun'
 require 'syncwrap/rsync'
 
 class TestRsync < MiniTest::Unit::TestCase
-  include SyncWrap::Rsync
 
-  attr_reader :last_args
+  class ArgTestStub
+    include SyncWrap::Rsync
+
+    attr_reader :last_args
+
+    def rsync( *args )
+      @last_args = rsync_args( *args )
+    end
+
+    def resolve_sources( args, opts = {} )
+      args #No-op
+    end
+  end
 
   def rsync( *args )
-    @last_args = rsync_args( *args )
+    @ats ||= ArgTestStub.new
+    @ats.rsync( *args )
+  end
+
+  def last_args
+    @ats && @ats.last_args
   end
 
   def test_rsync_args

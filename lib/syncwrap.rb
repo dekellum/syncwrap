@@ -43,7 +43,10 @@ module SyncWrap
     def initialize
       @roles = Hash.new { |h,k| h[k] = [] }
       @hosts = {}
-      @default_opts = { coalesce: true, sh_verbose: :v }
+      @default_opts = {
+        coalesce: true,
+        sh_verbose: :v,
+        src_roots: [ File.join( SyncWrap::GEM_ROOT, 'sync' ) ] }
       @formatter = Formatter.new
     end
 

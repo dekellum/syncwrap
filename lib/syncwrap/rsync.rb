@@ -14,6 +14,8 @@
 # permissions and limitations under the License.
 #++
 
+require 'pathname'
+
 require 'syncwrap/base'
 require 'syncwrap/shell'
 
@@ -64,6 +66,9 @@ module SyncWrap
     # :checksum::  Use MD5 to determine changes; not just size,time
     #              (default: true)
     # :backup::    Make backup files on remote (default: true)
+    # :src_roots:: Array of one or more local directories in which to
+    #              find source files.
+    #
     # :verbose::   Output stdout/stderr from rsync (default: false)
     def rsync_args( host, *args )
       opts = args.last.is_a?( Hash ) && args.pop || {}
@@ -74,6 +79,8 @@ module SyncWrap
       else
         abspath = args.pop
       end
+
+      srcs = resolve_sources( args, opts )
 
       # -i --itemize-changes, used for counting changed files
       flags = %w[ -i ]
@@ -121,7 +128,27 @@ module SyncWrap
 
       flags << '-n' if opts[ :dryrun ]
 
-      [ 'rsync', flags, args, [ host, abspath ].join(':') ].flatten.compact
+      [ 'rsync', flags, srcs, [ host, abspath ].join(':') ].flatten.compact
+    end
+
+    def resolve_sources( args, opts = {} )
+      src_roots = Array( opts[ :src_roots ] )
+      args.map do |path|
+        path = path.strip
+        found = src_roots.
+          map { |r| File.join( r, path ) }.
+          find { |src| File.exist?( src ) }
+        found && relativize( found )
+      end
+    end
+
+    def relativize( path )
+      p = Pathname.new( path )
+      unless p.relative?
+        p = p.relative_path_from( Pathname.pwd ).to_s
+        path = p if p.length < path.length
+      end
+      path
     end
 
   end
