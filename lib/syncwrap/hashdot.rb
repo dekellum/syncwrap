@@ -82,7 +82,6 @@ module SyncWrap
         curl -sSL #{hashdot_bin_url} | tar -C #{src_root} -zxf -
       SH
 
-      # FIXME: Should be templates here
       rput( 'src/hashdot/', "#{src}/", :excludes => :dev )
       sh "cd #{src} && make"
       sudo "cd #{src} && make install"

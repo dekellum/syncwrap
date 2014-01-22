@@ -1,18 +1,18 @@
 # JDK used for compiling, a different one can be set at runtime,
 # see profiles/default.hdp
-JAVA_HOME=/usr/local/lib/jdk-ora-1.7.0_07-x64
+JAVA_HOME=<%= jdk_dir %>
 # Dependent on apache portable runtime (apr-devel-1.x apr-1.x)
 APR_CONFIG=$(shell which apr-1-config)
 
 # Install hashdot binaries to specified directory
-INSTALL_BIN=/usr/local/bin
+INSTALL_BIN=<%= local_root %>/bin
 
 # The set of symlinks (from all below) to install
 INSTALL_SYMLINKS = jruby
 
 # Where to install and find profiles (*.hdp)
 # export PROFILE_DIR=./profiles to work in source directory
-PROFILE_DIR?=/usr/local/lib/hashdot/profiles
+PROFILE_DIR?=<%= local_root %>/lib/hashdot/profiles
 
 VERSION=1.4.0
 
