@@ -2,7 +2,7 @@
 
 # Identical defaults to jruby launcher
 # These can still be overridden by the individual scripts
-hashdot.vm.options += -Xmx500m -Xss1024k
+hashdot.vm.options += -Xmx768m -Xss1m
 
 # Only jruby.jar is required for typical usage (scripts can require
 # bsf.jar or JIP profiler if desired).

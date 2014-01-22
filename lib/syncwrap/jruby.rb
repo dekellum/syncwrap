@@ -22,7 +22,7 @@ module SyncWrap
   # utility methods for checking and installing JRuby gems.
   class JRuby < Component
 
-    # JRuby version to install (default: 1.6.8)
+    # JRuby version to install (default: 1.7.10)
     attr_accessor :jruby_version
 
     # The name of the gem command to be installed/used (default: jgem)
@@ -32,7 +32,7 @@ module SyncWrap
     attr_accessor :jruby_gem_install_args
 
     def initialize( opts = {} )
-      @jruby_version = '1.6.8'
+      @jruby_version = '1.7.10'
       @jruby_gem_command = 'jgem'
       @jruby_gem_install_args = %w[ --no-rdoc --no-ri ]
 
