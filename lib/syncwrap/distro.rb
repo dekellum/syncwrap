@@ -17,58 +17,66 @@
 require 'syncwrap/base'
 
 # Support for distro specializations.
-module SyncWrap::Distro
+module SyncWrap
 
-  # The root directory for local, non-distro installs
-  # (default: /usr/local)
-  attr_accessor :local_root
+  module Distro
 
-  # A Hash of internal/common package names to distro specific package
-  # names.
-  attr_reader :packages_map
+    # The root directory for local, non-distro installs
+    # (default: /usr/local)
+    attr_accessor :local_root
 
-  def initialize( *args )
-    @local_root = '/usr/local'
-    @packages_map = {}
+    # A Hash of internal/common package names to distro specific package
+    # names.
+    attr_reader :packages_map
 
-    super( *args )
-  end
+    def initialize( *args )
+      @local_root = '/usr/local'
+      @packages_map = {}
 
-  # Map internal/common names and return distro-specific names. If a
-  # mapping does not exist, return the original name.
-  def dist_map_packages( *pkgs )
-    pkgs.flatten.compact.map { |pkg| packages_map[ pkg ] || pkg }
-  end
+      super( *args )
+    end
 
-  # Install the specified packages using distro-specific mapped
-  # package names. A trailing hash is interpreted as options, see
-  # below.
-  #
-  # ==== Options
-  # :succeed:: Always succeed (useful for local rpms which might
-  # already be installed.
-  # :minimal:: Avoid additional "optional" packages when possible.
-  def dist_install( *pkgs )
-    raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
-  end
+    def distro
+      self
+    end
 
-  # Uninstall specified packages using distro-specific mapped
-  # package names and command.
-  def dist_uninstall( *pkgs )
-    raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
-  end
+    # Map internal/common names and return distro-specific names. If a
+    # mapping does not exist, return the original name.
+    def dist_map_packages( *pkgs )
+      pkgs.flatten.compact.map { |pkg| packages_map[ pkg ] || pkg }
+    end
 
-  # Install a System V style init.d script (already placed at remote
-  # /etc/init.d/<name>) via distro-specific command
-  def dist_install_init_service( name )
-    raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
-  end
+    # Install the specified packages using distro-specific mapped
+    # package names. A trailing hash is interpreted as options, see
+    # below.
+    #
+    # ==== Options
+    # :succeed:: Always succeed (useful for local rpms which might
+    # already be installed.
+    # :minimal:: Avoid additional "optional" packages when possible.
+    def dist_install( *pkgs )
+      raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
+    end
 
-  # Run via sudo, the System V style, distro specific `service`
-  # command, typically supporting 'start', 'stop', 'restart',
-  # 'status', etc. arguments.
-  def dist_service( *args )
-    raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
+    # Uninstall specified packages using distro-specific mapped
+    # package names and command.
+    def dist_uninstall( *pkgs )
+      raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
+    end
+
+    # Install a System V style init.d script (already placed at remote
+    # /etc/init.d/<name>) via distro-specific command
+    def dist_install_init_service( name )
+      raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
+    end
+
+    # Run via sudo, the System V style, distro specific `service`
+    # command, typically supporting 'start', 'stop', 'restart',
+    # 'status', etc. arguments.
+    def dist_service( *args )
+      raise "Include a distro-specific module, e.g. Ubuntu, RHEL"
+    end
+
   end
 
 end

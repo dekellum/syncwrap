@@ -18,6 +18,7 @@ lib/syncwrap/components/geminabox.rb
 lib/syncwrap/components/hashdot.rb
 lib/syncwrap/components/iyyov.rb
 lib/syncwrap/components/jruby.rb
+lib/syncwrap/components/open_jdk.rb
 lib/syncwrap/components/postgresql.rb
 lib/syncwrap/components/qpid.rb
 lib/syncwrap/components/rhel.rb
