@@ -28,6 +28,7 @@ module SyncWrap
     attr_accessor :home_users
 
     # Local set of home directories to be synchronized. (Default: ./home)
+    # FIXME: local_home_dir should now be part of 'sync' sync_root etc.
     attr_accessor :local_home_dir
 
     # Set of users to exclude from synchronization (default: [])
