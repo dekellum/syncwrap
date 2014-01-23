@@ -20,7 +20,7 @@ module SyncWrap
 
   # Provision JRuby by direct download from public S3 repo. Includes
   # utility methods for checking and installing JRuby gems.
-  class JRuby < Component
+  class JRubyVM < Component
 
     # JRuby version to install (default: 1.7.10)
     attr_accessor :jruby_version
