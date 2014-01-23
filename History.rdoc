@@ -1,3 +1,5 @@
+=== 2.0.0 (TBD)
+
 === 1.5.2 (2013-4-10)
 * Add check for init, aws_configure only if aws_config_json file
   exists.

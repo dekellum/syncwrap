@@ -15,7 +15,7 @@
 #++
 
 module SyncWrap
-  VERSION='1.5.2'
+  VERSION='2.0.0'
 
   GEM_ROOT = File.dirname(File.dirname(File.dirname(__FILE__)))
 end

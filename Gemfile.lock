@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    syncwrap (1.5.2)
+    syncwrap (2.0.0)
       term-ansicolor (~> 1.2.2)
 
 GEM
