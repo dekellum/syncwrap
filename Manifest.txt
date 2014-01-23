@@ -18,7 +18,6 @@ lib/syncwrap/java.rb
 lib/syncwrap/jruby.rb
 lib/syncwrap/postgresql.rb
 lib/syncwrap/qpid.rb
-lib/syncwrap/remote_task.rb
 lib/syncwrap/rhel.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/run_user.rb
