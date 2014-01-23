@@ -29,7 +29,7 @@ begin
   require_relative 'options.rb'
 rescue LoadError
   module TestOptions
-    # Set true is local password-less sudo works
+    # Set true if local password-less sudo works
     SAFE_SUDO = false
 
     # Set to host name for safe (non-modifying) SSH tests
