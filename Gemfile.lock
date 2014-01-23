@@ -20,7 +20,7 @@ GEM
     nokogiri (1.6.1-java)
       mini_portile (~> 0.5.0)
     rake (10.1.1)
-    rdoc (4.1.1)
+    rdoc (4.0.1)
       json (~> 1.4)
     rjack-maven (3.0.5.0-java)
     rjack-tarpit (2.1.0)
