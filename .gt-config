@@ -6,8 +6,7 @@ Gravitext::DevTools.configure do |c|
     h.holder = "David Kellum"
     h.inception = 2011
     h.license = :apache
-    h.exclusions += %w[ src/**/* usr/**/* etc/**/* postgresql/**/*
-                        var/iyyov/jobs.rb ]
+    h.exclusions += %w[ sync/**/* ]
   end
 
 end
