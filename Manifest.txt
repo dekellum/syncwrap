@@ -13,10 +13,10 @@ lib/syncwrap/formatter.rb
 lib/syncwrap/host.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/shell.rb
+lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/geminabox.rb
 lib/syncwrap/components/hashdot.rb
 lib/syncwrap/components/iyyov.rb
-lib/syncwrap/components/java.rb
 lib/syncwrap/components/jruby.rb
 lib/syncwrap/components/postgresql.rb
 lib/syncwrap/components/qpid.rb

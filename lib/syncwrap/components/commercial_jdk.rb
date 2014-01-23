@@ -18,10 +18,16 @@ require 'syncwrap/component'
 
 module SyncWrap
 
-  # Provision a JDK via an HTTP accessable binary repository of your
-  # making.  Oracle JDK usage terms generally preclude sharing a
-  # binary repository for these.
-  class Java < Component
+  # Provision a Commmercial (i.e. Oracle) JDK or "Server JRE" (jrs_)
+  # via an HTTP accessable binary repository of your making.
+  # Commercial usage terms generally preclude sharing a public binary
+  # repository for these.  Given the size, check-in or pushing from a
+  # development workstation is likely also a bad idea, though not
+  # difficult to implement.
+  #
+  # Oracle and Java are registered trademarks of Oracle and/or its
+  # affiliates.
+  class CommercialJDK < Component
 
     # HTTP URL to repo base directory. Note that the default
     # (http://localhost/repo) is unlikely to work here.
@@ -34,7 +40,7 @@ module SyncWrap
 
     def initialize( opts = {} )
       @java_repo_base_url = 'http://localhost/repo'
-      @jdk_name = 'jdk-ora-1.7.0_07-x64'
+      @jdk_name = 'jrs-ora-1.7.0_51-x64'
 
       super
     end
