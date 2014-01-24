@@ -35,10 +35,7 @@ module SyncWrap
 
   class Space
 
-    # FIXME: document?
-    # sudo_flags: ['-H']
-    # ssh_flags: %w[ -i ./key.pem -l ec2-user ]
-    # FIXME: Option to use example ssh-flags for Users setup only?
+    # FIXME: document
     attr_reader :default_opts
 
     attr_reader :formatter

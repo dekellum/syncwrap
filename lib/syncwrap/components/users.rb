@@ -34,10 +34,22 @@ module SyncWrap
     # Set of users to exclude from synchronization (default: [])
     attr_accessor :exclude_users
 
+    # If set, override the ssh_user for this Component install, since
+    # typically the 'normal' user (i.e your developer account) has not
+    # yet been created or given sudo access.  (Default: nil)
+    attr_accessor :ssh_user
+
+    # PEM file for the ssh_user.
+    # (Default: nil)
+    attr_accessor :ssh_user_pem
+
     def initialize( opts = {} )
       @home_users = nil
       @local_home_dir = "./home"
       @exclude_users = []
+      @ssh_user = nil
+      @ssh_user_pem = nil
+
       super
     end
 
@@ -64,7 +76,7 @@ module SyncWrap
 
     # Create user if not already present
     def create_user( user )
-      sudo <<-SH
+      sudo( <<-SH, ssh_flags )
         if ! id #{user} >/dev/null 2>&1; then
           useradd #{user}
         fi
@@ -73,14 +85,14 @@ module SyncWrap
 
     def sync_home_files( user )
       if File.directory?( "#{local_home_dir}/#{user}" )
-        rput( "#{local_home_dir}/#{user}", user: user )
+        rput( "#{local_home_dir}/#{user}", ssh_flags.merge( user: user ) )
       else
         false
       end
     end
 
     def fix_home_permissions( user )
-      sudo <<-SH
+      sudo( <<-SH, ssh_flags )
         if [ -e '/home/#{user}/.ssh' ]; then
           chmod 700 /home/#{user}/.ssh
           chmod -R o-rwx /home/#{user}/.ssh
@@ -91,13 +103,24 @@ module SyncWrap
     def set_sudoers( user )
       #FIXME: make this a template, Use commons bin for secure_path
       #Relax, less overrides needed for Ubuntu?
-      sudo <<-SH
+      sudo( <<-SH, ssh_flags )
         echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
         echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
         echo 'Defaults:#{user} secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin' \
           >> /etc/sudoers.d/#{user}
         chmod 440 /etc/sudoers.d/#{user}
       SH
+    end
+
+    private
+
+    def ssh_flags
+      flags = {}
+      if ssh_user
+        flags[ :ssh_user ] = ssh_user
+        flags[ :ssh_user_pem ] = ssh_user_pem if ssh_user_pem
+      end
+      flags
     end
 
   end
