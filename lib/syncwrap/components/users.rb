@@ -63,13 +63,16 @@ module SyncWrap
       users -= exclude_users
 
       users.each do |u|
+        create_user( u )
+        set_sudoers( u )
+      end
+
+      users.each do |u|
         sync_home_files( u )
       end
 
       users.each do |u|
-        create_user( u )
         fix_home_permissions( u )
-        set_sudoers( u )
       end
 
       #FIXME: Add special case for 'root' user?
