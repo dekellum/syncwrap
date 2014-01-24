@@ -56,6 +56,13 @@ class TestRsync < MiniTest::Unit::TestCase
     assert_opts( %w[ --exclude=foo --exclude=bar ], excludes: %w[ foo bar ] )
   end
 
+  def test_ssh_user_pem_options
+    assert_opts( [ '-e', 'ssh -l auser' ], ssh_user: 'auser' )
+    assert_opts( [], ssh_user_pem: 'key.pem' )
+    assert_opts( [ '-e', 'ssh -l auser -i key.pem' ],
+                 ssh_user: 'auser', ssh_user_pem: 'key.pem' )
+  end
+
   def test_other_options
     assert_opts( %w[ -n ], dryrun: true )
   end

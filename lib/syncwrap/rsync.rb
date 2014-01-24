@@ -46,7 +46,13 @@ module SyncWrap
       flags << '-b' unless opts[:backup] == false
 
       # Pass ssh options via -e (--rsh) flag
-      flags += [ '-e', "ssh #{opts[:ssh_flags]}" ] if opts[:ssh_flags]
+      ssh_flags = []
+      ssh_flags += opts[ :ssh_flags ] if opts[ :ssh_flags ]
+      if opts[ :ssh_user ]
+        ssh_flags += [ '-l', opts[ :ssh_user ] ]
+        ssh_flags += [ '-i', opts[ :ssh_user_pem ] ] if opts[ :ssh_user_pem ]
+      end
+      flags += [ '-e', "ssh #{ssh_flags.join ' '}" ] unless ssh_flags.empty?
 
       if opts[ :user ]
         # Use sudo to place files at remote.
