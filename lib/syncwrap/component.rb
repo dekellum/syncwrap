@@ -62,6 +62,12 @@ module SyncWrap
       ctx.rput( *args, opts )
     end
 
+    # Returns the path to the the specified src, first found in
+    # :src_roots option.  Returns nil if not found.
+    def find_source( src, opts = {} )
+      ctx.find_source( src, opts )
+    end
+
     def flush
       ctx.flush
     end

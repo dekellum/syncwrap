@@ -183,6 +183,15 @@ module SyncWrap
       changes
     end
 
+    # Returns the path to the the specified src, first found in
+    # :src_roots option.  Returns nil if not found.
+    def find_source( src, opts = {} )
+      opts = @default_opts.merge( opts )
+      resolve_sources( [ src ], Array( opts[ :src_roots ] ) ).first
+    rescue SourceNotFound
+      nil
+    end
+
     private
 
     def ssh_host_name

@@ -22,14 +22,14 @@ module SyncWrap
   # home directory files.
   class Users < Component
 
-    # The list of user names to install. If nil, home_users will be
-    # determined by the set of home directories in local_home_dir -
-    # exclude_users.
+    # The list of user names to install. If default nil, home_users
+    # will be determined by the set of home directories found in
+    # local_home_root - exclude_users.
     attr_accessor :home_users
 
-    # Local set of home directories to be synchronized. (Default: ./home)
-    # FIXME: local_home_dir should now be part of 'sync' sync_root etc.
-    attr_accessor :local_home_dir
+    # Local home root directory, to be resolved against sync_roots.
+    # (Default: home)
+    attr_accessor :local_home_root
 
     # Set of users to exclude from synchronization (default: [])
     attr_accessor :exclude_users
@@ -45,7 +45,7 @@ module SyncWrap
 
     def initialize( opts = {} )
       @home_users = nil
-      @local_home_dir = "./home"
+      @local_home_root = "home"
       @exclude_users = []
       @ssh_user = nil
       @ssh_user_pem = nil
@@ -54,11 +54,10 @@ module SyncWrap
     end
 
     def install
+      rdir = find_source( local_home_root )
       users = home_users
-      users ||= File.directory?( local_home_dir ) &&
-                Dir.entries( local_home_dir ).select do |d|
-        ( d !~ /^\./ &&
-          File.directory?( local_home_dir + d ) )
+      users ||= rdir && Dir.entries( rdir ).select do |d|
+        ( d !~ /^\./ && File.directory?( File.join( rdir, d ) ) )
       end
       users ||= []
       users -= exclude_users
@@ -72,6 +71,8 @@ module SyncWrap
         fix_home_permissions( u )
         set_sudoers( u )
       end
+
+      #FIXME: Add special case for 'root' user?
     end
 
     # Create user if not already present
@@ -84,11 +85,9 @@ module SyncWrap
     end
 
     def sync_home_files( user )
-      if File.directory?( "#{local_home_dir}/#{user}" )
-        rput( "#{local_home_dir}/#{user}", ssh_flags.merge( user: user ) )
-      else
-        false
-      end
+      rput( "#{local_home_root}/#{user}", ssh_flags.merge( user: user ) )
+    rescue SourceNotFound
+      false
     end
 
     def fix_home_permissions( user )
@@ -101,7 +100,8 @@ module SyncWrap
     end
 
     def set_sudoers( user )
-      #FIXME: make this a template, Use commons bin for secure_path
+      #FIXME: make this a template?
+      #FIXME: Use local_root for secure_path? (Order issue)
       #Relax, less overrides needed for Ubuntu?
       sudo( <<-SH, ssh_flags )
         echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
