@@ -65,6 +65,7 @@ module SyncWrap
       if opts[ :user ]
         args = [ 'sudo' ]
         args += opts[ :sudo_flags ] if opts[ :sudo_flags ]
+        # FIXME: Replace with :sudo_home support for '-H'?
         args += [ '-u', opts[ :user ] ] unless opts[ :user ] == :root
       end
       args + sh_args( command, opts )
