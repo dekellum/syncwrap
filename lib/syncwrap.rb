@@ -113,6 +113,7 @@ module SyncWrap
         host.components.each do |comp|
           if !component_plan.empty?
             found,method = component_plan.find { |pr| comp.is_a?( pr[0] ) }
+            #FIXME: Possible request to run multiple methods?
             next unless found
           else
             method = :install
