@@ -31,7 +31,7 @@ sync/etc/corosync/corosync.conf
 sync/etc/corosync/uidgid.d/qpid
 sync/etc/init.d/iyyov
 sync/etc/init.d/qpidd
-sync/etc/sysconfig/pgsql/postgresql
+sync/etc/sysconfig/pgsql/postgresql.erb
 sync/etc/sysctl.d/61-postgresql-shm.conf
 sync/postgresql/rhel/pg_hba.conf
 sync/postgresql/rhel/pg_ident.conf
