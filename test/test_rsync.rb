@@ -114,9 +114,9 @@ class TestRsync < MiniTest::Unit::TestCase
 
   def test_find_source_erbs
     erbs = find_source_erbs( SYNC_HASHDOT ).sort
-    assert_equal( [ SYNC_DIR + '/src/hashdot/Makefile.erb',
-                    SYNC_DIR + '/src/hashdot/profiles/default.hdp.erb',
-                    SYNC_DIR + '/src/hashdot/profiles/jruby.hdp.erb' ],
+    assert_equal( [ SYNC_HASHDOT + '/Makefile.erb',
+                    SYNC_HASHDOT + '/profiles/default.hdp.erb',
+                    SYNC_HASHDOT + '/profiles/jruby.hdp.erb' ],
                   erbs )
   end
 
