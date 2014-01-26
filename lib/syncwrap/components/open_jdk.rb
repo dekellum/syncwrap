@@ -39,9 +39,10 @@ module SyncWrap
     end
 
     def jdk_dir
-      if distro.is_a?( RHEL )
+      case distro
+      when RHEL
         "/usr/lib/jvm/java-1.#{jdk_major_minor}.0"
-      elsif distro.is_a?( Ubuntu )
+      when Ubuntu
         "/usr/lib/jvm/java-#{jdk_major_minor}-openjdk-amd64"
       else
         raise "Unknown distro jdk_dir"
@@ -50,10 +51,11 @@ module SyncWrap
 
     # Install including development headers for things like Hashdot.
     def install
-      if distro.is_a?( RHEL )
+      case distro
+      when RHEL
         dist_install( "java-1.#{jdk_major_minor}.0-openjdk",
                       "java-1.#{jdk_major_minor}.0-openjdk-devel" )
-      elsif distro.is_a?( Ubuntu )
+      when Ubuntu
         dist_install( "openjdk-#{jdk_major_minor}-jdk" )
       else
         raise "Unknown distro type"
