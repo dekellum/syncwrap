@@ -29,15 +29,16 @@ module SyncWrap
       @io = io
       @lock = Mutex.new
       @newlined = true
+      @backtraces = {}
     end
 
     def sync( &block )
       @lock.synchronize( &block )
     end
 
-    def write_component( host, comp, method, state )
+    def write_component( host, comp, mth, state )
       io.puts yellow( "== #{host.name} " +
-                      "#{short_cn( comp.class )}##{method}: #{state}" )
+                      "#{short_cn( comp.class )}##{mth}: #{state}" )
       flush
     end
 
@@ -77,14 +78,31 @@ module SyncWrap
     def write_command_output( stream, buff, color = true )
       unless buff.empty?
         if stream == :err && color
-          io.write red
-          io.write buff
-          io.write clear
+          io << red << buff << clear
         else
-          io.write buff
+          io << buff
         end
         @newlined = ( buff[-1] == "\n" )
       end
+    end
+
+    def write_error( host, error, comp = nil, mth = nil )
+      io << yellow
+      io << '== ' << host.name << ' '
+      io << short_cn( comp.class ) << '#' << mth << ' ' if comp && mth
+      io << "error:\n"
+      io << red
+      io << short_cn( error.class ) << ': ' << error.message << "\n"
+      bt = error.backtrace
+      if @backtraces[ bt ]
+        io.puts bt.first
+        io.puts "[duplicate stack omitted]"
+      else
+        @backtraces[ bt ] = true
+        io.puts bt
+      end
+      io << clear
+      flush
     end
 
     def flush

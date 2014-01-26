@@ -24,13 +24,26 @@ require 'syncwrap/formatter'
 
 module SyncWrap
 
-  class CommandFailure < RuntimeError
+  # Base class for all SyncWrap exception types
+  class SyncError < RuntimeError
   end
 
-  class NestingError < RuntimeError
+  # Error in the context in which a component is used
+  class ContextError < SyncError
   end
 
-  class SourceNotFound < RuntimeError
+  # Error in use of the Context#sh block form (:close option) with
+  # a nested flush or change in options.
+  class NestingError < SyncError
+  end
+
+  # Source specified in rput can not be found in :sync_roots
+  class SourceNotFound < SyncError
+  end
+
+  # Context#sh or derivatives failed with non-accepted exit code.
+  # Note the error may be delayed until the next Context#flush.
+  class CommandFailure < SyncError
   end
 
   class Space
@@ -84,24 +97,27 @@ module SyncWrap
         queue = Queue.new
         host_list.each { |host| queue.push( host ) }
         threads = opts[ :threads ].times.map do
-          Thread.new( queue, component_plan, opts ) do |q, c, o|
+          Thread.new( queue, component_plan, opts ) do |q, cp, o|
+            success = true
             begin
               while host = q.pop( true ) # non-block
-                execute_host( host, c, o )
+                r = execute_host( host, cp, o )
+                success &&= r
               end
             rescue ThreadError
               #exit, from queue being empty
             end
+            success
           end
         end
       else
         threads = host_list.map do |host|
-          Thread.new( host, component_plan, opts ) do |h, c, o|
-            execute_host( h, c, o )
+          Thread.new( host, component_plan, opts ) do |h, cp, o|
+            execute_host( h, cp, o )
           end
         end
       end
-      threads.each { |t| t.join }
+      threads.inject(true) { |s,t| t.value && s }
     end
 
     def execute_host( host, component_plan = [], opts = {} )
@@ -109,30 +125,54 @@ module SyncWrap
       ctx.with do
         host.components.each do |comp|
           if !component_plan.empty?
-            found,method = component_plan.find { |pr| comp.is_a?( pr[0] ) }
-            #FIXME: Possible request to run multiple methods?
+            found,mth = component_plan.find { |pr| comp.is_a?( pr[0] ) }
+            #FIXME: Possible request to run multiple mths?
             next unless found
           else
-            method = :install
-            next unless comp.respond_to?( method )
+            mth = :install
+            next unless comp.respond_to?( mth )
           end
 
-          if opts[ :flush_component ]
-            formatter.sync do
-              formatter.write_component( host, comp, method, "start" )
-            end
-          end
-
-          comp.send( method )
-
-          ctx.flush if opts[ :flush_component ]
-          formatter.sync do
-            formatter.write_component( host, comp, method,
-               opts[ :flush_component ] ? "complete" : "queued" )
-          end
-
+          success = execute_component( ctx, host, comp, mth, opts )
+          return false unless success
         end
       end
+      true
+    rescue SyncError => e
+      formatter.sync do
+        formatter.write_error( host, e )
+      end
+      false
+    end
+
+    def execute_component( ctx, host, comp, mth, opts )
+
+      if opts[ :flush_component ]
+        formatter.sync do
+          formatter.write_component( host, comp, mth, "start" )
+        end
+      end
+
+      comp.send( mth )
+
+      ctx.flush if opts[ :flush_component ]
+
+      formatter.sync do
+        formatter.write_component( host, comp, mth,
+          opts[ :flush_component ] ? "complete" : "queued" )
+      end
+
+      true
+    rescue SyncError => e
+      formatter.sync do
+        if e.is_a?( CommandFailure ) && ! opts[ :flush_component ]
+          # We don't know if its really from this component/method
+          formatter.write_error( host, e )
+        else
+          formatter.write_error( host, e, comp, mth )
+        end
+      end
+      false
     end
 
     # FIXME: Host name to ssh name strategies go here

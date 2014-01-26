@@ -38,7 +38,7 @@ module SyncWrap
       when Ubuntu
         'postgresql/ubuntu'
       else
-        raise "Distro #{distro.class.name} not supported"
+        raise ContextError, "Distro #{distro.class.name} not supported"
       end
     end
 
@@ -49,7 +49,7 @@ module SyncWrap
       when Ubuntu
         '/etc/postgresql/9.1/main'
       else
-        raise "Distro #{distro.class.name} not supported"
+        raise ContextError, "Distro #{distro.class.name} not supported"
       end
     end
 
@@ -95,7 +95,7 @@ module SyncWrap
            SH
          end
       else
-        raise "Distro #{distro.class.name} not supported"
+        raise ContextError, "Distro #{distro.class.name} not supported"
       end
     end
 

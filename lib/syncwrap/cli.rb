@@ -85,7 +85,7 @@ module SyncWrap
         opts.on( "--version",
                  "Show syncwrap version and exit" ) do
           puts "syncwrap: #{SyncWrap::VERSION}"
-          exit 1
+          exit( 2 )
         end
 
         opts.on( "-x", "--expand-shell",
@@ -133,7 +133,8 @@ module SyncWrap
 
       exit( 0 ) if lists > 0
 
-      @space.execute( @hosts, @component_plan, @options )
+      success = @space.execute( @hosts, @component_plan, @options )
+      exit( success ? 0 : 1 )
     end
 
     def list_components( comp_classes, multi )

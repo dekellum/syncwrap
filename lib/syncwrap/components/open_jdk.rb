@@ -45,7 +45,7 @@ module SyncWrap
       when Ubuntu
         "/usr/lib/jvm/java-#{jdk_major_minor}-openjdk-amd64"
       else
-        raise "Unknown distro jdk_dir"
+        raise ContextError, "Unknown distro jdk_dir"
       end
     end
 
@@ -58,7 +58,7 @@ module SyncWrap
       when Ubuntu
         dist_install( "openjdk-#{jdk_major_minor}-jdk" )
       else
-        raise "Unknown distro type"
+        raise ContextError, "Unknown distro type"
       end
     end
 
