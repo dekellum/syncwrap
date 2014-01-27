@@ -99,7 +99,10 @@ module SyncWrap
         io.puts "[duplicate stack omitted]"
       else
         @backtraces[ bt ] = true
-        io.puts bt
+        bt.each do |line|
+          break if line =~ /execute_component'$/
+          io.puts line
+        end
       end
       io << clear
       flush
