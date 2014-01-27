@@ -109,18 +109,24 @@ module SyncWrap
     end
 
     def write_error( host, error, comp = nil, mth = nil )
+      bt = error.backtrace
+      bt_num = @backtraces[ bt ]
+      if bt_num
+        bt = nil
+      else
+        @backtraces[ bt ] = bt_num = @backtraces.length + 1
+      end
+
       io << yellow if colorize
       io << '== ' << host.name << ' '
       io << short_cn( comp.class ) << '#' << mth << ' ' if comp && mth
-      io << "error:\n"
+      io << "error"
+      io << ", same stack as" unless bt
+      io << " [" << bt_num << "]:\n"
+
       io << red if colorize
       io << short_cn( error.class ) << ': ' << error.message << "\n"
-      bt = error.backtrace
-      if @backtraces[ bt ]
-        io.puts bt.first
-        io.puts "[duplicate stack omitted]"
-      else
-        @backtraces[ bt ] = true
+      if bt
         bt.each do |line|
           break if line =~ /execute_component'$/
           io.puts line
