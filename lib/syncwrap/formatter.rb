@@ -42,14 +42,14 @@ module SyncWrap
       flush
     end
 
-    def write_header( host, mode, opts, streaming = false )
+    def write_header( host, mode, opts, live = false )
       olist = []
       olist << "-#{opts[:sh_verbose]}" if opts[:sh_verbose] && mode != :rsync
       olist << 'coalesce' if opts[:coalesce]
       olist << 'dryrun' if opts[:dryrun]
       olist << "accept:#{opts[:accept].join ','}" if opts[:accept]
       olist << "user:#{opts[:user]}" if opts[:user]
-      olist << "stream" if streaming
+      olist << "live" if live
 
       io.puts yellow( "<-- #{mode} #{host.name} (#{olist.join ' '})" )
       flush
