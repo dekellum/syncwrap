@@ -70,6 +70,11 @@ module SyncWrap
           @options[ :coalesce ] = false
         end
 
+        opts.on( "--no-color",
+                 "Do not colorize output (as is the default)" ) do
+          @options[ :colorize ] = false
+        end
+
         opts.on( "-t", "--threads N",
                  "Specify the number of hosts to process concurrently",
                  "(default: all hosts)",

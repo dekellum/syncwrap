@@ -24,10 +24,12 @@ module SyncWrap
 
     attr_reader :io
     attr_reader :lock
+    attr_accessor :colorize
 
     def initialize( io = $stdout )
       @io = io
       @lock = Mutex.new
+      @colorize = true
       @newlined = true
       @backtraces = {}
     end
@@ -37,8 +39,11 @@ module SyncWrap
     end
 
     def write_component( host, comp, mth, state )
-      io.puts yellow( "== #{host.name} " +
-                      "#{short_cn( comp.class )}##{mth}: #{state}" )
+      io << yellow if colorize
+      io << '== ' << host.name << ' ' << short_cn( comp.class ) << '#' << mth
+      io << ': ' << state
+      io << clear if colorize
+      io << "\n"
       flush
     end
 
@@ -49,14 +54,31 @@ module SyncWrap
       olist << 'dryrun' if opts[:dryrun]
       olist << "accept:#{opts[:accept].join ','}" if opts[:accept]
       olist << "user:#{opts[:user]}" if opts[:user]
-      olist << "live" if live
+      olist << 'live' if live
 
-      io.puts yellow( "<-- #{mode} #{host.name} (#{olist.join ' '})" )
+      io << yellow if colorize
+      io << '<-- ' << mode << ' ' << host.name
+      first = true
+      olist.each do |li|
+        if first
+          io << ' ('
+          first = false
+        else
+          io << ' '
+        end
+        io << li
+      end
+      io << ')' unless olist.empty?
+      io << clear if colorize
+      io << "\n"
       flush
     end
 
     def write_result( result )
-      io.puts yellow( "--> " + result )
+      io << yellow if colorize
+      io << '--> ' << result
+      io << clear if colorize
+      io << "\n"
       flush
     end
 
@@ -77,7 +99,7 @@ module SyncWrap
 
     def write_command_output( stream, buff, color = true )
       unless buff.empty?
-        if stream == :err && color
+        if stream == :err && colorize && color
           io << red << buff << clear
         else
           io << buff
@@ -87,11 +109,11 @@ module SyncWrap
     end
 
     def write_error( host, error, comp = nil, mth = nil )
-      io << yellow
+      io << yellow if colorize
       io << '== ' << host.name << ' '
       io << short_cn( comp.class ) << '#' << mth << ' ' if comp && mth
       io << "error:\n"
-      io << red
+      io << red if colorize
       io << short_cn( error.class ) << ': ' << error.message << "\n"
       bt = error.backtrace
       if @backtraces[ bt ]
@@ -104,7 +126,7 @@ module SyncWrap
           io.puts line
         end
       end
-      io << clear
+      io << clear if colorize
       flush
     end
 

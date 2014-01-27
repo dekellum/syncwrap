@@ -93,6 +93,8 @@ module SyncWrap
 
     def execute( host_list = hosts, component_plan = [], opts = {} )
       opts = default_opts.merge( opts )
+      @formatter.colorize = ( opts[ :colorize ] != false )
+
       if opts[ :threads ] && host_list.length > opts[ :threads ]
         queue = Queue.new
         host_list.each { |host| queue.push( host ) }
