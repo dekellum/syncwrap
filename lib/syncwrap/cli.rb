@@ -90,7 +90,7 @@ module SyncWrap
         opts.on( "--version",
                  "Show syncwrap version and exit" ) do
           puts "syncwrap: #{SyncWrap::VERSION}"
-          exit( 2 )
+          exit 0
         end
 
         opts.on( "-x", "--expand-shell",
@@ -121,7 +121,13 @@ module SyncWrap
         end
 
       end
+
       @component_plan = opts.parse!( args )
+
+    rescue OptionParser::ParseError => e
+      $stderr.puts e.message
+      $stderr.puts opts
+      exit 3
     end
 
     def run( args )
