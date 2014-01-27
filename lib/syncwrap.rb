@@ -118,22 +118,28 @@ module SyncWrap
         end
       end
       threads.inject(true) { |s,t| t.value && s }
+      # Note: Unhandled (i.e. non-SyncError) exceptions will be
+      # propigated and re-raised on call to value above, resulting in
+      # standard ruby stack trace and immediate exit.
     end
 
     def execute_host( host, component_plan = [], opts = {} )
       ctx = Context.new( host, opts )
       ctx.with do
         host.components.each do |comp|
+          mths = []
           if !component_plan.empty?
-            found,mth = component_plan.find { |pr| comp.is_a?( pr[0] ) }
-            #FIXME: Possible request to run multiple mths?
-            next unless found
+            found = component_plan.select { |cls,_| comp.is_a?( cls ) }
+            mths = found.map { |_,mth| mth }
+            mths = [ :install ] if mths.include?( :install ) #trumps
           else
-            mth = :install
-            next unless comp.respond_to?( mth )
+            mths = [ :install ] if comp.respond_to?( :install )
           end
 
-          success = execute_component( ctx, host, comp, mth, opts )
+          success = mths.inject(true) do |s, mth|
+            # short-circuit after first non-success
+            s && execute_component( ctx, host, comp, mth, opts )
+          end
           return false unless success
         end
       end
