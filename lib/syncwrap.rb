@@ -37,7 +37,7 @@ module SyncWrap
   class NestingError < SyncError
   end
 
-  # Source specified in rput can not be found in :sync_roots
+  # Source specified in rput can not be found in :src_roots
   class SourceNotFound < SyncError
   end
 

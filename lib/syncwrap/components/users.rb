@@ -27,7 +27,7 @@ module SyncWrap
     # local_home_root - exclude_users.
     attr_accessor :home_users
 
-    # Local home root directory, to be resolved against sync_roots.
+    # Local home root directory, to be resolved against src_roots.
     # (Default: home)
     attr_accessor :local_home_root
 
