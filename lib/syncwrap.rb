@@ -216,8 +216,12 @@ module SyncWrap
       Space.current.host( *args )
     end
 
-    def options( opts )
-      Space.current.merge_default_options( opts )
+    def options( opts = nil )
+      if opts
+        Space.current.merge_default_options( opts )
+      else
+        Space.current.default_opts
+      end
     end
 
   end
