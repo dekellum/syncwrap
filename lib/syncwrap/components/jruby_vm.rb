@@ -125,8 +125,8 @@ module SyncWrap
     end
 
     def min_deps_supported?
-      varray = version.split('.').map { |n| n.to_i }
-      ( varry <=> [1, 7, 5] ) >= 0
+      varray = jruby_version.split('.').map { |n| n.to_i }
+      ( varray <=> [1, 7, 5] ) >= 0
     end
 
     def jruby_gem_version_flags( reqs )
