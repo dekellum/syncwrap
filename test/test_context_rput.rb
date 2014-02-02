@@ -17,12 +17,7 @@
 # permissions and limitations under the License.
 #++
 
-require 'rubygems'
-require 'bundler/setup'
-
-require 'fileutils'
-require 'minitest/unit'
-require 'minitest/autorun'
+require_relative 'setup'
 
 require 'syncwrap'
 

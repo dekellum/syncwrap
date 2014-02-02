@@ -45,6 +45,7 @@ sync/postgresql/ubuntu/start.conf
 sync/usr/local/bin/jgem
 sync/usr/local/etc/qpidd.conf
 sync/var/iyyov/jobs.rb
+test/setup.rb
 test/test_context.rb
 test/test_context_rput.rb
 test/test_rsync.rb

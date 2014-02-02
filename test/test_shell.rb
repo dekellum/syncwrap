@@ -17,28 +17,9 @@
 # permissions and limitations under the License.
 #++
 
-require 'rubygems'
-require 'bundler/setup'
-
-require 'minitest/unit'
-require 'minitest/autorun'
+require_relative 'setup'
 
 require 'syncwrap/shell'
-
-begin
-  require_relative 'options.rb'
-rescue LoadError
-  module TestOptions
-    # Set true if local password-less sudo works
-    SAFE_SUDO = false
-
-    # Set to host name for safe (non-modifying) SSH tests
-    SAFE_SSH = false
-
-    # Set true if SAFE_SSH also supports pasword-less sudo
-    SAFE_SSH_SUDO = false
-  end
-end
 
 class TestShell < MiniTest::Unit::TestCase
   include TestOptions
