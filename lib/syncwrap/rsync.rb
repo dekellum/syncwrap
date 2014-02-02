@@ -80,9 +80,9 @@ module SyncWrap
 
       flags << '-n' if opts[ :dryrun ]
 
-      #FIXME: Add similar support for localhost, test in sudo case?
+      target = [ host, target ].join(':') unless host == 'localhost'
 
-      [ 'rsync', flags, srcs, [ host, target ].join(':') ].flatten.compact
+      [ 'rsync', flags, srcs, target ].flatten.compact
     end
 
     def expand_implied_target( srcs )

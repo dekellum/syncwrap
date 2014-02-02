@@ -67,6 +67,11 @@ class TestRsync < MiniTest::Unit::TestCase
     assert_opts( %w[ -n ], dryrun: true )
   end
 
+  def test_localhost
+    args = rsync_args( 'localhost', ['d'], 'd/' )
+    assert_equal( %w[rsync -i -r -l -p -c -b d d/], args )
+  end
+
   def assert_expand( expected, args )
     expanded = expand_implied_target( args )
     assert_equal( expected, expanded.flatten, expanded )
