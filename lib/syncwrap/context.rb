@@ -175,7 +175,7 @@ module SyncWrap
       changes = rsync( srcs, target, st_opts )
 
       if opts[:process_erbs] != false
-        srcs.inject(changes) do |changes,src|
+        srcs.each do |src|
           changes += rsync_templates( src, target, opts )
         end
       end
