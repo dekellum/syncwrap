@@ -59,6 +59,25 @@ class TestContextRput < MiniTest::Unit::TestCase
     end
   end
 
+  def test_rput_file_sudo
+    skip unless TestOptions::SAFE_SUDO
+    host = sp.host( 'localhost' )
+    ctx = Context.new( host, sp.default_opts )
+
+    2.times do |i|
+      ctx.with do
+        changes = ctx.rput( 'd1/bar', "#{TEST_DIR}/d2/", user: ENV['USER'] )
+        if i == 0
+          assert_equal( %w[ bar ], changes.map { |c| c[1] } )
+        else
+          assert_empty( changes )
+        end
+        assert_equal( IO.read( "#{SYNC_DIR}/d1/bar" ),
+                      IO.read( "#{TEST_DIR}/d2/bar" ) )
+      end
+    end
+  end
+
   def test_rput_erb
     host = sp.host( 'localhost' )
     ctx = Context.new( host, sp.default_opts )
