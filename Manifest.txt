@@ -46,6 +46,9 @@ sync/usr/local/bin/jgem
 sync/usr/local/etc/qpidd.conf
 sync/var/iyyov/jobs.rb
 test/test_context.rb
+test/test_context_rput.rb
 test/test_rsync.rb
 test/test_shell.rb
 test/test_space.rb
+test/sync/d1/bar
+test/sync/d1/foo.erb
