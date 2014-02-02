@@ -36,6 +36,7 @@ class TestContextRput < MiniTest::Unit::TestCase
   def setup
     FileUtils.rm_rf( "#{TEST_DIR}/d1" )
     FileUtils.rm_rf( "#{TEST_DIR}/d2" )
+    FileUtils.rm_rf( "#{TEST_DIR}/d3" )
   end
 
   def sp
@@ -133,6 +134,47 @@ class TestContextRput < MiniTest::Unit::TestCase
                       IO.read( "#{TEST_DIR}/d1/bar" ) )
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d1/foo" ) )
+      end
+    end
+  end
+
+  def test_rput_subdir_with_erb
+    host = sp.host( 'localhost' )
+    ctx = Context.new( host, sp.default_opts )
+
+    2.times do |i|
+      ctx.with do
+        changes = ctx.rput( 'd3', "#{TEST_DIR}" )
+        if i == 0
+          assert_equal( %w[ d3/ d3/d2/ d3/d2/bar d3/d2/foo ],
+                        changes.map { |c| c[1] } )
+        else
+          assert_empty( changes )
+        end
+        assert_equal( IO.read( "#{SYNC_DIR}/d3/d2/bar" ),
+                      IO.read( "#{TEST_DIR}/d3/d2/bar" ) )
+        assert_equal( "barfoobar\n",
+                      IO.read( "#{TEST_DIR}/d3/d2/foo" ) )
+      end
+    end
+  end
+
+  def test_rput_subdir_contents_with_erb
+    host = sp.host( 'localhost' )
+    ctx = Context.new( host, sp.default_opts )
+
+    2.times do |i|
+      ctx.with do
+        changes = ctx.rput( 'd3/', "#{TEST_DIR}" )
+        if i == 0
+          assert_equal( %w[ d2/ d2/bar d2/foo ], changes.map { |c| c[1] } )
+        else
+          assert_empty( changes )
+        end
+        assert_equal( IO.read( "#{SYNC_DIR}/d3/d2/bar" ),
+                      IO.read( "#{TEST_DIR}/d2/bar" ) )
+        assert_equal( "barfoobar\n",
+                      IO.read( "#{TEST_DIR}/d2/foo" ) )
       end
     end
   end

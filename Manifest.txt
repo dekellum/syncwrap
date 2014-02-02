@@ -52,3 +52,5 @@ test/test_shell.rb
 test/test_space.rb
 test/sync/d1/bar
 test/sync/d1/foo.erb
+test/sync/d3/d2/bar
+test/sync/d3/d2/foo.erb

@@ -125,6 +125,14 @@ module SyncWrap
       path
     end
 
+    # Given file path within src, return any sub-directory path needed
+    # to reach file, or the empty string.  This is also src trailing
+    # '/' aware.
+    def subpath( src, file )
+      src = src.sub( %r{/[^/]*$}, '' ) #remove trail slash or last element
+      File.dirname( file ).sub( /^#{src}\/?/, '' )
+    end
+
     def find_source_erbs( sources )
       Array( sources ).inject([]) do |list, src|
         if File.directory?( src )

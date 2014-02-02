@@ -221,10 +221,9 @@ module SyncWrap
         []
       else
         Dir.mktmpdir( 'syncwrap' ) do |tmp_dir|
-          #FIXME: Special handling in single template case? i.e. no trailing '/'?
           out_dir = File.join( tmp_dir, 'd' ) #for default perms
           erbs.each do |erb|
-            spath = File.dirname( erb )[src.length..-1] || ""
+            spath = subpath( src, erb )
             outname = File.join( out_dir, spath, File.basename( erb, '.erb' ) )
             FileUtils.mkdir_p( File.dirname( outname ) )
             perm = File.stat( erb ).mode

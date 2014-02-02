@@ -100,6 +100,19 @@ class TestRsync < MiniTest::Unit::TestCase
     assert_equal( rel + '/', relativize( rel + '/' ) )
   end
 
+  def test_subpath
+    assert_equal( "",    subpath( "d/",     "d/f" ) )
+    assert_equal( "",    subpath( "d",      "d/f" ) )
+    assert_equal( "",    subpath( "d/e/",   "d/e/f" ) )
+    assert_equal( "",    subpath( "d/e/d/", "d/e/d/f" ) )
+    assert_equal( "e",   subpath( "d",      "d/e/f" ) )
+    assert_equal( "e",   subpath( "d/e",    "d/e/f" ) )
+    assert_equal( "e/d", subpath( "d",      "d/e/d/f" ) )
+    assert_equal( "e/d", subpath( "d/",     "d/e/d/f" ) )
+    assert_equal( "e/d", subpath( "d/e" ,   "d/e/d/f" ) )
+    assert_equal( "d",   subpath( "d/e/",   "d/e/d/f" ) )
+  end
+
   def test_resolve_sources
     src = resolve_sources( [ 'src/hashdot' ], SRC_ROOTS ).first
     assert( File.identical?( SYNC_HASHDOT, src ), src )
