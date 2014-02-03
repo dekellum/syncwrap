@@ -65,7 +65,7 @@ class TestRsync < MiniTest::Unit::TestCase
 
   def test_localhost
     args = rsync_args( 'localhost', ['d'], 'd/' )
-    assert_equal( %w[rsync -i -r -l -p -c -b d d/], args )
+    assert_equal( %w[rsync -i -r -l -E -c -b d d/], args )
   end
 
   def assert_expand( expected, args )
@@ -75,7 +75,7 @@ class TestRsync < MiniTest::Unit::TestCase
 
   def assert_opts( expected, opts )
     args = rsync_args( 'testhost', ['d'], 'd/', opts )
-    assert_equal( %w[rsync -i -r -l -p -c -b] +
+    assert_equal( %w[rsync -i -r -l -E -c -b] +
                   expected +
                   %w[d testhost:d/],
                   args )

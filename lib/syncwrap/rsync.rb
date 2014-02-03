@@ -37,7 +37,17 @@ module SyncWrap
       flags << '-l' unless opts[:links] == false
 
       # -p --perms (set destination to source permissions)
-      flags << '-p' unless opts[:perms] == false
+      # -E --executability (perserve execute only, default)
+      if opts[:perms] != false
+        if opts[:perms] == :p || opts[:perms].is_a?( String )
+          flags << '-p'
+          if opts[ :perms ].is_a?( String )
+            flags << "--chmod=#{opts[ :perms ]}"
+          end
+        else
+          flags << '-E'
+        end
+      end
 
       # -c --checksum (to determine changes; not just size,time)
       flags << '-c' unless opts[:checksum] == false
@@ -62,11 +72,6 @@ module SyncWrap
                    else
                      "--rsync-path=sudo rsync"
                    end )
-      end
-
-      #FIXME: Switch default to -E --executability ?
-      if opts[ :perms ] && opts[ :perms ].is_a?( String )
-        flags << "--chmod=#{opts[ :perms ]}"
       end
 
       excludes = Array( opts[ :excludes ] )
