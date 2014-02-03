@@ -24,6 +24,8 @@ require 'syncwrap'
 class TestContextRput < MiniTest::Unit::TestCase
   include SyncWrap
 
+  VERBOSE = ARGV.include?( '--verbose' )
+
   TEST_DIR = File.dirname( __FILE__ ).freeze
   SYNC_DIR = File.join( TEST_DIR, 'sync' ).freeze
   SRC_ROOTS = [ SYNC_DIR ].freeze
@@ -38,6 +40,7 @@ class TestContextRput < MiniTest::Unit::TestCase
     @sp ||= Space.new.tap do |s|
       s.merge_default_options( src_roots: SRC_ROOTS,
                                erb_binding: binding_under_test )
+      s.merge_default_options( verbose: :v ) if VERBOSE
     end
   end
 
@@ -170,8 +173,10 @@ class TestContextRput < MiniTest::Unit::TestCase
         else
           assert_empty( changes )
         end
+        refute( File.executable?( "#{TEST_DIR}/d1/bar" ) )
         assert_equal( IO.read( "#{SYNC_DIR}/d1/bar" ),
                       IO.read( "#{TEST_DIR}/d1/bar" ) )
+        refute( File.executable?( "#{TEST_DIR}/d1/foo" ) )
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d1/foo" ) )
       end
@@ -191,8 +196,10 @@ class TestContextRput < MiniTest::Unit::TestCase
         else
           assert_empty( changes )
         end
+        assert( File.executable?( "#{TEST_DIR}/d3/d2/bar" ) )
         assert_equal( IO.read( "#{SYNC_DIR}/d3/d2/bar" ),
                       IO.read( "#{TEST_DIR}/d3/d2/bar" ) )
+        assert( File.executable?( "#{TEST_DIR}/d3/d2/foo" ) )
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d3/d2/foo" ) )
       end
@@ -211,12 +218,29 @@ class TestContextRput < MiniTest::Unit::TestCase
         else
           assert_empty( changes )
         end
+        assert( File.executable?( "#{TEST_DIR}/d2/bar" ) )
         assert_equal( IO.read( "#{SYNC_DIR}/d3/d2/bar" ),
                       IO.read( "#{TEST_DIR}/d2/bar" ) )
+        assert( File.executable?( "#{TEST_DIR}/d2/foo" ) )
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d2/foo" ) )
       end
     end
+  end
+
+  def test_rput_erb_perm_change_only
+    host = sp.host( 'localhost' )
+    ctx = Context.new( host, sp.default_opts )
+    changes = ctx.rput( 'd3/', "#{TEST_DIR}" )
+    assert_equal( %w[ d2/ d2/bar d2/foo ], changes.map { |c| c[1] } )
+    assert( File.executable?( "#{TEST_DIR}/d2/foo" ) )
+
+    # Make the template target non-executable temporarily. On re-rput,
+    # only change is that file should have its exec bits reset.
+    FileUtils.chmod( "-x", "#{TEST_DIR}/d2/foo" )
+    changes = ctx.rput( 'd3/', "#{TEST_DIR}" )
+    assert_equal( [ %w[ .f...p..... d2/foo ] ], changes )
+    assert( File.executable?( "#{TEST_DIR}/d2/foo" ) )
   end
 
   def binding_under_test
