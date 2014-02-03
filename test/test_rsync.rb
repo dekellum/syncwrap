@@ -110,11 +110,11 @@ class TestRsync < MiniTest::Unit::TestCase
   end
 
   def test_resolve_sources
-    src = resolve_sources( [ 'src/hashdot' ], SRC_ROOTS ).first
+    src = resolve_source!( 'src/hashdot', SRC_ROOTS )
     assert( File.identical?( SYNC_HASHDOT, src ), src )
     assert( src[-1] != '/' )
 
-    src = resolve_sources( [ 'src/hashdot/' ], SRC_ROOTS ).first
+    src = resolve_source!( 'src/hashdot/', SRC_ROOTS )
     assert( File.identical?( SYNC_HASHDOT, src ), src )
     assert( src[-1] == '/' )
 
@@ -122,7 +122,7 @@ class TestRsync < MiniTest::Unit::TestCase
       resolve_sources( [ 'src/hashdot', 'not/found' ], SRC_ROOTS )
     end
 
-    src = resolve_sources( [ 'src/hashdot' ], SRC_ROOTS + [ '/bogus' ] ).first
+    src = resolve_source!( 'src/hashdot', [ '/bogus' ] + SRC_ROOTS )
     assert( File.identical?( SYNC_HASHDOT, src ), src )
   end
 

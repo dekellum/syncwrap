@@ -76,7 +76,7 @@ module SyncWrap
         unless pg_data_dir == '/var/lib/pgsql9/data'
           # (Per Amazon Linux)
           # Install PGDATA var override for init.d/postgresql
-          rput( 'etc/sysconfig/pgsql/postgresql.erb', :user => 'root' )
+          rput( 'etc/sysconfig/pgsql/postgresql', :user => 'root' )
           sudo <<-SH
             mkdir -p #{pg_data_dir}
             chown postgres:postgres #{pg_data_dir}

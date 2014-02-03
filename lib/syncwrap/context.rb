@@ -191,9 +191,7 @@ module SyncWrap
     # :src_roots option.  Returns nil if not found.
     def find_source( src, opts = {} )
       opts = @default_opts.merge( opts )
-      resolve_sources( [ src ], Array( opts[ :src_roots ] ) ).first
-    rescue SourceNotFound
-      nil
+      resolve_source( src, Array( opts[ :src_roots ] ) )
     end
 
     private

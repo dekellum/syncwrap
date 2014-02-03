@@ -78,7 +78,25 @@ class TestContextRput < MiniTest::Unit::TestCase
     end
   end
 
-  def test_rput_erb
+  def test_rput_erb_no_suffix
+    host = sp.host( 'localhost' )
+    ctx = Context.new( host, sp.default_opts )
+
+    2.times do |i|
+      ctx.with do
+        changes = ctx.rput( 'd1/foo', "#{TEST_DIR}/d2/" )
+        if i == 0
+          assert_equal( %w[ foo ], changes.map { |c| c[1] } )
+        else
+          assert_empty( changes )
+        end
+        assert_equal( "barfoobar\n",
+                      IO.read( "#{TEST_DIR}/d2/foo" ) )
+      end
+    end
+  end
+
+  def test_rput_erb_suffix
     host = sp.host( 'localhost' )
     ctx = Context.new( host, sp.default_opts )
 
@@ -96,19 +114,27 @@ class TestContextRput < MiniTest::Unit::TestCase
     end
   end
 
-  def test_rput_file_missing_for_erb
-    host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
-    assert_raises( SourceNotFound ) do
-      ctx.rput( 'd1/foo', "#{TEST_DIR}/d2/" )
-    end
-  end
-
   def test_rput_missing_dir
     host = sp.host( 'localhost' )
     ctx = Context.new( host, sp.default_opts )
-    assert_raises( SourceNotFound ) do
+    begin
       ctx.rput( 'nodir/', "#{TEST_DIR}/" )
+      flunk "Expected SourceNotFound execption"
+    rescue SourceNotFound => e
+      refute_match( /.erb/, e.message )
+      pass
+    end
+  end
+
+  def test_rput_missing_file
+    host = sp.host( 'localhost' )
+    ctx = Context.new( host, sp.default_opts )
+    begin
+      ctx.rput( 'd1/goo', "#{TEST_DIR}/" )
+      flunk "Expected SourceNotFound execption"
+    rescue SourceNotFound => e
+      refute_match( /.erb/, e.message )
+      pass
     end
   end
 

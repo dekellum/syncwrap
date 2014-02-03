@@ -97,20 +97,38 @@ module SyncWrap
     end
 
     # Preserves any trailing '/'.
-    def resolve_sources( args, src_roots )
+    # Raises SourceNotFound if any not found.
+    def resolve_sources( srcs, src_roots )
+      srcs.map { |path| resolve_source!( path, src_roots ) }
+    end
+
+    # Preserves any trailing '/'.
+    # Raises SourceNotFound if not found.
+    def resolve_source!( path, src_roots )
+      resolve_source( path, src_roots ) or
+        raise( SourceNotFound,
+              "#{path.inspect} not found in roots #{src_roots.inspect}" )
+    end
+
+    # Preserves any trailing '/'.
+    # Returns nil if not found.
+    def resolve_source( path, src_roots )
       #FIXME: Honor absolute arg paths?
-      args.map do |path|
-        path = path.strip
-        found = src_roots.
-          map { |r| File.join( r, path ) }.
-          find { |src| File.exist?( src ) }
-        # File.exist? only matches directories when trailing '/' is found.
-        unless found
-          raise SourceNotFound,
-                "#{path.inspect} not found in roots #{src_roots.inspect}"
+      found = nil
+      src_roots.each do |r|
+        candidate = File.join( r, path )
+        if File.exist?( candidate )
+          found = candidate
+        elsif candidate !~ %r{(\.erb|/)$}
+          candidate += '.erb'
+          if File.exist?( candidate )
+            found = candidate
+          end
         end
-        relativize( found )
+        break if found
       end
+
+      found && relativize( found )
     end
 
     # Return path relative to PWD if the result is shorter, otherwise
