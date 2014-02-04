@@ -23,15 +23,22 @@ require 'fileutils'
 
 module SyncWrap
 
+  # A single-thread execution context for a single Host.
+  #
+  # Context implements much of the interface and behavior defined by
+  # Component, via use of the Shell and Rsync module mixins.
   class Context
     include Shell
     include Rsync
 
     class << self
+      # Return the current (thread local) Context, or nil.
       def current
         Thread.current[:syncwrap_context]
       end
 
+      # Set the current Context to ctx and return any prior Context or
+      # nil.
       def swap( ctx )
         old = current
         Thread.current[:syncwrap_context] = ctx
@@ -39,8 +46,11 @@ module SyncWrap
       end
     end
 
+    # The current Host of this context
     attr_reader :host
 
+    # Construct given host and default_opts to use for all #sh and
+    # #rput calls.
     def initialize( host, opts = {} )
       @host = host
       reset_queue
@@ -50,6 +60,8 @@ module SyncWrap
       super()
     end
 
+    # Set (thread local) current context to self, yield to block, then
+    # #flush and reset the context.
     def with
       prior = Context.swap( self )
       yield
@@ -58,13 +70,13 @@ module SyncWrap
       Context.swap( prior )
     end
 
-    # Return true if being executed, by constructed default opts, in
-    # dryrun mode.
+    # Return true if being executed, by constructed default options,
+    # in dryrun mode.
     def dryrun?
       @default_opts[ :dryrun ]
     end
 
-    # Enqueue a shell command to be run on host.
+    # See Component#sh for interface details
     def sh( command, opts = {} )
       opts = @default_opts.merge( opts )
       close = opts.delete( :close )
@@ -87,6 +99,7 @@ module SyncWrap
       nil
     end
 
+    # See Component#flush for interface details
     def flush
       if @queued_cmd.length > 0
         begin
@@ -101,63 +114,14 @@ module SyncWrap
       nil
     end
 
-    # Capture and return [exit_code, stdout] from command. Does not
-    # raise on non-success.  Any commands queued via #sh are flushed
-    # beforehand, to avoid ambiguous order of remote changes.
+    # See Component#capture for interface details.
     def capture( command, opts = {} )
       opts = @default_opts.merge( coalesce: false, dryrun: false ).merge( opts )
       flush
       capture_shell( command, opts )
     end
 
-    # Put files or entire directories to host, resolved from multople
-    # source root directories and processing erb templates.
-    #
-    #   rput( src..., dest, {options} )
-    #   rput( src, {options} )
-    #
-    # A trailing hash is interpreted as options, see below.
-    #
-    # If there are two or more remaining src arguments, the last is
-    # interpreted as the remote destination.  If there is a single src
-    # argument, the destination is implied by finding its base
-    # directory and prepending '/'. Thus for example:
-    #
-    #   rput( 'etc/gemrc', user: :root )
-    #
-    # has an implied destination of: `/etc/`. The src and destination
-    # directories are intrepreted as by `rsync`: glob patterns are
-    # expanded and trailing '/' is significant.
-    #
-    # Before execution, any commands queued via #sh are flushed to
-    # avoid ambiguous order of remote changes.
-    #
-    # On success, returns an array of format [ [change_code, file_name] ]
-    # for files changed, as parsed from the rsync --itemize-changes to
-    # standard out.
-    #
-    # On failure, raises CommandFailure.
-    #
-    # ==== Options
-    #
-    # :user::      Files should be owned on destination by a user other
-    #              than installer (ex: 'root') (implies sudo)
-    # :perms::     Permissions to set for synchronized files. If just true,
-    #              use local permissions (-p). (default: true)
-    # :ssh_flags:: Array of flags to give to ssh via rsync -e
-    # :excludes::  One or more rsync compatible --exclude values, or
-    #              :dev which excludes common developmoent tree droppings
-    #              like '*~'
-    # :dryrun::    Don't actually make any changes (but report files that
-    #              would be changed) (default: false)
-    # :recursive:: Recurse into subdirectories (default: true)
-    # :links::     Recreate symlinks on the destination (default: true)
-    # :checksum::  Use MD5 to determine changes; not just size,time
-    #              (default: true)
-    # :backup::    Make backup files on remote (default: true)
-    # :src_roots:: Array of one or more local directories in which to
-    #              find source files.
-    # :verbose::   Output stdout/stderr from rsync (default: false)
+    # See Component#rput for interface details.
     def rput( *args )
       opts = @default_opts
       opts = opts.merge( args.pop ) if args.last.is_a?( Hash )
