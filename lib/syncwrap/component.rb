@@ -21,25 +21,26 @@ module SyncWrap
   # Base class and primary implementation interface for component
   # authoring.
   #
-  # Much of this interface is ultimately delegated to a _current_
-  # Context arranged (via Context#with). Without this, many of these
-  # methods will raise a ContextError.
+  # Much of the protected interface is ultimately delegated to a
+  # _current_ Context (arranged via Context#with). Without this, many
+  # of these methods will raise a ContextError.
   #
-  # Components that require installation should implement a
-  # no-argument `install` method which idempotently performs the
-  # installation via the #rput, #sh, etc. methods. Complex
-  # installations can be broken into multiple methods called from
-  # install. If these are no-argument, they also may be usefully
-  # called from the CLI or other external integrating code for testing
-  # or short-circuiting. In general however, install should be
-  # fast enough to always be run in complete form.
+  # Components that require installation should implement a public
+  # no-argument `install` method which performs the installation via
+  # #rput, #sh et al. Complex installations can be broken into
+  # multiple methods called from install. If these are public and
+  # no-argument, they may also be called from the CLI or other
+  # external integrating code for testing or short-circuit
+  # operation. In general however, install should be fast enough to
+  # repeat in complete form. All such methods should be idempotent.
   #
-  # Components may expose other useful no-argument methods for
-  # external use which are not called via install.
+  # Components may expose other public no-argument methods for
+  # external use which are not called via install. For example,
+  # diagnostic methods or uninstall.
   #
-  # Finally components may expose utility methods (with or with
-  # arguments) that will be dynamical bound and used by other
-  # components which are stacked on the same Host.
+  # Components may also expose public utility methods (with or without
+  # arguments) that will be dynamical bound and may be used by higher
+  # (later) component instances stacked on the same Host.
   class Component
 
     # Construct given options that are applied via same name setters
@@ -59,9 +60,9 @@ module SyncWrap
     end
 
     # Enqueue a bash shell command or script fragment to be run on the
-    # host of the current Context.  Newlines in command are
-    # interpreted as per bash. For example, it is common to use a
-    # here-document for readability:
+    # host of the current Context. Newlines in command are interpreted
+    # as per bash. For example, it is common to use a here-document
+    # for readability:
     #
     #   sh <<-SH
     #      if [ ! -e /var/#{fname} ]; then
@@ -82,11 +83,13 @@ module SyncWrap
     # === Command Queue and Composition
     #
     # The provided options are enqueued along with the
-    # command/fragment. If a subsequent call used the same options,
-    # then it is joined using a newline with the prior command(s)
-    # in the queue. If a subsequent call changes options, than any
-    # current commands in the queue are executed (via #flush) before
-    # the current command is enqueued, with the new options.
+    # command/fragment for deferred execution. If a subsequent call
+    # uses the same options, then it is effectively joined using a
+    # newline with the prior commands in the queue. If a subsequent
+    # call changes options, than any current commands in the queue are
+    # executed (via #flush) before the current command is enqueued
+    # with the new options. It is possible for commands to be enqueued
+    # and joined across multiple Components within the same Context.
     #
     # For example the following will be executed as a single composed
     # script fragment:
@@ -113,11 +116,12 @@ module SyncWrap
     #     sudo "touch /var/foobar" #=> NestingError
     #   end
     #
-    # The above instead fails with a NestingError and accurate stack
-    # trace, without running any potentially dangerous, incomplete
-    # bash on the remote side. Replace the call to sudo with sh above
-    # and the composed single fragment will execute without error. The
-    # block form may be nested to arbitrary depth.
+    # While executing the block, #flush is _locked_.  The above fails
+    # with a NestingError and accurate stack trace, without running
+    # any potentially dangerous, incomplete bash fragments on the
+    # remote side. Replace the call to sudo with sh above and the
+    # composed single fragment will execute without error. The block
+    # form may be nested to arbitrary depth.
     #
     # === Options
     #
@@ -195,8 +199,9 @@ module SyncWrap
     #
     # See #sh for additional options.  For the better performance
     # achieved with larger script fragments and fewer ssh sessions,
-    # try to use #sh remote conditionals instead of testing with
-    # #capture on the local side. But sometimes this can't be avoided.
+    # you should attempt to use #sh remote conditionals instead of
+    # testing with #capture on the local side. But sometimes this
+    # can't be avoided.
     def capture( command, opts = {} )
       ctx.capture( command, opts )
     end
@@ -220,8 +225,9 @@ module SyncWrap
     # Execute and empty the queue of any previous commands added with
     # #sh or its variants.
     #
-    # A CommandFailure is raised if the command return an exit_code
-    # that is not accepted via the :accept option. See #sh options.
+    # A CommandFailure is raised if commands return an exit_code that
+    # is not accepted via the :accept option (by default,
+    # non-zero). See #sh options :accept and :error.
     #
     # A NestingError is raised if called from within a #sh block.
     #
@@ -378,8 +384,8 @@ module SyncWrap
       ctx.rput( *args, opts )
     end
 
-    # Dynamically send missing methods to in-context, same host
-    # Components, that were added before self (lower in the stack).
+    # Attempt to dynamically bind and delegate missing methods to
+    # Components that were added before self to the same Host.
     def method_missing( meth, *args, &block )
       ctx = Context.current
 
