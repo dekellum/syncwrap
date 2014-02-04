@@ -78,7 +78,7 @@ module SyncWrap
       ctx = Context.current
 
       # Guard and no-op if reentrant or calling out of context.
-      if ctx && mm_lock?
+      if ctx && mm_lock
         begin
           unlocked = false
           below = false
@@ -106,7 +106,7 @@ module SyncWrap
       Context.current or raise "ctx called out of SyncWrap::Context"
     end
 
-    def mm_lock?
+    def mm_lock
       if Thread.current[:syncwrap_component_mm]
         false
       else
