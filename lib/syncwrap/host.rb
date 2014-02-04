@@ -16,13 +16,19 @@
 
 module SyncWrap
 
+  # Represents various host (server, machine instance) metadata and
+  # serves as a container for roles and Component instances.
   class Host
 
+    # The space in which this host was constructed.
     attr_reader :space
-    attr_reader :name
-    attr_reader :contents
 
+    attr_reader :name
     # FIXME: Short name, long name, or IP?
+
+    # Array of role Symbols or (direct) Component instances in the
+    # order added.
+    attr_reader :contents
 
     def initialize( space, name )
       @space = space
@@ -30,6 +36,8 @@ module SyncWrap
       @contents = [ :all ]
     end
 
+    # Add any number of roles (by Symbol) or (direct) Component
+    # instances.
     def add( *args )
       args.each do |arg|
         case( arg )
@@ -43,10 +51,13 @@ module SyncWrap
       end
     end
 
+    # Return an Array of previously added role symbols.
     def roles
       @contents.select { |c| c.is_a?( Symbol ) }
     end
 
+    # Return a flat Array of Component instances by traversing
+    # previously added roles and any direct components in order.
     def components
       @contents.inject([]) do |m,c|
         if c.is_a?( Symbol )
@@ -58,7 +69,7 @@ module SyncWrap
       end
     end
 
-    # Return the component added to this Host previous to the given
+    # Return the last component added to this Host prior to the given
     # component (either directly or via a role), or nil if there is no
     # such component.
     def prior_component( component )
@@ -77,6 +88,8 @@ module SyncWrap
       nil
     end
 
+    # Return the _last_ component which is a kind of the specified
+    # Class or Module clz, or nil if not found.
     def component( clz )
       components.reverse.find { |c| c.kind_of?( clz ) }
     end
