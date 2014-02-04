@@ -71,7 +71,11 @@ module SyncWrap
     # Additional args are interpreted as Components to add to this
     # role.
     def role( symbol, *args )
-      @roles[ symbol.to_sym ] += args.flatten.compact
+      if args.empty?
+        @roles[ symbol.to_sym ]
+      else
+        @roles[ symbol.to_sym ] += args.flatten.compact
+      end
     end
 
     # Define/access a Host by name
