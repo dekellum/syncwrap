@@ -218,6 +218,7 @@ module SyncWrap
 
     def rsync_templates( src, target, opts )
       bnd = opts[ :erb_binding ] or raise "required :erb_binding param missing"
+      erb_mode = opts[ :erb_mode ] || ''
       erbs = find_source_erbs( src )
       if erbs.empty?
         []
@@ -230,8 +231,7 @@ module SyncWrap
             FileUtils.mkdir_p( File.dirname( outname ) )
             perm = File.stat( erb ).mode
             File.open( outname, "w", perm ) do |fout|
-              template = ERB.new( IO.read( erb ), nil, '' )
-              #FIXME: :erb_template_opts?
+              template = ERB.new( IO.read( erb ), nil, erb_mode )
               template.filename = erb
               fout.puts( template.result( bnd ) )
             end
