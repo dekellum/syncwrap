@@ -34,12 +34,12 @@ module SyncWrap
     # Set of users to exclude from synchronization (default: [])
     attr_accessor :exclude_users
 
-    # If set, override the ssh_user for this Component install, since
+    # If set, override the :ssh_user for this Component install, since
     # typically the 'normal' user (i.e your developer account) has not
     # yet been created or given sudo access.  (Default: nil)
     attr_accessor :ssh_user
 
-    # PEM file for the ssh_user.
+    # PEM file for ssh_user.
     # (Default: nil)
     attr_accessor :ssh_user_pem
 
@@ -80,7 +80,7 @@ module SyncWrap
 
     # Create user if not already present
     def create_user( user )
-      sudo( <<-SH, ssh_flags )
+      sudo <<-SH
         if ! id #{user} >/dev/null 2>&1; then
           useradd #{user}
         fi
@@ -88,13 +88,13 @@ module SyncWrap
     end
 
     def sync_home_files( user )
-      rput( "#{local_home_root}/#{user}", ssh_flags.merge( user: user ) )
+      rput( "#{local_home_root}/#{user}", user: user )
     rescue SourceNotFound
       false
     end
 
     def fix_home_permissions( user )
-      sudo( <<-SH, ssh_flags )
+      sudo <<-SH
         if [ -e '/home/#{user}/.ssh' ]; then
           chmod 700 /home/#{user}/.ssh
           chmod -R o-rwx /home/#{user}/.ssh
@@ -106,7 +106,7 @@ module SyncWrap
       #FIXME: make this a template?
       #FIXME: Use local_root for secure_path? (Order issue)
       #Relax, less overrides needed for Ubuntu?
-      sudo( <<-SH, ssh_flags )
+      sudo <<-SH
         echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
         echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
         echo 'Defaults:#{user} secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin' \
@@ -119,7 +119,16 @@ module SyncWrap
       #FIXME: echo 'Defaults:#{user} always_set_home' >> /etc/sudoers.d/#{user}
     end
 
-    private
+    protected
+
+    def sh( command, opts = {}, &block )
+      super( command, ssh_flags.merge( opts ), &block )
+    end
+
+    def rput( *args )
+      opts = args.last.is_a?( Hash ) ? ssh_flags.merge( args.pop ) : ssh_flags
+      super( *args, opts )
+    end
 
     def ssh_flags
       flags = {}
