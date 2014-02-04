@@ -286,7 +286,7 @@ module SyncWrap
             fmt.flush
           end
         end
-        failed = accept && !accept.include?( exit_code )
+        failed = !accept.include?( exit_code )
 
         if stream_output
           fmt.output_terminate
