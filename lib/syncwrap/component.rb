@@ -51,6 +51,8 @@ module SyncWrap
       end
     end
 
+    protected
+
     # Return the Host of the current Context.
     def host
       ctx.host
