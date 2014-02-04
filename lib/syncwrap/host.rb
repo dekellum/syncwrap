@@ -58,6 +58,25 @@ module SyncWrap
       end
     end
 
+    # Return the component added to this Host previous to the given
+    # component (either directly or via a role), or nil if there is no
+    # such component.
+    def prior_component( component )
+      last = nil
+      @contents.each do |c|
+        if c.is_a?( Symbol )
+          space.role( c ).each do |rc|
+            return last if rc.equal?( component ) #identity
+            last = rc
+          end
+        else
+          return last if c.equal?( component ) #identity
+          last = c
+        end
+      end
+      nil
+    end
+
     def component( clz )
       components.reverse.find { |c| c.kind_of?( clz ) }
     end

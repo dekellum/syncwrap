@@ -119,10 +119,10 @@ class TestSpace < MiniTest::Unit::TestCase
       assert_equal( 42, c3.bar )
       assert( c1.respond_to?( :unresolved ) )
       refute( c1.respond_to?( :goo ) )
-      assert_raises( NameError, NoMethodError ) { c1.unresolved }
+      assert_raises( NameError ) { c1.unresolved }
     end
 
-    assert_raises( NameError, NoMethodError ) { c2.goo }
+    assert_raises( NameError ) { c2.goo }
   end
 
   def test_component_custom_binding

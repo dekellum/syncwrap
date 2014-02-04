@@ -387,9 +387,9 @@ module SyncWrap
     # Attempt to dynamically bind and delegate missing methods to
     # Components that were added before self to the same Host.
     def method_missing( meth, *args, &block )
-      comp = method_in_below_component( meth )
-      if comp
-        comp.send( meth, *args, &block )
+      pc = prior_component
+      if pc && pc.respond_to?( meth )
+        pc.send( meth, *args, &block )
       else
         super
       end
@@ -398,7 +398,7 @@ module SyncWrap
     # Include the same dynamically bound, earlier component methods
     # via hook to respond_to?
     def respond_to_missing?( meth, include_private = false )
-      super || !!method_in_below_component( meth )
+      super || ( ( pc = prior_component ) && pc.respond_to?( meth ) )
     end
 
     private
@@ -407,43 +407,10 @@ module SyncWrap
       Context.current or raise "ctx called out of SyncWrap::Context"
     end
 
-    # Return the in-context, same Host, lower component that publicly
-    # responds to the specified method; or nil.
-    def method_in_below_component( meth )
-      ctx = Context.current
-
-      # Guard reentrance or call out of context. Note that the
-      # respond_to? call below is reentrant
-      if ctx && mm_lock
-        begin
-          below = false
-          ctx.host.components.reverse_each do |comp|
-            if comp == self
-              below = true
-            elsif below && comp.respond_to?( meth )
-              return comp
-            end
-          end
-        ensure
-          mm_unlock
-        end
-      end
-
-      nil
-    end
-
-    def mm_lock
-      if Thread.current[:syncwrap_component_mm]
-        false
-      else
-        Thread.current[:syncwrap_component_mm] = true
-        true
-      end
-    end
-
-    def mm_unlock
-      Thread.current[:syncwrap_component_mm] = false
-      true
+    # Return the prior (added before) component instance on the same
+    # host, or nil if either not in context, or no such component.
+    def prior_component
+      ( lc = Context.current ) && lc.host.prior_component( self )
     end
 
     def custom_binding( extra_vars = {} )
