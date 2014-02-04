@@ -84,6 +84,7 @@ module SyncWrap
       ensure
         @queue_locked = prev if close
       end
+      nil
     end
 
     def flush
@@ -97,6 +98,7 @@ module SyncWrap
           reset_queue
         end
       end
+      nil
     end
 
     # Capture and return [exit_code, stdout] from command. Does not
