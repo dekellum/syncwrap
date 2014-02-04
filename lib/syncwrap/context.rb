@@ -167,14 +167,16 @@ module SyncWrap
 
       srcs = resolve_sources( srcs, Array( opts[ :src_roots ] ) )
 
-      if opts[:process_erbs] != false
+      if opts[:erb_process] != false
         st_opts = opts.dup
         st_opts[ :excludes ] = Array( opts[ :excludes ] ) + [ '*.erb' ]
+      else
+        st_opts = opts
       end
 
       changes = rsync( srcs, target, st_opts )
 
-      if opts[:process_erbs] != false
+      if opts[:erb_process] != false
         srcs.each do |src|
           changes += rsync_templates( src, target, opts )
         end
