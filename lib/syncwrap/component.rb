@@ -387,35 +387,49 @@ module SyncWrap
     # Attempt to dynamically bind and delegate missing methods to
     # Components that were added before self to the same Host.
     def method_missing( meth, *args, &block )
-      ctx = Context.current
-
-      # Guard and no-op if reentrant or calling out of context.
-      if ctx && mm_lock
-        begin
-          unlocked = false
-          below = false
-          ctx.host.components.reverse_each do |comp|
-            if comp == self
-              below = true
-            elsif below
-              if comp.respond_to?( meth )
-                unlocked = mm_unlock
-                return comp.send( meth, *args, &block )
-              end
-            end
-          end
-        ensure
-          mm_unlock unless unlocked
-        end
+      comp = method_in_below_component( meth )
+      if comp
+        comp.send( meth, *args, &block )
+      else
+        super
       end
+    end
 
-      super
+    # Include the same dynamically bound, earlier component methods
+    # via hook to respond_to?
+    def respond_to_missing?( meth, include_private = false )
+      super || !!method_in_below_component( meth )
     end
 
     private
 
     def ctx
       Context.current or raise "ctx called out of SyncWrap::Context"
+    end
+
+    # Return the in-context, same Host, lower component that publicly
+    # responds to the specified method; or nil.
+    def method_in_below_component( meth )
+      ctx = Context.current
+
+      # Guard reentrance or call out of context. Note that the
+      # respond_to? call below is reentrant
+      if ctx && mm_lock
+        begin
+          below = false
+          ctx.host.components.reverse_each do |comp|
+            if comp == self
+              below = true
+            elsif below && comp.respond_to?( meth )
+              return comp
+            end
+          end
+        ensure
+          mm_unlock
+        end
+      end
+
+      nil
     end
 
     def mm_lock

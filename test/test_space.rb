@@ -115,7 +115,10 @@ class TestSpace < MiniTest::Unit::TestCase
     host = sp.host( 'localhost', :test )
 
     Context.new( host ).with do
+      assert( c3.respond_to?( :goo ) )
       assert_equal( 42, c3.bar )
+      assert( c1.respond_to?( :unresolved ) )
+      refute( c1.respond_to?( :goo ) )
       assert_raises( NameError, NoMethodError ) { c1.unresolved }
     end
 
