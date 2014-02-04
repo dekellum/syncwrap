@@ -107,12 +107,29 @@ class TestSpace < MiniTest::Unit::TestCase
     assert_equal( c2b, host.component( CompTwo ) ) #last instance
   end
 
-  def test_component_dynamic_binding
+  def test_component_dynamic_binding_direct
     c1 = CompOne.new
     c2 = CompTwo.new
     c3 = CompThree.new
-    sp.role( :test, c1, c2, c3 )
-    host = sp.host( 'localhost', :test )
+    host = sp.host( 'localhost', c1, c2, c3 )
+
+    Context.new( host ).with do
+      assert( c3.respond_to?( :goo ) )
+      assert_equal( 42, c3.bar )
+      assert( c1.respond_to?( :unresolved ) )
+      refute( c1.respond_to?( :goo ) )
+      assert_raises( NameError ) { c1.unresolved }
+    end
+
+    assert_raises( NameError ) { c2.goo }
+  end
+
+  def test_component_dynamic_binding_role_plus_direct
+    c1 = CompOne.new
+    c2 = CompTwo.new
+    c3 = CompThree.new
+    sp.role( :test, c1, c2 )
+    host = sp.host( 'localhost', :test, c3 )
 
     Context.new( host ).with do
       assert( c3.respond_to?( :goo ) )
