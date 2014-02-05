@@ -5,9 +5,9 @@ jruby.home    = <%= jruby_dist_path %>
 jruby.lib     = ${jruby.home}/lib
 jruby.script  = jruby
 jruby.shell   = /bin/sh
-jruby.bindir  = /usr/local/bin
+jruby.bindir  = <%= local_root %>/bin
 
 hashdot.profile += jruby-common
 
 # Rubygems Home (Install)
-jruby.gem.home = /usr/local/lib/jruby/gems
+jruby.gem.home = <%= local_root %>/lib/jruby/gems
