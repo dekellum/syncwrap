@@ -245,7 +245,14 @@ module SyncWrap
     end
 
     def class_lookup( names )
-      names.inject( self.class ) do |mod, name|
+      if names.length == 1
+        begin
+          SyncWrap.const_get( name )
+        rescue NameError
+        end
+      end
+      # Otherwise assume its fully qualified and look from top-level
+      names.inject( Object ) do |mod, name|
         mod.const_get( name )
       end
     end
