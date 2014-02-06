@@ -35,9 +35,10 @@ module SyncWrap
     # jobs.rb. Returns true if iyyov was installed/upgraded and should
     # be restarted.
     def install
+
       # Short-circuit if the correct versioned process is already running
-      dpat = "iyyov-#{iyyov_version}-java/init/iyyov"
-      code,_ = capture( "pgrep -f #{dpat}", accept:[0,1], user: run_user )
+      dpat = "^jruby .*/iyyov-#{iyyov_version}-java/init/iyyov"
+      code,_ = capture( "pgrep -f '#{dpat}'", accept:[0,1], user: run_user )
 
       if code == 1
         install_run_dir
@@ -48,18 +49,30 @@ module SyncWrap
       end
     end
 
-    # Update remote (run_user) var/iyyov/jobs.rb; which will trigger
-    # any necessary restarts.  For backward compatibility, yields to
-    # block if given for daemon install, etc. However, this can more
-    # simply be done beforehand.
-    def iyyov_install_jobs
+    # Install a specific iyyov/jobs.d/<JOB>.rb file that works with
+    # the default (this sync root) jobs.rb. This also calls
+    # iyyov_install_jobs for the jobs.rb root file.
+    def iyyov_install_job( comp, job_file, force = false )
 
-      # Any Iyyov restart completes *before* job changes
-      yield if block_given?
+      changes = comp.rput( "var/iyyov/jobs.d/#{job_file}",
+                           "#{iyyov_run_dir}/jobs.d/",
+                           user: run_user )
+      changes + iyyov_install_jobs( force && changes.empty? )
+    end
+
+    # Update remote (run_dir/) iyyov/jobs.rb. If force is true, touch
+    # root jobs.rb even if it was not changed: forcing an iyyov config
+    # reload.  Returns any changes in the rput change format,
+    # including any forced mtime update.
+    def iyyov_install_jobs( force = false )
 
       changes = rput( 'var/iyyov/jobs.rb', iyyov_run_dir, user: run_user )
 
-      rudo "touch #{iyyov_run_dir}/jobs.rb" if changes.empty?
+      if force && changes.empty?
+        rudo "touch #{iyyov_run_dir}/jobs.rb"
+        changes << [ '.f..T......', "#{iyyov_run_dir}/jobs.rb" ]
+      end
+      changes
     end
 
     def iyyov_run_dir
@@ -71,15 +84,15 @@ module SyncWrap
     def install_run_dir
       rudo <<-SH
         mkdir -p #{iyyov_run_dir}
+        mkdir -p #{iyyov_run_dir}/jobs.d
+
         if [ ! -e #{iyyov_run_dir}/jobs.rb ]; then
           touch #{iyyov_run_dir}/jobs.rb
         fi
       SH
-      chown_run_user( '-R', iyyov_run_dir )
     end
 
     # Ensure install of same gem version as init.d/iyyov script
-    # Return true if installed
     def install_iyyov_gem
       jruby_install_gem( 'iyyov', version: "=#{iyyov_version}", minimize: true )
     end
