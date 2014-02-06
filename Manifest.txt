@@ -29,7 +29,7 @@ lib/syncwrap/components/users.rb
 sync/etc/gemrc
 sync/etc/corosync/corosync.conf
 sync/etc/corosync/uidgid.d/qpid
-sync/etc/init.d/iyyov
+sync/etc/init.d/iyyov.erb
 sync/etc/init.d/qpidd
 sync/etc/sysconfig/pgsql/postgresql.erb
 sync/etc/sysctl.d/61-postgresql-shm.conf
@@ -44,7 +44,7 @@ sync/postgresql/ubuntu/postgresql.conf
 sync/postgresql/ubuntu/start.conf
 sync/usr/local/bin/jgem
 sync/usr/local/etc/qpidd.conf
-sync/var/iyyov/jobs.rb
+sync/var/iyyov/jobs.rb.erb
 test/setup.rb
 test/test_context.rb
 test/test_context_rput.rb

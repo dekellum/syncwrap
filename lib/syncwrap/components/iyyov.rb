@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/components/ubuntu'
 
 module SyncWrap
 
@@ -36,7 +37,7 @@ module SyncWrap
     def install
       # Short-circuit if the correct versioned process is already running
       dpat = "iyyov-#{iyyov_version}-java/init/iyyov"
-      code,_ = capture( "pgrep -f #{dpat}", accept:[0,1] )
+      code,_ = capture( "pgrep -f #{dpat}", accept:[0,1], user: run_user )
 
       if code == 1
         install_run_dir
@@ -85,8 +86,8 @@ module SyncWrap
 
     # Install iyyov daemon init.d script and add to init daemons
     def install_iyyov_init
-      # FIXME: Templatize for version or pull out of gem sample
-      rput( 'etc/init.d/iyyov', user: :root )
+      rput( 'etc/init.d/iyyov', user: :root,
+            erb_vars: { lsb: distro.kind_of?( Ubuntu ) } )
 
       # Add to init.d
       dist_install_init_service( 'iyyov' )

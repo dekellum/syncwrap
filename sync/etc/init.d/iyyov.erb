@@ -1,13 +1,27 @@
 #!/bin/bash
-#
+<% if lsb %>
+### BEGIN INIT INFO
+# Provides:          iyyov
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $named
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Iyyov jruby monitor
+# Description:       Iyyov jruby monitoring and job control daemon
+### END INIT INFO
+
+. /lib/lsb/init-functions
+<% else %>
 # iyyov    Startup script for Iyyov monitoring daemon
 #
 # chkconfig: 2345 88 12
-# description: Iyyov monitoring daemon
+# description: Iyyov monitoring and job control daemon
 # processname: iyyov
 # config: /opt/var/iyyov/jobs.rb
 
 . /etc/rc.d/init.d/functions
+<% end %>
 
 # Gem home directory
 # Set to match system "jgem environment path"
@@ -37,11 +51,18 @@ start() {
     [ -f "$config" ] || exit 6
     [ -d "$rundir" ] || exit 7
 
+<% if lsb %>
+    log_daemon_msg "Starting Iyyov Daemon" "iyyov"
+    start-stop-daemon --start -d $rundir -c $user --exec $daemon -- $config
+    RETVAL=$?
+    log_end_msg $RETVAL
+<% else %>
     echo -n $"Starting $prog: "
     runuser -c "cd $rundir && $daemon $config" $user
     RETVAL=$?
     [ $RETVAL -eq 0 ] && success $"$prog startup" || failure $"$prog startup"
     echo
+<% end %>
 }
 
 status() {
@@ -59,12 +80,19 @@ reload() {
 }
 
 stop() {
+<% if lsb %>
+    log_daemon_msg "Stopping iyyov daemon" "iyyov"
+    start-stop-daemon --stop --quiet --oknodo --pidfile $pidfile
+    RETVAL=$?
+    log_end_msg $RETVAL
+<% else %>
     echo -n $"Shutting down $prog: "
     killproc -p $pidfile $prog
     RETVAL=$?
     [ $RETVAL -eq 0 ] && success || failure
     echo
     return $RETVAL
+<% end %>
 }
 
 case "$1" in
