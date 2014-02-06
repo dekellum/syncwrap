@@ -132,7 +132,7 @@ module SyncWrap
 
     def run( args )
       parse_cmd( args )
-      load( @sw_file, true )
+      load( @sw_file ) #unwrapped
       resolve_hosts
       lookup_component_plan
       resolve_components
