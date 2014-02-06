@@ -130,18 +130,11 @@ module SyncWrap
     end
 
     def execute_host( host, component_plan = [], opts = {} )
+      # Important: resolve outside of context
+      comp_methods = resolve_component_methods(host.components, component_plan)
       ctx = Context.new( host, opts )
       ctx.with do
-        host.components.each do |comp|
-          mths = []
-          if !component_plan.empty?
-            found = component_plan.select { |cls,_| comp.is_a?( cls ) }
-            mths = found.map { |_,mth| mth }
-            mths = [ :install ] if mths.include?( :install ) #trumps
-          else
-            mths = [ :install ] if comp.respond_to?( :install )
-          end
-
+        comp_methods.each do |comp, mths|
           success = mths.inject(true) do |s, mth|
             # short-circuit after first non-success
             s && execute_component( ctx, host, comp, mth, opts )
@@ -155,6 +148,28 @@ module SyncWrap
         formatter.write_error( host, e )
       end
       false
+    end
+
+    # Given components and plan, return an ordered Array of
+    # [component, [methods]] to execute. An empty/default plan is
+    # interpreted as :install on all components which implement it. If
+    # :install is explicitly part of the plan, then it trumps any
+    # other methods listed for the same component.
+    #
+    # Note this must be run out-of-Context to avoid unintended dynamic
+    # binding of the :install methods, etc.
+    def resolve_component_methods( components, component_plan = [] )
+      components.map do |comp|
+        mths = []
+        if component_plan.empty?
+          mths = [ :install ] if comp.respond_to?( :install )
+        else
+          found = component_plan.select { |cls,_| comp.is_a?( cls ) }
+          mths = found.map { |_,mth| mth }
+          mths = [ :install ] if mths.include?( :install ) #trumps
+        end
+        [ comp, mths ] unless mths.empty?
+      end.compact
     end
 
     def execute_component( ctx, host, comp, mth, opts )

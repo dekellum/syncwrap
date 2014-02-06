@@ -42,9 +42,6 @@ class TestSpace < MiniTest::Unit::TestCase
   end
 
   class CompTwo < Component
-    def install
-    end
-
     def goo
       foo
     end
@@ -122,6 +119,43 @@ class TestSpace < MiniTest::Unit::TestCase
     end
 
     assert_raises( NameError ) { c2.goo }
+  end
+
+  def test_resolve_component_methods
+    c1 = CompOne.new
+    c2 = CompTwo.new
+    c3 = CompThree.new
+    host = sp.host( 'localhost', c1, c2, c3 )
+
+    # Note: c2 not here, though in Context, c1's :install is visible
+    # to c2.
+    refute( c2.respond_to?( :install ) )
+    assert_equal( [ [ c1, [:install] ], [ c3, [:install] ] ],
+                  sp.resolve_component_methods( host.components, [] ) )
+  end
+
+  def test_resolve_component_methods_with_plan
+    c1 = CompOne.new
+    c2 = CompTwo.new
+    c3 = CompThree.new
+    host = sp.host( 'localhost', c1, c2, c3 )
+
+    plan = [ [CompOne, :foo], [CompOne, :unresolved], [CompTwo, :goo] ]
+
+    assert_equal( [ [ c1, [:foo, :unresolved] ], [ c2, [:goo] ] ],
+                  sp.resolve_component_methods( host.components, plan ) )
+  end
+
+  def test_resolve_component_methods_with_plan_trumped
+    c1 = CompOne.new
+    c2 = CompTwo.new
+    c3 = CompThree.new
+    host = sp.host( 'localhost', c1, c2, c3 )
+
+    plan = [ [CompOne, :foo], [CompOne, :install], [CompThree, :install] ]
+
+    assert_equal( [ [ c1, [:install] ], [ c3, [:install] ] ],
+                  sp.resolve_component_methods( host.components, plan ) )
   end
 
   def test_component_dynamic_binding_role_plus_direct
