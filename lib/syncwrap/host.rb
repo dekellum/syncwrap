@@ -46,7 +46,7 @@ module SyncWrap
         when Component
           @contents << arg
         else
-          raise "Invalid host #{name} addition: #{c.inspect}"
+          raise "Invalid host #{name} addition: #{arg.inspect}"
         end
       end
     end
