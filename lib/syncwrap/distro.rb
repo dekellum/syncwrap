@@ -52,8 +52,10 @@ module SyncWrap
     # below.
     #
     # ==== Options
+    #
     # :succeed:: Always succeed (useful for local rpms which might
-    # already be installed.
+    #            already be installed.
+    #
     # :minimal:: Avoid additional "optional" packages when possible.
     def dist_install( *pkgs )
       raise "Include a distro-specific component, e.g. Ubuntu, RHEL"
