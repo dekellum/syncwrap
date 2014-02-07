@@ -32,5 +32,8 @@ rescue LoadError
 
     # Set true if SAFE_SSH also supports pasword-less sudo
     SAFE_SSH_SUDO = false
+
+    # See test/sync.rb test/test_vms.rb
+    LOCAL_VM_TEST = false
   end
 end
