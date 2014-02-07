@@ -34,6 +34,7 @@ class TestContextRput < MiniTest::Unit::TestCase
     FileUtils.rm_rf( "#{TEST_DIR}/d1" )
     FileUtils.rm_rf( "#{TEST_DIR}/d2" )
     FileUtils.rm_rf( "#{TEST_DIR}/d3" )
+    FileUtils.rm_rf( "#{TEST_DIR}/baz" )
   end
 
   def sp
@@ -113,6 +114,25 @@ class TestContextRput < MiniTest::Unit::TestCase
         end
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d2/foo" ) )
+      end
+    end
+  end
+
+  def test_rput_erb_rename
+    host = sp.host( 'localhost' )
+    ctx = Context.new( host, sp.default_opts )
+
+    2.times do |i|
+      ctx.with do
+        changes = ctx.rput( 'd1/foo.erb', "#{TEST_DIR}/baz" )
+        if i == 0
+          assert_equal( %w[ foo ], changes.map { |c| c[1] } )
+          refute( File.exist?( "#{TEST_DIR}/foo" ) )
+        else
+          assert_empty( changes )
+        end
+        assert_equal( "barfoobar\n",
+                      IO.read( "#{TEST_DIR}/baz" ) )
       end
     end
   end
