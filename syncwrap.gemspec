@@ -14,4 +14,6 @@ RJack::TarPit.specify do |s|
 
   s.depend 'minitest', '~> 4.7.4', :dev
   s.depend 'aws-sdk',  '~> 1.8.5', :dev
+
+  s.required_ruby_version = '>= 1.9.1'
 end
