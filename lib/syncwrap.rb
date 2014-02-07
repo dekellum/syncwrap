@@ -340,6 +340,7 @@ module SyncWrap
   autoload :Iyyov,         'syncwrap/components/iyyov'
   autoload :IyyovDaemon,   'syncwrap/components/iyyov_daemon'
   autoload :JRubyVM,       'syncwrap/components/jruby_vm'
+  autoload :MDRaid,        'syncwrap/components/mdraid'
   autoload :OpenJDK,       'syncwrap/components/open_jdk'
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
