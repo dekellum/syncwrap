@@ -14,51 +14,18 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/component'
+require 'syncwrap/components/iyyov_daemon'
 
 module SyncWrap
 
   # Provision the
   # {boxed-geminabox}[https://github.com/dekellum/boxed-geminabox/]
-  # gem server.
-  # FIXME: Break out a reusable IyyovDaemon component with generic
-  # job.rb template.
-  # Component dependencies: jruby, iyyov, run_user
-  class Geminabox < Component
-
-    attr_accessor :geminabox_version
+  # gem server as a simple specialization of IyyovDaemon.
+  class Geminabox < IyyovDaemon
 
     def initialize( opts = {} )
-      @geminabox_version = '1.1.0'
-
-      super
+      super( { name: 'boxed-geminabox', version: '1.1.0' }.merge( opts ) )
     end
-
-    def daemon_service_dir
-      service_dir( 'boxed-geminabox' )
-    end
-
-    def install
-      create_service_dir( 'boxed-geminabox' )
-
-      src = 'var/boxed-geminabox/config.rb'
-      unless find_source( src )
-        src = 'var/iyyov/empty_config.rb'
-      end
-      changes = rput( src, "#{daemon_service_dir}/config.rb", user: run_user )
-
-      # Shorten if the desired versioned process is already running.
-      pid, ver = capture_running_version( "boxed-geminabox" )
-      if ver != geminabox_version
-        jruby_install_gem( 'boxed-geminabox',
-                           version: "=#{geminabox_version}",
-                           minimize: true )
-        changes += iyyov_install_job( self, 'boxed-geminabox.rb' )
-      elsif !changes.empty?
-        rudo( "kill #{pid} || true" ) # ..and let Iyyov restart it
-      end
-      changes
-   end
 
   end
 

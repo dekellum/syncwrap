@@ -45,12 +45,11 @@ module SyncWrap
       false
     end
 
-    # Given name and optional instance check for name.pid in
-    # service_dir and extracts the version number from the associated
-    # cmdline. If this is running out of installed gem directory
-    # (Iyyov itself, standard Iyyov daemons) then cmdline should
-    # reference the gem version.
-    # Returns [pid, version] or nil if not found running
+    # Given name(-instance), check for name.pid in service_dir and
+    # extract the version number from the associated cmdline. If this
+    # is running out of installed gem directory (Iyyov itself,
+    # standard Iyyov daemons) then cmdline should reference the gem
+    # version.  Returns [pid, version] or nil if not found running
     def capture_running_version( name, instance = nil )
       sdir = service_dir( name, instance )
       code, out = capture( <<-SH, user: run_user, accept:[0,1,91] )
@@ -71,17 +70,6 @@ module SyncWrap
       else
         nil
       end
-    end
-
-    # Install a specific iyyov/jobs.d/<JOB>.rb file that works with
-    # the default (this sync root) jobs.rb. This also calls
-    # iyyov_install_jobs for the jobs.rb root file.
-    def iyyov_install_job( comp, job_file, force = false )
-
-      changes = comp.rput( "var/iyyov/jobs.d/#{job_file}",
-                           "#{iyyov_run_dir}/jobs.d/",
-                           user: run_user )
-      changes + iyyov_install_jobs( force && changes.empty? )
     end
 
     # Update remote (run_dir/) iyyov/jobs.rb. If force is true, touch

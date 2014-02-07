@@ -1,0 +1,15 @@
+Iyyov.context do |c|
+
+  c.define_daemon do |d|
+    d.name     = "<%= name %>"
+<% if gem_name != name %>
+    d.gem_name = "<%= gem_name %>"
+<% end %>
+<% if instance %>
+    d.instance = "<%= instance %>"
+<% end %>
+    d.version  = "= <%= version %>"
+    d.log_rotate
+  end
+
+end

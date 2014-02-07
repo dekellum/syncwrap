@@ -18,6 +18,7 @@ lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/geminabox.rb
 lib/syncwrap/components/hashdot.rb
 lib/syncwrap/components/iyyov.rb
+lib/syncwrap/components/iyyov_daemon.rb
 lib/syncwrap/components/jruby_vm.rb
 lib/syncwrap/components/open_jdk.rb
 lib/syncwrap/components/postgresql.rb
@@ -44,9 +45,9 @@ sync/postgresql/ubuntu/postgresql.conf
 sync/postgresql/ubuntu/start.conf
 sync/usr/local/bin/jgem
 sync/usr/local/etc/qpidd.conf
-sync/var/iyyov/empty_config.rb
 sync/var/iyyov/jobs.rb.erb
-sync/var/iyyov/jobs.d/boxed-geminabox.rb.erb
+sync/var/iyyov/default/config.rb
+sync/var/iyyov/default/daemon.rb.erb
 test/setup.rb
 test/test_context.rb
 test/test_context_rput.rb
