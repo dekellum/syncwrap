@@ -49,19 +49,19 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_capture_noop
-    exit_code, outputs = capture3( %w[sh -c true])
+    exit_code, outputs = capture3( %w[bash -c true])
     assert_equal( 0, exit_code )
     assert_equal( [], outputs )
   end
 
   def test_capture_error
-    exit_code, outputs = capture3( %w[sh -v -c] << "exit 33" )
+    exit_code, outputs = capture3( %w[bash -v -c] << "exit 33" )
     assert_equal( 33, exit_code )
     assert_equal( [[:err, "exit 33\n"]], outputs, outputs )
   end
 
   def test_capture_output
-    exit_code, outputs = capture3( %w[sh -v -c] << "echo foo" )
+    exit_code, outputs = capture3( %w[bash -v -c] << "echo foo" )
     assert_equal( 0, exit_code )
     assert_equal( [ [:err, "echo foo\n"],
                     [:out, "foo\n"] ],
@@ -100,7 +100,7 @@ class TestShell < MiniTest::Unit::TestCase
     # Timing dependent, one or two reads will be received. Regardless,
     # capture3 should combine them to a single read as shown
     11.times do
-      exit_code, outputs = capture3( %w[sh -v -c] << "echo foo >&2")
+      exit_code, outputs = capture3( %w[bash -v -c] << "echo foo >&2")
       assert_equal( 0, exit_code )
       assert_equal( [[:err, "echo foo >&2\nfoo\n"]],
                     outputs, outputs )
