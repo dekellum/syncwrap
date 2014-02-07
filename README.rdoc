@@ -1,6 +1,7 @@
 = SyncWrap
 
 * http://github.com/dekellum/syncwrap
+* {<img src="https://travis-ci.org/dekellum/syncwrap.png" />}[https://travis-ci.org/dekellum/syncwrap]
 
 == Description
 
