@@ -15,6 +15,8 @@
 #++
 
 require 'syncwrap/component'
+
+# For distro class comparison only (pre-load for safety)
 require 'syncwrap/components/rhel'
 require 'syncwrap/components/ubuntu'
 

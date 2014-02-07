@@ -18,16 +18,6 @@
 # on local VMs ssh accessible at "ubuntu-1" and "centos-1". Note this
 # can make potentially damaging changes to these hosts!
 
-require 'syncwrap/components/ubuntu'
-require 'syncwrap/components/rhel'
-require 'syncwrap/components/users'
-require 'syncwrap/components/run_user'
-require 'syncwrap/components/open_jdk'
-require 'syncwrap/components/jruby_vm'
-require 'syncwrap/components/hashdot'
-require 'syncwrap/components/iyyov'
-require 'syncwrap/components/geminabox'
-
 include SyncWrap
 
 options[ :src_roots ].unshift( File.join( File.dirname( __FILE__ ), 'sync' ) )
