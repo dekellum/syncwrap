@@ -182,7 +182,7 @@ module SyncWrap
 
     def rsync_templates( src, target, opts )
       bnd = opts[ :erb_binding ] or raise "required :erb_binding param missing"
-      erb_mode = opts[ :erb_mode ] || ''
+      erb_mode = opts[ :erb_mode ] || '<>' #Trim new line on "<% ... %>\n"
       erbs = find_source_erbs( src )
       if erbs.empty?
         []

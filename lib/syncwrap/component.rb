@@ -368,7 +368,7 @@ module SyncWrap
     #                files (default: true)
     #
     # :erb_mode::  The trim_mode options as documented in ERB::new
-    #              (default: '')
+    #              (default: '<>' trim NEWLINE on /^<%...%>$/ lines)
     #
     # :erb_vars::  Hash of additional variable names/values to pass to
     #              ERBs. These names will override the default
