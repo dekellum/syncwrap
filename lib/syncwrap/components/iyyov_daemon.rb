@@ -18,9 +18,9 @@ require 'syncwrap/component'
 
 module SyncWrap
 
-  # Provision an Iyyov launched and monitored jruby daemon using
-  # standard conventions.  Can be used directly in the common case, or
-  # sub-classed as needed.
+  # Provision a gem installed, Iyyov launched and monitored jruby
+  # daemon using a standard set of conventions.  Can be used directly
+  # in the common case, or sub-classed as needed.
   #
   # Two :src_roots files are searched for deployment: a config.rb and
   # a jobs.d/<name>.rb.  If concrete or .erb variants of these are not
