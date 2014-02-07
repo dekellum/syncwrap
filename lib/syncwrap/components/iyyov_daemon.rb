@@ -18,14 +18,15 @@ require 'syncwrap/component'
 
 module SyncWrap
 
-  # Provisions a Iyyov launched and monitored jruby daemon using
+  # Provision an Iyyov launched and monitored jruby daemon using
   # standard conventions.  Can be used directly in the common case, or
   # sub-classed as needed.
   #
-  # Two src_roots files are searched for: a config.rb and a
-  # jobs.d/<name>.rb.  If direct or erb variants of these are not
-  # found than an empty default/config.rb and a default/jobs.rb.erb is
-  # used. Again these will work as in in the common case.
+  # Two :src_roots files are searched for deployment: a config.rb and
+  # a jobs.d/<name>.rb.  If concrete or .erb variants of these are not
+  # found than an (empty) default/config.rb and a generic
+  # default/jobs.rb.erb is used. Again, these will work in the common
+  # case.
   #
   # Direct component dependencies: JRubyVM, Iyyov, RunUser
   class IyyovDaemon < Component
@@ -60,6 +61,8 @@ module SyncWrap
     def install
       standard_install
     end
+
+    protected
 
     def standard_install
       raise "IyyovDaemon#name is nil" unless name

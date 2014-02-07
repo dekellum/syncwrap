@@ -36,7 +36,7 @@ module SyncWrap
       # Shorten if the desired iyyov version is already running
       pid, ver = capture_running_version( 'iyyov' )
       unless ver == iyyov_version
-        install_run_dir    #as run_user
+        install_run_dir    #as root
         install_iyyov_gem  #as root
         install_iyyov_init #as root
         iyyov_restart      #as root
@@ -92,14 +92,17 @@ module SyncWrap
     end
 
     # Create iyyov run directory and make sure there is at minimum an
-    # empty jobs file. Avoid touching it if already present
+    # empty jobs file. Avoid touching it if already present.
     def install_run_dir
-      rudo <<-SH
+      # Run as root for merging with the other install fragments.
+      sudo <<-SH
         mkdir -p #{iyyov_run_dir}
         mkdir -p #{iyyov_run_dir}/jobs.d
-
+      SH
+      chown_run_user( '-R', iyyov_run_dir )
+      sudo <<-SH
         if [ ! -e #{iyyov_run_dir}/jobs.rb ]; then
-          touch #{iyyov_run_dir}/jobs.rb
+          sudo -u #{run_user} touch #{iyyov_run_dir}/jobs.rb
         fi
       SH
     end
