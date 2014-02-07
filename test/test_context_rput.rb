@@ -122,7 +122,7 @@ class TestContextRput < MiniTest::Unit::TestCase
     ctx = Context.new( host, sp.default_opts )
     begin
       ctx.rput( 'nodir/', "#{TEST_DIR}/" )
-      flunk "Expected SourceNotFound execption"
+      flunk "Expected SourceNotFound exception"
     rescue SourceNotFound => e
       refute_match( /.erb/, e.message )
       pass
@@ -134,7 +134,7 @@ class TestContextRput < MiniTest::Unit::TestCase
     ctx = Context.new( host, sp.default_opts )
     begin
       ctx.rput( 'd1/goo', "#{TEST_DIR}/" )
-      flunk "Expected SourceNotFound execption"
+      flunk "Expected SourceNotFound exception"
     rescue SourceNotFound => e
       refute_match( /.erb/, e.message )
       pass
