@@ -151,7 +151,7 @@ module SyncWrap
     end
 
     # Given components and plan, return an ordered Array of
-    # [component, [methods]] to execute. An empty/default plan is
+    # \[component, [methods]] to execute. An empty/default plan is
     # interpreted as :install on all components which implement it. If
     # :install is explicitly part of the plan, then it trumps any
     # other methods listed for the same component.
