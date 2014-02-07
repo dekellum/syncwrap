@@ -34,42 +34,31 @@ module SyncWrap
       super
     end
 
+    def daemon_service_dir
+      service_dir( 'boxed-geminabox' )
+    end
+
     def install
       create_service_dir( 'boxed-geminabox' )
 
-      if find_source( 'var/boxed-geminabox/config.rb' )
-        changes = rput( 'var/boxed-geminabox/config.rb',
-                        service_dir( 'boxed-geminabox' ),
-                        user: run_user )
-        config_changed = !changes.empty?
-      else
-        conf = "#{service_dir( 'boxed-geminabox' )}/config.rb"
-        code,_ = capture( <<-SH, user: run_user, accept: [0,91] )
-          if [ -f "#{conf}" ]; then
-            mv -f #{conf} #{conf}~
-            exit 91
-          fi
-        SH
-        config_changed = (code == 91)
+      src = 'var/boxed-geminabox/config.rb'
+      unless find_source( src )
+        src = 'var/iyyov/empty_config.rb'
       end
+      changes = rput( src, "#{daemon_service_dir}/config.rb", user: run_user )
 
-      # Short-circuit if the correct versioned process is already
-      # running. The pattern starts with jruby to avoid undesired
-      # match on the wrapping ssh command, The '.*' includes '-java',
-      # or not
-      dpat = "^jruby .*boxed-geminabox-#{geminabox_version}.*/init/boxed-geminabox"
-      code, pid = capture( "pgrep -f '#{dpat}'", accept:[0,1] )
-
-      if code == 1
+      # Shorten if the desired versioned process is already running.
+      pid, ver = capture_running_version( "boxed-geminabox" )
+      if ver != geminabox_version
         jruby_install_gem( 'boxed-geminabox',
                            version: "=#{geminabox_version}",
                            minimize: true )
-        iyyov_install_job( self, 'boxed-geminabox.rb' )
-      elsif config_changed
-        rudo( "kill #{pid.strip} || true" ) # ..and let Iyyov restart it
+        changes += iyyov_install_job( self, 'boxed-geminabox.rb' )
+      elsif !changes.empty?
+        rudo( "kill #{pid} || true" ) # ..and let Iyyov restart it
       end
-
-    end
+      changes
+   end
 
   end
 

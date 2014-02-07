@@ -31,21 +31,45 @@ module SyncWrap
       super
     end
 
-    # Deploy iyyov gem, init.d/iyyov and at least an empty
-    # jobs.rb. Returns true if iyyov was installed/upgraded and should
-    # be restarted.
+    # Deploy iyyov gem, init.d/iyyov and at least an empty jobs.rb.
     def install
-
-      # Short-circuit if the correct versioned process is already running
-      dpat = "^jruby .*/iyyov-#{iyyov_version}-java/init/iyyov"
-      code,_ = capture( "pgrep -f '#{dpat}'", accept:[0,1], user: run_user )
-
-      if code == 1
-        install_run_dir
-        install_iyyov_gem
-        install_iyyov_init
-        iyyov_restart
+      # Shorten if the desired iyyov version is already running
+      pid, ver = capture_running_version( 'iyyov' )
+      unless ver == iyyov_version
+        install_run_dir    #as run_user
+        install_iyyov_gem  #as root
+        install_iyyov_init #as root
+        iyyov_restart      #as root
         true
+      end
+      false
+    end
+
+    # Given name and optional instance check for name.pid in
+    # service_dir and extracts the version number from the associated
+    # cmdline. If this is running out of installed gem directory
+    # (Iyyov itself, standard Iyyov daemons) then cmdline should
+    # reference the gem version.
+    # Returns [pid, version] or nil if not found running
+    def capture_running_version( name, instance = nil )
+      sdir = service_dir( name, instance )
+      code, out = capture( <<-SH, user: run_user, accept:[0,1,91] )
+        pid=$(< #{sdir}/#{name}.pid)
+        if [[ $(< /proc/$pid/cmdline) =~ -(([0-9]+)(\\.[0-9A-Za-z]+)+)[-/] ]]; then
+          echo $pid ${BASH_REMATCH[1]}
+          exit 0
+        fi
+        exit 91
+      SH
+      # Above accepts exit 1 as from $(< missing-file), since it would
+      # be a race to pre-check. Note '\\' escape is for this
+      # ruby here-doc.
+
+      if code == 0
+        pid, ver = out.strip.split( ' ' )
+        [ pid.to_i, ver ]
+      else
+        nil
       end
     end
 
