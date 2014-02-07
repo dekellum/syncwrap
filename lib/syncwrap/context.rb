@@ -189,6 +189,7 @@ module SyncWrap
       else
         Dir.mktmpdir( 'syncwrap' ) do |tmp_dir|
           out_dir = File.join( tmp_dir, 'd' ) #for default perms
+          outname = nil
           erbs.each do |erb|
             spath = subpath( src, erb )
             outname = File.join( out_dir, spath, File.basename( erb, '.erb' ) )
@@ -200,7 +201,11 @@ module SyncWrap
               fout.puts( template.result( bnd ) )
             end
           end
-          rsync( out_dir + '/', target, opts )
+          if erbs.length == 1 && src == erbs.first
+            rsync( outname, target, opts )
+          else
+            rsync( out_dir + '/', target, opts )
+          end
         end
       end
     end
