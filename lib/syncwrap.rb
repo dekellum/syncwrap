@@ -50,6 +50,10 @@ module SyncWrap
   # level #execute method.
   class Space
 
+    class << self
+      attr_accessor :current #:nodoc:
+    end
+
     # Default options for execution, including Component#rput and
     # Component#sh (see Options details). The CLI uses this, for
     # example, to set :verbose => true (from --verbose) and
@@ -116,6 +120,16 @@ module SyncWrap
       @hosts.values
     end
 
+    # Return an ordered, unique set of component classes, direct or via
+    # roles, currently contained by the specified hosts or all hosts.
+    def component_classes( hs = hosts )
+      hs.
+        map { |h| h.components }.
+        flatten.
+        map { |comp| comp.class }.
+        uniq
+    end
+
     def execute( host_list = hosts, component_plan = [], opts = {} )
       opts = default_options.merge( opts )
       @formatter.colorize = ( opts[ :colorize ] != false )
@@ -149,6 +163,13 @@ module SyncWrap
       # propigated and re-raised on call to value above, resulting in
       # standard ruby stack trace and immediate exit.
     end
+
+    # FIXME: Host name to ssh name strategies go here
+    def ssh_host_name( host ) # :nodoc:
+      host.name
+    end
+
+    private
 
     def execute_host( host, component_plan = [], opts = {} )
       # Important: resolve outside of context
@@ -221,25 +242,6 @@ module SyncWrap
         end
       end
       false
-    end
-
-    # FIXME: Host name to ssh name strategies go here
-    def ssh_host_name( host )
-      host.name
-    end
-
-    # Return an ordered, unique set of component classes, direct or via
-    # roles, currently contained by the specified hosts or all hosts.
-    def component_classes( hs = hosts )
-      hs.
-        map { |h| h.components }.
-        flatten.
-        map { |comp| comp.class }.
-        uniq
-    end
-
-    class << self
-      attr_accessor :current #:nodoc:
     end
 
   end

@@ -25,7 +25,13 @@ class TestSpace < MiniTest::Unit::TestCase
   include SyncWrap
 
   def sp
-    @sp ||= Space.new
+    @sp ||= Space.new.tap do |s|
+      class << s
+        # for test access:
+        public :resolve_component_methods
+      end
+    end
+
   end
 
   class CompOne < Component
