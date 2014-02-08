@@ -54,8 +54,8 @@ module SyncWrap
       attr_accessor :current #:nodoc:
     end
 
-    # Default options for execution, including Component#rput and
-    # Component#sh (see Options details). The CLI uses this, for
+    # Default options, for use including Component#rput, Component#sh,
+    # and #execute (see Options details). The CLI uses this, for
     # example, to set :verbose => true (from --verbose) and
     # :shell_verbose => :x (from --expand-shell). In limited cases it
     # may be appropriate to set default overrides in a sync.rb.
@@ -93,7 +93,7 @@ module SyncWrap
       roots.dup #return a copy
     end
 
-    # Define/access a Role by symbol
+    # Define/access a Role by symbol.
     # Additional args are interpreted as Components to add to this
     # role.
     def role( symbol, *args )
@@ -131,6 +131,21 @@ module SyncWrap
         uniq
     end
 
+    # Execute components based on a host_list (default all), a
+    # component_plan (default :install on all components), and with
+    # any additional options (merged with default_options).
+    #
+    # === Options
+    #
+    # The following options are specifically handled by execute:
+    #
+    # :colorize:: If false, don't color diagnostic output to stdout
+    #             (default: true)
+    #
+    # :threads:: The number of threads on which to execute. Each host is
+    #            executed with a single thread.
+    #            (Default: the number of hosts, maximum concurrency)
+    #
     def execute( host_list = hosts, component_plan = [], opts = {} )
       opts = default_options.merge( opts )
       @formatter.colorize = ( opts[ :colorize ] != false )

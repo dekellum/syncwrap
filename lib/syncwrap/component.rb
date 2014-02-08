@@ -18,8 +18,7 @@ require 'syncwrap/context'
 
 module SyncWrap
 
-  # Base class and primary implementation interface for component
-  # authoring.
+  # Base class and primary interface for component implementation.
   #
   # Much of the protected interface is ultimately delegated to a
   # _current_ Context (arranged via Context#with). Without this, many
