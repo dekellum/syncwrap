@@ -41,7 +41,7 @@ class Uninstaller < Component
       if [ -d /var/local/runr ]; then
         for pid in /var/local/runr/*/*.pid; do
           if [ -e "$pid" ]; then
-            kill $(<$pid)
+            kill $(<$pid) || true
           fi
         done
       fi
@@ -59,13 +59,15 @@ class Validator < Component
 
   def validate_running
     sh <<-SH
-      for w in 1 1 1 1 2 2 4 4 4 4 4 4 4; do
-        if curl -sS http://localhost:5791 -o /dev/null; then
-          exit 0
-        fi
-        sleep $w
-      done
-      exit 96
+     i=0
+     until curl -sS http://localhost:5791 -o /dev/null; do
+       sleep 1
+       i=$(( $i + 1 ))
+       if [ $i -gt 40 ]; then
+         echo "geminabox (port 5791) not responding after 40s" >&2
+         exit 91
+       fi
+     done
     SH
   end
 end
