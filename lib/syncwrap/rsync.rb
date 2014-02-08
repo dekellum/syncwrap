@@ -103,24 +103,24 @@ module SyncWrap
 
     # Preserves any trailing '/'.
     # Raises SourceNotFound if any not found.
-    def resolve_sources( srcs, src_roots )
-      srcs.map { |path| resolve_source!( path, src_roots ) }
+    def resolve_sources( srcs, sync_paths )
+      srcs.map { |path| resolve_source!( path, sync_paths ) }
     end
 
     # Preserves any trailing '/'.
     # Raises SourceNotFound if not found.
-    def resolve_source!( path, src_roots )
-      resolve_source( path, src_roots ) or
+    def resolve_source!( path, sync_paths )
+      resolve_source( path, sync_paths ) or
         raise( SourceNotFound,
-              "#{path.inspect} not found in roots #{src_roots.inspect}" )
+              "#{path.inspect} not found in :sync_paths #{sync_paths.inspect}" )
     end
 
     # Preserves any trailing '/'.
     # Returns nil if not found.
-    def resolve_source( path, src_roots )
+    def resolve_source( path, sync_paths )
       #FIXME: Honor absolute arg paths?
       found = nil
-      src_roots.each do |r|
+      sync_paths.each do |r|
         candidate = File.join( r, path )
         if File.exist?( candidate )
           found = candidate

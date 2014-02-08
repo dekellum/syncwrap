@@ -28,7 +28,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   TEST_DIR = File.dirname( __FILE__ ).freeze
   SYNC_DIR = File.join( TEST_DIR, 'sync' ).freeze
-  SRC_ROOTS = [ SYNC_DIR ].freeze
+  SYNC_PATHS = [ SYNC_DIR ].freeze
 
   def setup
     FileUtils.rm_rf( "#{TEST_DIR}/d1" )
@@ -39,7 +39,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def sp
     @sp ||= Space.new.tap do |s|
-      s.merge_default_options( src_roots: SRC_ROOTS,
+      s.merge_default_options( sync_paths: SYNC_PATHS,
                                erb_binding: binding_under_test )
       s.merge_default_options( verbose: :v ) if VERBOSE
     end

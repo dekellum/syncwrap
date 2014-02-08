@@ -131,7 +131,7 @@ module SyncWrap
 
       srcs, target = expand_implied_target( args )
 
-      srcs = resolve_sources( srcs, Array( opts[ :src_roots ] ) )
+      srcs = resolve_sources( srcs, Array( opts[ :sync_paths ] ) )
 
       if opts[:erb_process] != false
         st_opts = opts.dup
@@ -152,10 +152,10 @@ module SyncWrap
     end
 
     # Returns the path to the the specified src, first found in
-    # :src_roots option.  Returns nil if not found.
+    # :sync_paths option.  Returns nil if not found.
     def find_source( src, opts = {} )
       opts = @default_options.merge( opts )
-      resolve_source( src, Array( opts[ :src_roots ] ) )
+      resolve_source( src, Array( opts[ :sync_paths ] ) )
     end
 
     private

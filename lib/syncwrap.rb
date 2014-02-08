@@ -37,7 +37,7 @@ module SyncWrap
   class NestingError < SyncError
   end
 
-  # Source specified in rput can not be found in :src_roots
+  # Source specified in rput can not be found in :sync_paths
   class SourceNotFound < SyncError
   end
 
@@ -59,7 +59,7 @@ module SyncWrap
       @default_options = {
         coalesce: true,
         sh_verbose: :v,
-        src_roots: [ File.join( SyncWrap::GEM_ROOT, 'sync' ) ] }
+        sync_paths: [ File.join( SyncWrap::GEM_ROOT, 'sync' ) ] }
       @formatter = Formatter.new
     end
 

@@ -215,7 +215,7 @@ module SyncWrap
     end
 
     # Return the path to the the specified src, as first found in the
-    # :src_roots option as per #rput, Source Resolution.  Returns nil
+    # :sync_paths option as per #rput, Source Resolution.  Return nil
     # if not found.  This allows optional, local behavior based on the
     # existance of optional sources.
     def find_source( src, opts = {} )
@@ -259,7 +259,8 @@ module SyncWrap
     # directories are interpreted as by `rsync`: glob patterns are
     # expanded and trailing '/' is significant.
     #
-    # Each src is search in :src_roots. See Source Resolution below.
+    # Each src is searched in :sync_paths. See Source Resolution
+    # below.
     #
     # === Execution
     #
@@ -281,19 +282,19 @@ module SyncWrap
     # === Source Resolution
     #
     # For each src path in arguments, interpret each as a relative path
-    # from any of the provided :src_roots (see in Options below),
+    # from any of the provided :sync_paths (see in Options below),
     # searched in order. The first matching source found will be
-    # used. If no source is found (or if src_roots is not provided
+    # used. If no source is found (or if sync_paths is not provided
     # or empty) then raise a SourceNotFound exception. Note that a src
     # trailing '/' is significant both to rsync itself and that only
     # source directories will be matched.
     #
     # If a src path does not have a trailing '/' or '.erb' suffix
     # already, if the non-suffixed file is not found within a given
-    # src_root; then '.erb' is appended and tested as well. Thus if a
+    # sync_path; then '.erb' is appended and tested as well. Thus if a
     # src "foo.erb" is given, the template must exist. If instead
     # 'foo' is given, then 'foo.erb' will be processed, if and only
-    # if, 'foo' does not already exist in a given src_root. See ERB
+    # if, 'foo' does not already exist in a given sync_path. See ERB
     # processing below.
     #
     # === ERB processing
@@ -358,9 +359,9 @@ module SyncWrap
     #              If set to a String "VALUE", instead use
     #              `rsync --perms --chmod=VALUE`
     #
-    # :src_roots:: Array of one or more local directories in which to
-    #              find source files.
-    #              Effectively a required parameter.
+    # :sync_paths:: Array of one or more local directories in which to
+    #               find source files.
+    #               Effectively required.
     #
     # :verbose::   Output stdout/stderr from rsync (default: false)
     #

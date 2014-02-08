@@ -82,7 +82,7 @@ class TestRsync < MiniTest::Unit::TestCase
   end
 
   SYNC_DIR = File.join( SyncWrap::GEM_ROOT, 'sync' ).freeze
-  SRC_ROOTS = [ SYNC_DIR ].freeze
+  SYNC_PATHS = [ SYNC_DIR ].freeze
 
   # Maintenance: We use gem's sync/src/hashdot template list for
   # testing, so expect breakage if that changes.
@@ -110,19 +110,19 @@ class TestRsync < MiniTest::Unit::TestCase
   end
 
   def test_resolve_sources
-    src = resolve_source!( 'src/hashdot', SRC_ROOTS )
+    src = resolve_source!( 'src/hashdot', SYNC_PATHS )
     assert( File.identical?( SYNC_HASHDOT, src ), src )
     assert( src[-1] != '/' )
 
-    src = resolve_source!( 'src/hashdot/', SRC_ROOTS )
+    src = resolve_source!( 'src/hashdot/', SYNC_PATHS )
     assert( File.identical?( SYNC_HASHDOT, src ), src )
     assert( src[-1] == '/' )
 
     assert_raises( SyncWrap::SourceNotFound ) do
-      resolve_sources( [ 'src/hashdot', 'not/found' ], SRC_ROOTS )
+      resolve_sources( [ 'src/hashdot', 'not/found' ], SYNC_PATHS )
     end
 
-    src = resolve_source!( 'src/hashdot', [ '/bogus' ] + SRC_ROOTS )
+    src = resolve_source!( 'src/hashdot', [ '/bogus' ] + SYNC_PATHS )
     assert( File.identical?( SYNC_HASHDOT, src ), src )
   end
 
