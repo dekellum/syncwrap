@@ -23,17 +23,32 @@ module SyncWrap
     # The space in which this host was constructed.
     attr_reader :space
 
-    attr_reader :name
-    # FIXME: Short name, long name, or IP?
-
     # Array of role Symbols or (direct) Component instances in the
     # order added.
     attr_reader :contents
 
-    def initialize( space, name )
+    def initialize( space, props = {} )
       @space = space
-      @name = name
+      @props = props.dup
       @contents = [ :all ]
+      roles = @props.delete( :roles )
+      @contents |= roles if roles
+    end
+
+    def name
+      self[ :name ]
+    end
+
+    def []( key )
+      @props[ key ]
+    end
+
+    def []=( key, val )
+      @props[ key ] = val
+    end
+
+    def merge_props( opts )
+      @props.merge!( opts )
     end
 
     # Add any number of roles (by Symbol) or (direct) Component

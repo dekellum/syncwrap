@@ -140,13 +140,18 @@ module SyncWrap
     end
 
     # Define/access a Host by name
-    # Additional args are interpreted as role symbols or (direct)
-    # Components to add to this Host. Each role will only be added
-    # once. A final Hash argument is interpreted as and reserved for
-    # future options.
-    def host( name, *args )
-      opts = args.last.is_a?( Hash ) && args.pop || {}
-      host = @hosts[ name ] ||= Host.new( self, name )
+    #
+    # If first arg is a String, it is interpreted as the name property
+    # and is also used for lookup. Additional args are interpreted as
+    # role symbols or (direct) Components to add to this Host. Each
+    # role will only be added once. A final Hash argument is
+    # interpreted as properties to add to the host.
+    def host( *args )
+      props = args.last.is_a?( Hash ) && args.pop || {}
+      name = args.first.is_a?( String ) && args.shift
+      props = props.merge( name: name ) if name
+      host = @hosts[ props[ :name ] ] ||= Host.new( self )
+      host.merge_props( props )
       host.add( *args )
       host
     end
