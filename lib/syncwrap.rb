@@ -67,6 +67,19 @@ module SyncWrap
       @default_options.merge!( opts )
     end
 
+    # Prepend the given, optionally relative to caller (i.e. sync.rb)
+    # path to front of the :sync_paths list.
+    def prepend_sync_path( rpath = 'sync' )
+      unless rpath =~ %r{^/}
+        from = caller.first =~ /^([^:]+):/ && $1
+        rpath = File.expand_path( rpath, File.dirname( from ) ) if from
+      end
+      roots = default_options[ :sync_paths ]
+      roots.delete( rpath ) # don't duplicate but move to front
+      roots.unshift( rpath )
+      roots.dup
+    end
+
     # Define/access a Role by symbol
     # Additional args are interpreted as Components to add to this
     # role.
@@ -227,19 +240,27 @@ module SyncWrap
 
     private
 
+    # The current space for use in sync.rb
+    def space
+      Space.current
+    end
+
+    # Shorthand for space.role
     def role( *args )
-      Space.current.role( *args )
+      space.role( *args )
     end
 
+    # Shorthand for host.role
     def host( *args )
-      Space.current.host( *args )
+      space.host( *args )
     end
 
+    # Merge options given, or (without opts) return space.default_options
     def options( opts = nil )
       if opts
-        Space.current.merge_default_options( opts )
+        space.merge_default_options( opts )
       else
-        Space.current.default_options
+        space.default_options
       end
     end
 

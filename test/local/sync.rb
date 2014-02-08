@@ -30,7 +30,7 @@ require 'syncwrap/components/geminabox'
 
 include SyncWrap
 
-options[ :src_roots ].unshift( File.join( File.dirname( __FILE__ ), 'sync' ) )
+space.prepend_sync_path
 
 class Uninstaller < Component
   def uninstall
