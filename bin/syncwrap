@@ -23,8 +23,6 @@ require 'rubygems'
 
 require 'syncwrap'
 require 'syncwrap/cli'
-
-# Extend the top level Object with the Main module
-self.extend SyncWrap::Main
+require 'syncwrap/main'
 
 SyncWrap::CLI.new.run( ARGV )

@@ -12,6 +12,7 @@ lib/syncwrap/context.rb
 lib/syncwrap/distro.rb
 lib/syncwrap/formatter.rb
 lib/syncwrap/host.rb
+lib/syncwrap/main.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/components/commercial_jdk.rb

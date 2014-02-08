@@ -247,35 +247,4 @@ module SyncWrap
 
   end
 
-  # A limited set of (private) convenience methods for use in sync.rb
-  module Main
-
-    private
-
-    # The current Space
-    def space # :doc:
-      Space.current
-    end
-
-    # Shorthand for space.role
-    def role( *args ) # :doc:
-      space.role( *args )
-    end
-
-    # Shorthand for host.role
-    def host( *args ) # :doc:
-      space.host( *args )
-    end
-
-    # Merge options given, or (without opts) return space.default_options
-    def options( opts = nil ) # :doc:
-      if opts
-        space.merge_default_options( opts )
-      else
-        space.default_options
-      end
-    end
-
-  end
-
 end
