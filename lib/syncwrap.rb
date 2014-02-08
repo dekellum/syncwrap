@@ -76,6 +76,7 @@ module SyncWrap
     # Merge the specified options to default_options
     def merge_default_options( opts )
       @default_options.merge!( opts )
+      nil
     end
 
     # Prepend the given path to front of the :sync_paths list. The
