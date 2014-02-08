@@ -47,7 +47,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_file
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -66,7 +66,7 @@ class TestContextRput < MiniTest::Unit::TestCase
   def test_rput_file_sudo
     skip unless TestOptions::SAFE_SUDO
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -84,7 +84,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_erb_no_suffix
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -102,7 +102,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_erb_suffix
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -120,7 +120,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_erb_rename
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -139,7 +139,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_missing_dir
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
     begin
       ctx.rput( 'nodir/', "#{TEST_DIR}/" )
       flunk "Expected SourceNotFound exception"
@@ -151,7 +151,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_missing_file
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
     begin
       ctx.rput( 'd1/goo', "#{TEST_DIR}/" )
       flunk "Expected SourceNotFound exception"
@@ -163,7 +163,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_contents_with_erb
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -183,7 +183,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_dir_with_erb
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -205,7 +205,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_subdir_with_erb
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -228,7 +228,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_subdir_contents_with_erb
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
 
     2.times do |i|
       ctx.with do
@@ -250,7 +250,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_erb_perm_change_only
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_opts )
+    ctx = Context.new( host, sp.default_options )
     changes = ctx.rput( 'd3/', "#{TEST_DIR}" )
     assert_equal( %w[ d2/ d2/bar d2/foo ], changes.map { |c| c[1] } )
     assert( File.executable?( "#{TEST_DIR}/d2/foo" ) )

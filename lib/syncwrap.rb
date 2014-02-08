@@ -49,14 +49,14 @@ module SyncWrap
   class Space
 
     # FIXME: document
-    attr_reader :default_opts
+    attr_reader :default_options
 
     attr_reader :formatter
 
     def initialize
       @roles = Hash.new { |h,k| h[k] = [] }
       @hosts = {}
-      @default_opts = {
+      @default_options = {
         coalesce: true,
         sh_verbose: :v,
         src_roots: [ File.join( SyncWrap::GEM_ROOT, 'sync' ) ] }
@@ -64,7 +64,7 @@ module SyncWrap
     end
 
     def merge_default_options( opts )
-      @default_opts.merge!( opts )
+      @default_options.merge!( opts )
     end
 
     # Define/access a Role by symbol
@@ -96,7 +96,7 @@ module SyncWrap
     end
 
     def execute( host_list = hosts, component_plan = [], opts = {} )
-      opts = default_opts.merge( opts )
+      opts = default_options.merge( opts )
       @formatter.colorize = ( opts[ :colorize ] != false )
 
       if opts[ :threads ] && host_list.length > opts[ :threads ]
@@ -239,7 +239,7 @@ module SyncWrap
       if opts
         Space.current.merge_default_options( opts )
       else
-        Space.current.default_opts
+        Space.current.default_options
       end
     end
 

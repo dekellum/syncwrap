@@ -150,14 +150,14 @@ module SyncWrap
     #               post expanded. This option should generally be set
     #               even if :verbose if false, since it will still be
     #               useful to error output on a CommandFailure.
-    #               Default: nil (but :v via Space.default_opts)
+    #               Default: nil (but :v via Space.default_options)
     #
     # :coalesce::   Coalesce (or merge) STDOUT to STDERR either via ssh
     #               or bash, to avoid out-of-order verbose output (due
     #               to buffering/timing). STDERR is used to increase
     #               incremental output through ssh, which tends to
     #               buffer STDOUT.
-    #               Default: false (but true via Space.default_opts)
+    #               Default: false (but true via Space.default_options)
     #
     # :error::      Pass bash the -e option to terminate early on errors.
     #               Default: true

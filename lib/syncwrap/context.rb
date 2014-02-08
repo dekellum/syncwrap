@@ -49,13 +49,13 @@ module SyncWrap
     # The current Host of this context
     attr_reader :host
 
-    # Construct given host and default_opts to use for all #sh and
+    # Construct given host and default_options to use for all #sh and
     # #rput calls.
     def initialize( host, opts = {} )
       @host = host
       reset_queue
       @queue_locked = false
-      @default_opts = opts
+      @default_options = opts
 
       super()
     end
@@ -73,12 +73,12 @@ module SyncWrap
     # Return true if being executed, by constructed default options,
     # in dryrun mode.
     def dryrun?
-      @default_opts[ :dryrun ]
+      @default_options[ :dryrun ]
     end
 
     # See Component#sh for interface details
     def sh( command, opts = {} )
-      opts = @default_opts.merge( opts )
+      opts = @default_options.merge( opts )
       close = opts.delete( :close )
 
       flush if opts != @queued_opts #may still be a no-op
@@ -116,14 +116,14 @@ module SyncWrap
 
     # See Component#capture for interface details.
     def capture( command, opts = {} )
-      opts = @default_opts.merge( coalesce: false, dryrun: false ).merge( opts )
+      opts = @default_options.merge( coalesce: false, dryrun: false ).merge( opts )
       flush
       capture_shell( command, opts )
     end
 
     # See Component#rput for interface details.
     def rput( *args )
-      opts = @default_opts
+      opts = @default_options
       opts = opts.merge( args.pop ) if args.last.is_a?( Hash )
       opts = opts.merge( coalesce: false )
 
@@ -154,7 +154,7 @@ module SyncWrap
     # Returns the path to the the specified src, first found in
     # :src_roots option.  Returns nil if not found.
     def find_source( src, opts = {} )
-      opts = @default_opts.merge( opts )
+      opts = @default_options.merge( opts )
       resolve_source( src, Array( opts[ :src_roots ] ) )
     end
 
