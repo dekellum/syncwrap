@@ -46,12 +46,18 @@ module SyncWrap
   class CommandFailure < SyncError
   end
 
+  # Serves as the container for Host and roles and provides the top
+  # level #execute method.
   class Space
 
-    # FIXME: document
+    # Default options for execution, including Component#rput and
+    # Component#sh (see Options details). The CLI uses this, for
+    # example, to set :verbose => true (from --verbose) and
+    # :shell_verbose => :x (from --expand-shell). In limited cases it
+    # may be appropriate to set default overrides in a sync.rb.
     attr_reader :default_options
 
-    attr_reader :formatter
+    attr_reader :formatter #:nodoc:
 
     def initialize
       @roles = Hash.new { |h,k| h[k] = [] }
@@ -63,12 +69,14 @@ module SyncWrap
       @formatter = Formatter.new
     end
 
+    # Merge the specified options to default_options
     def merge_default_options( opts )
       @default_options.merge!( opts )
     end
 
-    # Prepend the given, optionally relative to caller (i.e. sync.rb)
-    # path to front of the :sync_paths list.
+    # Prepend the given path to front of the :sync_paths list. The
+    # path may be relative to the caller (i.e. sync.rb). Return a copy
+    # of the resultant sync_paths list.
     def prepend_sync_path( rpath = 'sync' )
       unless rpath =~ %r{^/}
         from = caller.first =~ /^([^:]+):/ && $1
@@ -77,7 +85,7 @@ module SyncWrap
       roots = default_options[ :sync_paths ]
       roots.delete( rpath ) # don't duplicate but move to front
       roots.unshift( rpath )
-      roots.dup
+      roots.dup #return a copy
     end
 
     # Define/access a Role by symbol
@@ -231,32 +239,33 @@ module SyncWrap
     end
 
     class << self
-      attr_accessor :current
+      attr_accessor :current #:nodoc:
     end
 
   end
 
+  # A limited set of (private) convenience methods for use in sync.rb
   module Main
 
     private
 
-    # The current space for use in sync.rb
-    def space
+    # The current Space
+    def space # :doc:
       Space.current
     end
 
     # Shorthand for space.role
-    def role( *args )
+    def role( *args ) # :doc:
       space.role( *args )
     end
 
     # Shorthand for host.role
-    def host( *args )
+    def host( *args ) # :doc:
       space.host( *args )
     end
 
     # Merge options given, or (without opts) return space.default_options
-    def options( opts = nil )
+    def options( opts = nil ) # :doc:
       if opts
         space.merge_default_options( opts )
       else
