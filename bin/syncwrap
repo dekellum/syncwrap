@@ -23,6 +23,5 @@ require 'rubygems'
 
 require 'syncwrap'
 require 'syncwrap/cli'
-require 'syncwrap/main'
 
 SyncWrap::CLI.new.run( ARGV )

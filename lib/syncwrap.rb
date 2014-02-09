@@ -50,8 +50,11 @@ module SyncWrap
   # level #execute method.
   class Space
 
-    class << self
-      attr_accessor :current #:nodoc:
+    # Return the current space, as setup within a Space#with block, or
+    # raise something fierce.
+    def self.current
+      Thread.current[:syncwrap_current_space] or
+        raise "Space.current called outside of Space#with/thread"
     end
 
     # Default options, for use including Component#rput, Component#sh,
@@ -73,20 +76,47 @@ module SyncWrap
       @formatter = Formatter.new
     end
 
+    # Load the specified filename as per a sync.rb, into this
+    # Space. The path may be relative to the caller (i.e. Rakefile,
+    # etc.) as with the default 'sync'. Uses #with internally.
+    def load_sync_file_relative( fpath = './sync.rb' )
+      load_sync_file( path_relative_to_caller( fpath, caller ) )
+    end
+
+    # Load the specified filename as per a sync.rb, into this Space.
+    # This uses a #with block internally.
+    def load_sync_file( filename )
+      require 'syncwrap/main'
+      with do
+        load( filename )
+      end
+    end
+
+    # Make self the Space.current inside of block.
+    def with
+      prior = Thread.current[:syncwrap_current_space]
+      raise "Invalid Space#with nesting!" if prior && prior != self
+      begin
+        Thread.current[:syncwrap_current_space] = self
+        yield self
+      ensure
+        Thread.current[:syncwrap_current_space] = prior
+      end
+    end
+
     # Merge the specified options to default_options
     def merge_default_options( opts )
       @default_options.merge!( opts )
       nil
     end
 
-    # Prepend the given path to front of the :sync_paths list. The
-    # path may be relative to the caller (i.e. sync.rb). Return a copy
-    # of the resultant sync_paths list.
+    # Prepend the given directory path to front of the :sync_paths
+    # list. If relative, path is assumed to be relative to the caller
+    # (i.e. sync.rb) as with the conventional 'sync'
+    # directory. Returns a copy of the resultant sync_paths list.
     def prepend_sync_path( rpath = 'sync' )
-      unless rpath =~ %r{^/}
-        from = caller.first =~ /^([^:]+):/ && $1
-        rpath = File.expand_path( rpath, File.dirname( from ) ) if from
-      end
+      rpath = path_relative_to_caller( rpath, caller )
+
       roots = default_options[ :sync_paths ]
       roots.delete( rpath ) # don't duplicate but move to front
       roots.unshift( rpath )
@@ -131,6 +161,30 @@ module SyncWrap
         uniq
     end
 
+    # Returns a new component_plan from plan, looking up any Class
+    # string names and using :install for any missing methods:
+    #
+    #  \[ [ Class | String, Symbol? ] ... ] -> [ [ Class, Symbol ] ... ]
+    #
+    # Class name lookup is by unqualified matching against
+    # #component_classes (already added to hosts of this space.) If
+    # such String match is ambiguous or not found, a RuntimeError is
+    # raised.
+    def resolve_component_plan( plan )
+      classes = component_classes
+      plan.map do |clz,mth|
+        if clz.is_a?( String )
+          found = classes.select { |cc| cc.name =~ /(^|::)#{clz}$/ }
+          if found.length == 1
+            clz = found.first
+          else
+            raise "Class \"#{clz}\" ambiguous or not found: #{found.inspect}"
+          end
+        end
+        [ clz, mth && mth.to_sym || :install ]
+      end
+    end
+
     # Execute components based on a host_list (default all), a
     # component_plan (default :install on all components), and with
     # any additional options (merged with default_options).
@@ -149,6 +203,7 @@ module SyncWrap
     def execute( host_list = hosts, component_plan = [], opts = {} )
       opts = default_options.merge( opts )
       @formatter.colorize = ( opts[ :colorize ] != false )
+      component_plan = resolve_component_plan( component_plan )
 
       if opts[ :threads ] && host_list.length > opts[ :threads ]
         queue = Queue.new
@@ -222,7 +277,7 @@ module SyncWrap
         if component_plan.empty?
           mths = [ :install ] if comp.respond_to?( :install )
         else
-          found = component_plan.select { |cls,_| comp.is_a?( cls ) }
+          found = component_plan.select { |cls,_| comp.kind_of?( cls ) }
           mths = found.map { |_,mth| mth }
           mths = [ :install ] if mths.include?( :install ) #trumps
         end
@@ -258,6 +313,14 @@ module SyncWrap
         end
       end
       false
+    end
+
+    def path_relative_to_caller( rpath, clr )
+      unless rpath =~ %r{^/}
+        from = clr.first =~ /^([^:]+):/ && $1
+        rpath = File.expand_path( rpath, File.dirname( from ) ) if from
+      end
+      rpath
     end
 
   end

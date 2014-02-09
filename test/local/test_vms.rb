@@ -21,38 +21,27 @@ require_relative '../setup'
 
 require 'syncwrap'
 
-# Extend the top level Object with the Main module in order to load
-# local/sync.rb
-self.extend SyncWrap::Main
-
 # Test using the local sync.rb, and 'ubuntu-1' (12.04.4 LTS) and
 # 'centos-1' (6.5) local VMs. This is not a default test.
-# THE TEST CHANGES ARE POTENTIALLY DAMAGING.
+# THE TEST CHANGES ARE POTENTIALLY DAMAGING. See sync.rb
 class TestVMs < MiniTest::Unit::TestCase
   include SyncWrap
 
-  LOCAL_DIR = File.dirname( __FILE__ )
-  SYNC_DIR = File.join( LOCAL_DIR, 'sync' )
-
-  def space
-    Space.current
-  end
-
   def setup
-    Space.current = Space.new
-    load File.join( LOCAL_DIR, 'sync.rb' )
+    @sp = Space.new
+    @sp.load_sync_file_relative 'sync.rb'
   end
 
   # Uninstall, install, install-again
   def test
-    skip unless TestOptions::LOCAL_VM_TEST
     puts "[[ Test execute Uninstaller.uninstall ]]"
-    assert( space.execute( space.hosts, [ [ Uninstaller, :uninstall ] ] ) )
+    assert( @sp.execute( @sp.hosts, [ ['Uninstaller', :uninstall ]] ) )
 
     puts "[[ Test execute (from scratch) ]]"
-    assert( space.execute )
+    assert( @sp.execute )
 
     puts "[[ Test execute (over again) ]]"
-    assert( space.execute )
+    assert( @sp.execute )
   end
+
 end

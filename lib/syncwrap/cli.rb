@@ -32,8 +32,10 @@ module SyncWrap
       @component_plan = []
       @roles = []
       @host_patterns = []
-      Space.current = @space = Space.new
+      @space = Space.new
     end
+
+    attr_reader :space
 
     def parse_cmd( args )
       opts = OptionParser.new do |opts|
@@ -132,7 +134,8 @@ module SyncWrap
 
     def run( args )
       parse_cmd( args )
-      load( @sw_file ) #unwrapped
+      space.load_sync_file( @sw_file )
+
       resolve_hosts
       lookup_component_plan
       resolve_components
@@ -144,13 +147,13 @@ module SyncWrap
 
       exit( 0 ) if lists > 0
 
-      success = @space.execute( @hosts, @component_plan, @options )
+      success = space.execute( @hosts, @component_plan, @options )
       exit( success ? 0 : 1 )
     end
 
     def list_components( comp_classes, multi )
       puts "Selected Components:" if multi
-      puts comp_classes.map { |cls| short_cn( cls ) }.join( ' ')
+      puts short_class_names( comp_classes ).join( ' ')
       puts if multi
     end
 
@@ -158,19 +161,25 @@ module SyncWrap
       puts "Included Roles:" if multi
       roles = hosts.map { |h| h.roles }.inject([],:|)
       table = roles.map do |role|
-        [ ':' + role.to_s ] +
-          @space.role( role ).map { |c| short_cn( c.class ) }
+        row = [ ':' + role.to_s ]
+        classes = space.role( role ).map { |c| c.class }
+        row << short_class_names( classes ).join(' ')
       end
       print_table( table )
       puts if multi
     end
 
     def list_hosts( hosts, multi )
+      names = []
       puts "Selected Hosts:" if multi
       table = hosts.map do |host|
-        [ host.name ] +
-          host.contents.map do |c|
-            c.is_a?( Symbol ) ? ':' + c.to_s : short_cn( c.class )
+        row = [ host.name ]
+        row += host.contents.map do |c|
+          if c.is_a?( Symbol )
+            ':' + c.to_s
+          else
+            short_class_names( [c.class], names ).first
+          end
         end
       end
       print_table( table )
@@ -195,22 +204,31 @@ module SyncWrap
       end
     end
 
-    def short_cn( cls )
-      cls.name.sub(/^SyncWrap::/,'')
+    # Return a new Array of classes mapped to the shortest possible
+    # non-duplicate name.
+    def short_class_names( classes, names = [] )
+      classes.map do |cls|
+        segs = cls.name.split( '::' )
+        (0...segs.length).reverse_each do |s|
+          tn = segs[s..-1].join( '::' )
+          if !names.include?( tn )
+            break tn
+          end
+        end
+      end
     end
 
     def lookup_component_plan
       @component_plan.map! do |comp|
         name, meth = comp.split( '.' )
-        nameparts = name.split( '::' )
-        cls = class_lookup( nameparts )
-        [ cls, meth && meth.to_sym || :install ]
+        [ name, meth ]
       end
+      @component_plan = space.resolve_component_plan( @component_plan )
     end
 
     def component_classes
       if @component_plan.empty?
-        @space.component_classes( @hosts )
+        space.component_classes( @hosts )
       else
         @component_plan.map { |a| a[0] }
       end
@@ -227,7 +245,7 @@ module SyncWrap
     end
 
     def resolve_hosts
-      @hosts = @space.hosts
+      @hosts = space.hosts
       unless @host_patterns.empty?
         @hosts.select! do |host|
           @host_patterns.any? do |pat|
@@ -241,19 +259,6 @@ module SyncWrap
         @hosts.select! do |host|
           host.roles.any? { |r| @roles.include?( r ) }
         end
-      end
-    end
-
-    def class_lookup( names )
-      if names.length == 1
-        begin
-          SyncWrap.const_get( name )
-        rescue NameError
-        end
-      end
-      # Otherwise assume its fully qualified and look from top-level
-      names.inject( Object ) do |mod, name|
-        mod.const_get( name )
       end
     end
 

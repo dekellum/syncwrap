@@ -18,12 +18,9 @@ require 'syncwrap'
 
 module SyncWrap
 
-  # A limited set of (private) convenience methods for use in sync.rb.
-  # If not running via the syncwrap command, you need to explicitly:
-  #
-  #   require 'syncwrap/main'
-  #
-  # ...to make these methods available.
+  # A limited set of (private) methods for use at the top-level in
+  # a sync.rb. All of these methods delegate to the _current_
+  # Space.
   module Main
 
     private
