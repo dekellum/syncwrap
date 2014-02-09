@@ -40,7 +40,7 @@ module SyncWrap
 
     def write_component( host, comp, mth, state )
       io << yellow if colorize
-      io << '== ' << host.name << ' ' << short_cn( comp.class ) << '#' << mth
+      io << '== ' << host.name << ' ' << comp.class << '#' << mth
       io << ': ' << state
       io << clear if colorize
       io << "\n"
@@ -119,7 +119,7 @@ module SyncWrap
 
       io << yellow if colorize
       io << '== ' << host.name << ' '
-      io << short_cn( comp.class ) << '#' << mth << ' ' if comp && mth
+      io << comp.class << '#' << mth << ' ' if comp && mth
       io << "error"
       io << ", same stack as" unless bt
       io << " [" << bt_num << "]:\n"
