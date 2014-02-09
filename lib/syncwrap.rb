@@ -46,8 +46,8 @@ module SyncWrap
   class CommandFailure < SyncError
   end
 
-  # Serves as the container for Host and roles and provides the top
-  # level #execute method.
+  # Serves as the container for #hosts and roles and provides the top
+  # level #execute.
   class Space
 
     # Return the current space, as setup within a Space#with block, or
@@ -76,9 +76,9 @@ module SyncWrap
       @formatter = Formatter.new
     end
 
-    # Load the specified filename as per a sync.rb, into this
-    # Space. The path may be relative to the caller (i.e. Rakefile,
-    # etc.) as with the default 'sync'. Uses #with internally.
+    # Load the specified file path as per a sync.rb, into this
+    # Space. If relative, path is assumed to be relative to the caller
+    # (i.e. Rakefile, etc.) as with the conventional 'sync' directory.
     def load_sync_file_relative( fpath = './sync.rb' )
       load_sync_file( path_relative_to_caller( fpath, caller ) )
     end
@@ -151,7 +151,7 @@ module SyncWrap
       host
     end
 
-    # All hosts, in order added.
+    # All Host instances, in order added.
     def hosts
       @hosts.values
     end
@@ -169,7 +169,7 @@ module SyncWrap
     # Returns a new component_plan from plan, looking up any Class
     # string names and using :install for any missing methods:
     #
-    #  \[ [ Class | String, Symbol? ] ... ] -> [ [ Class, Symbol ] ... ]
+    # \[ [ Class | String, Symbol? ] ... ] -> [ [ Class, Symbol ] ... ]
     #
     # Class name lookup is by unqualified matching against
     # #component_classes (already added to hosts of this space.) If
@@ -269,13 +269,13 @@ module SyncWrap
     end
 
     # Given components and plan, return an ordered Array of
-    # \[component, [methods]] to execute. An empty/default plan is
+    # \[component, [method,...]] to execute. An empty/default plan is
     # interpreted as :install on all components which implement it. If
     # :install is explicitly part of the plan, then it trumps any
     # other methods listed for the same component.
     #
     # Note this must be run out-of-Context to avoid unintended dynamic
-    # binding of the :install methods, etc.
+    # binding of :install or other methods.
     def resolve_component_methods( components, component_plan = [] )
       components.map do |comp|
         mths = []
