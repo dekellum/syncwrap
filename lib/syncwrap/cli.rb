@@ -41,19 +41,20 @@ module SyncWrap
       opts = OptionParser.new do |opts|
         opts.banner = "Usage: syncwrap {options} [Component[.method]] ..."
 
-        opts.on( "-e", "--each-component",
-                 "Flush shell commands after each component method" ) do
-          @options[ :flush_component ] = true
-        end
-
         opts.on( "-f", "--file FILE",
                  "Load FILE for role/host/component definitions",
                  "(default: './sync.rb')" ) do |f|
           @sw_file = f
         end
+
         opts.on( "-h", "--hosts PATTERN",
                  "Constrain hosts by pattern (may use multiple)" ) do |p|
           @host_patterns << Regexp.new( p )
+        end
+
+        opts.on( "-r", "--hosts-with-role ROLE",
+                 "Constrain hosts by role (may use multiple)" ) do |r|
+          @roles << r.sub(/^:/,'').to_sym
         end
 
         opts.on( "-n", "--dryrun",
@@ -62,9 +63,16 @@ module SyncWrap
           @options[ :dryrun ] = true
         end
 
-        opts.on( "-r", "--hosts-with-role ROLE",
-                 "Constrain hosts by role (may use multiple)" ) do |r|
-          @roles << r.sub(/^:/,'').to_sym
+        opts.on( "-t", "--threads N",
+                 "Specify the number of hosts to process concurrently",
+                 "(default: all hosts)",
+                  Integer ) do |n|
+          @options[ :threads ] = n
+        end
+
+        opts.on( "-e", "--each-component",
+                 "Flush shell commands after each component/method" ) do
+          @options[ :flush_component ] = true
         end
 
         opts.on( "-s", "--no-coalesce",
@@ -77,28 +85,21 @@ module SyncWrap
           @options[ :colorize ] = false
         end
 
-        opts.on( "-t", "--threads N",
-                 "Specify the number of hosts to process concurrently",
-                 "(default: all hosts)",
-                  Integer ) do |n|
-          @options[ :threads ] = n
-        end
-
         opts.on( "-v", "--verbose",
                  "Show details of local/remote command execution" ) do
           @options[ :verbose ] = true
-        end
-
-        opts.on( "--version",
-                 "Show syncwrap version and exit" ) do
-          puts "syncwrap: #{SyncWrap::VERSION}"
-          exit 0
         end
 
         opts.on( "-x", "--expand-shell",
                  "Use -x (expand) instead of -v shell verbose output",
                  "(sh_verbose: :x, typically combined with -v)" ) do
           @options[ :sh_verbose ] = :x
+        end
+
+        opts.on( "--version",
+                 "Show syncwrap version and exit" ) do
+          puts "syncwrap: #{SyncWrap::VERSION}"
+          exit 0
         end
 
         opts.on( "--list-components",
