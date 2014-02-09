@@ -34,7 +34,7 @@ class TestSpaceMain < MiniTest::Unit::TestCase
   end
 
   def test
-    skip if defined?( JRUBY_VERSION )
+    skip if defined?( JRUBY_VERSION ) # 1.6.8 and 1.7.10 both fail this test
     assert( @sp.execute( @sp.hosts, [ [IyyovDaemon, :daemon_service_dir] ] ) )
   end
 end
