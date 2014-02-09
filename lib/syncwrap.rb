@@ -292,19 +292,19 @@ module SyncWrap
 
     def execute_component( ctx, host, comp, mth, opts )
 
-      if opts[ :flush_component ]
-        formatter.sync do
-          formatter.write_component( host, comp, mth, "start" )
-        end
+      formatter.sync do
+        formatter.write_component( host, comp, mth,
+          opts[ :flush_component ] ? "start" : "enqueue" )
       end
 
       comp.send( mth )
 
       ctx.flush if opts[ :flush_component ]
 
-      formatter.sync do
-        formatter.write_component( host, comp, mth,
-          opts[ :flush_component ] ? "complete" : "queued" )
+      if opts[ :flush_component ]
+        formatter.sync do
+          formatter.write_component( host, comp, mth, "complete" )
+        end
       end
 
       true
