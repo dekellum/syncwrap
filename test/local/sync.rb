@@ -30,7 +30,7 @@ require 'syncwrap/components/geminabox'
 
 include SyncWrap
 
-space.prepend_sync_path
+space.prepend_sync_path # local's
 
 class Uninstaller < Component
   def uninstall
