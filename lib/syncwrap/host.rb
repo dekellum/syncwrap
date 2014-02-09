@@ -17,7 +17,7 @@
 module SyncWrap
 
   # Represents various host (server, machine instance) metadata and
-  # serves as a container for roles and Component instances.
+  # serves as a container for #roles and #components.
   class Host
 
     # The space in which this host was constructed.
@@ -29,26 +29,44 @@ module SyncWrap
 
     def initialize( space, props = {} )
       @space = space
-      @props = props.dup
+      @props = {}
+      merge_props( props )
       @contents = [ :all ]
-      roles = @props.delete( :roles )
-      @contents |= roles if roles
     end
 
+    # Return the :name property.
     def name
       self[ :name ]
     end
 
+    # Return the property by (Symbol) key
     def []( key )
       @props[ key ]
     end
 
+    # Set property by (Symbol) key to value. Note that the :roles
+    # property key is supported here, but is effectively the same as
+    # #add( val ). Roles are only added, never removed.
     def []=( key, val )
-      @props[ key ] = val
+      key = key.to_sym
+      if key == :roles
+        add( *val )
+      else
+        @props[ key.to_sym ] = val
+      end
+      val
     end
 
+    # Merge properties. Note that the :roles property key is
+    # supported here, but is affectively the same as #add( val ).
     def merge_props( opts )
-      @props.merge!( opts )
+      opts.each do |key,val|
+        self[ key ] = val
+      end
+    end
+
+    def to_h
+      @props.merge( roles: roles )
     end
 
     # Add any number of roles (by Symbol) or (direct) Component
