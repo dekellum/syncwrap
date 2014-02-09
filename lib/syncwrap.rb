@@ -330,4 +330,22 @@ module SyncWrap
 
   end
 
+  # Setup autoloads for all included components. This should not be
+  # risky in SyncWrap given that all of these should be loaded before
+  # any threads are in play.
+
+  autoload :CommericalJDK, 'syncwrap/components/commmercial_jdk'
+  autoload :Geminabox,     'syncwrap/components/geminabox'
+  autoload :Hashdot,       'syncwrap/components/hashdot'
+  autoload :Iyyov,         'syncwrap/components/iyyov'
+  autoload :IyyovDaemon,   'syncwrap/components/iyyov_daemon'
+  autoload :JRubyVM,       'syncwrap/components/jruby_vm'
+  autoload :OpenJDK,       'syncwrap/components/open_jdk'
+  autoload :RHEL,          'syncwrap/components/rhel'
+  autoload :RunUser,       'syncwrap/components/run_user'
+  autoload :Ubuntu,        'syncwrap/components/ubuntu'
+  autoload :Users,         'syncwrap/components/users'
+
+  # (Alpha sort class name)
+
 end

@@ -2,10 +2,6 @@
 # This contrived sync file demonstrates evil method polution if loaded
 # without the "wrap". See test_space_main.rb
 
-#FIXME: autoload with obsolesce these
-require 'syncwrap/components/run_user.rb'
-require 'syncwrap/components/iyyov_daemon.rb'
-
 include SyncWrap
 
 # A method with name same as what IyyovDaemon#daemon_service_dir needs
