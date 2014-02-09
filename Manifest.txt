@@ -49,12 +49,14 @@ sync/usr/local/etc/qpidd.conf
 sync/var/iyyov/jobs.rb.erb
 sync/var/iyyov/default/config.rb
 sync/var/iyyov/default/daemon.rb.erb
+test/muddled_sync.rb
 test/setup.rb
 test/test_context.rb
 test/test_context_rput.rb
 test/test_rsync.rb
 test/test_shell.rb
 test/test_space.rb
+test/test_space_main.rb
 test/sync/d1/bar
 test/sync/d1/foo.erb
 test/sync/d3/d2/bar

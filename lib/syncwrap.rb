@@ -88,7 +88,12 @@ module SyncWrap
     def load_sync_file( filename )
       require 'syncwrap/main'
       with do
-        load( filename )
+        load( filename, true )
+        # This is true -> wrapped to avoid pollution of sync
+        # namespace. This is particularly important given the dynamic
+        # binding scheme of components. If not done, top-level
+        # methods/vars in sync.rb would have precidents over
+        # component methods.
       end
     end
 
