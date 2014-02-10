@@ -27,6 +27,8 @@ module SyncWrap
     # order added.
     attr_reader :contents
 
+    attr_reader :props
+
     def initialize( space, props = {} )
       @space = space
       @props = {}
