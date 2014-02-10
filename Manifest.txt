@@ -22,6 +22,7 @@ lib/syncwrap/components/hashdot.rb
 lib/syncwrap/components/iyyov.rb
 lib/syncwrap/components/iyyov_daemon.rb
 lib/syncwrap/components/jruby_vm.rb
+lib/syncwrap/components/network.rb
 lib/syncwrap/components/open_jdk.rb
 lib/syncwrap/components/postgresql.rb
 lib/syncwrap/components/qpid.rb

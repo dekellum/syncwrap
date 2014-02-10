@@ -65,6 +65,7 @@ end
 role( :all, Users.new, EtcHosts.new )
 
 role( :iyyov,
+      Uninstaller.new,
       RunUser.new,
       OpenJDK.new,
       JRubyVM.new( jruby_version: '1.7.10' ),
@@ -75,7 +76,7 @@ role( :geminabox,
       Geminabox.new,
       Validator.new )
 
-host( 'centos-1', RHEL.new,   Uninstaller.new, :iyyov, :geminabox, :empty_role,
+host( 'centos-1', RHEL.new,   Network.new, :iyyov, :geminabox, :empty_role,
       internal_ip: '192.168.122.4' )
-host( 'ubuntu-1', Ubuntu.new, Uninstaller.new, :iyyov, :geminabox,
+host( 'ubuntu-1', Ubuntu.new, Network.new, :iyyov, :geminabox,
       internal_ip: '192.168.122.145' )
