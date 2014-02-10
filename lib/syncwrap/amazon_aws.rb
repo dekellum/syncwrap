@@ -16,6 +16,7 @@
 
 require 'aws-sdk'
 require 'resolv'
+require 'json'
 
 module SyncWrap
 
@@ -26,7 +27,7 @@ module SyncWrap
   # This module also includes a disk based cache of meta-data on created
   # instances which allows automated role assignment (i.e. create an
   # instance and run deploy tasks on it in a single pass.)
-  module AWS
+  module AmazonAWS
 
     # The json configuration file, parsed and passed directly to
     # AWS::config method. This file should contain a json object with
@@ -250,9 +251,8 @@ module SyncWrap
 
     # Find running or pending instances in each region String and
     # convert to a HostList.
-    def import_host_list( regions )
-
-      regions.inject([]) do |instances, region|
+    def import_host_props( regions )
+      regions.inject([]) do |insts, region|
         ec2 = AWS::EC2.new.regions[ region ]
 
         found = ec2.instances.map do |inst|
@@ -260,10 +260,9 @@ module SyncWrap
           instance_to_props( region, inst )
         end
 
-        instances += found.compact
+        insts + found.compact
       end
 
-      instances
     end
 
     def instance_to_props( region, inst )
