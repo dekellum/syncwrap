@@ -16,6 +16,7 @@ lib/syncwrap/main.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/components/commercial_jdk.rb
+lib/syncwrap/components/etc_hosts.rb
 lib/syncwrap/components/geminabox.rb
 lib/syncwrap/components/hashdot.rb
 lib/syncwrap/components/iyyov.rb
@@ -29,6 +30,7 @@ lib/syncwrap/components/run_user.rb
 lib/syncwrap/components/ubuntu.rb
 lib/syncwrap/components/users.rb
 sync/etc/gemrc
+sync/etc/hosts.erb
 sync/etc/corosync/corosync.conf
 sync/etc/corosync/uidgid.d/qpid
 sync/etc/init.d/iyyov.erb

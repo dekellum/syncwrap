@@ -62,7 +62,7 @@ class Validator < Component
   end
 end
 
-role( :all, Users.new )
+role( :all, Users.new, EtcHosts.new )
 
 role( :iyyov,
       RunUser.new,
@@ -75,5 +75,7 @@ role( :geminabox,
       Geminabox.new,
       Validator.new )
 
-host( 'centos-1', RHEL.new,   Uninstaller.new, :iyyov, :geminabox, :empty_role )
-host( 'ubuntu-1', Ubuntu.new, Uninstaller.new, :iyyov, :geminabox )
+host( 'centos-1', RHEL.new,   Uninstaller.new, :iyyov, :geminabox, :empty_role,
+      internal_ip: '192.168.122.4' )
+host( 'ubuntu-1', Ubuntu.new, Uninstaller.new, :iyyov, :geminabox,
+      internal_ip: '192.168.122.145' )
