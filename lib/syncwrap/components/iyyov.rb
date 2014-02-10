@@ -104,7 +104,7 @@ module SyncWrap
       chown_run_user( '-R', iyyov_run_dir )
       sudo <<-SH
         if [ ! -e #{iyyov_run_dir}/jobs.rb ]; then
-          sudo -u #{run_user} touch #{iyyov_run_dir}/jobs.rb
+          su #{run_user} -c "touch #{iyyov_run_dir}/jobs.rb"
         fi
       SH
     end
