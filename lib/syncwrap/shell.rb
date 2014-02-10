@@ -18,7 +18,6 @@
 # Copyright (c) Ryan Davis, RubyHitSquad
 #++
 
-require 'syncwrap/base'
 require 'open3'
 
 module SyncWrap

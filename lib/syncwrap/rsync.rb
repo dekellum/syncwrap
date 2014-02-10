@@ -16,7 +16,6 @@
 
 require 'pathname'
 
-require 'syncwrap/base'
 require 'syncwrap/shell'
 
 module SyncWrap
