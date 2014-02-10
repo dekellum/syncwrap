@@ -6,6 +6,7 @@ bin/syncwrap
 lib/syncwrap/base.rb
 lib/syncwrap.rb
 lib/syncwrap/amazon_aws.rb
+lib/syncwrap/amazon_ec2.rb
 lib/syncwrap/cli.rb
 lib/syncwrap/component.rb
 lib/syncwrap/context.rb

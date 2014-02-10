@@ -32,6 +32,7 @@ module SyncWrap
       @component_plan = []
       @roles = []
       @host_patterns = []
+      @import_regions = []
       @space = Space.new
     end
 
@@ -123,6 +124,11 @@ module SyncWrap
           @list_hosts = true
         end
 
+        opts.on( "--import-hosts REGIONs",
+                 "Import hosts form regions and append to sync.rb and exit" ) do |rs|
+          @import_regions = rs.split( /[\s,]+/ )
+        end
+
       end
 
       @component_plan = opts.parse!( args )
@@ -136,6 +142,15 @@ module SyncWrap
     def run( args )
       parse_cmd( args )
       space.load_sync_file( @sw_file )
+
+      if !@import_regions.empty?
+        if space.provider
+          space.provider.import_hosts( @import_regions, @sw_file )
+          exit 0
+        else
+          raise "No provider created in sync file/registered with Space"
+        end
+      end
 
       resolve_hosts
       lookup_component_plan

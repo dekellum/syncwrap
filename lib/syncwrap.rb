@@ -64,9 +64,13 @@ module SyncWrap
     # may be appropriate to set default overrides in a sync.rb.
     attr_reader :default_options
 
+    # A hosting/cloud provider for interaction with this space.
+    attr_accessor :provider
+
     attr_reader :formatter #:nodoc:
 
     def initialize
+      @provider = nil
       @roles = Hash.new { |h,k| h[k] = [] }
       @hosts = {}
       @default_options = {
@@ -355,5 +359,8 @@ module SyncWrap
   autoload :Users,         'syncwrap/components/users'
 
   # (Alpha sort class name)
+
+  # Additional autoloads (optional support)
+  autoload :AmazonEC2,     'syncwrap/amazon_ec2'
 
 end
