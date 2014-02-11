@@ -211,24 +211,28 @@ module SyncWrap
       end
     end
 
-    # Terminates an instance and permanently deletes any EBS volumes
-    # attached to /dev/sdh like via create. WARNING: potential for data
-    # loss! The minimum required propererties in iprops hash are :region
-    # and :id.
-    def aws_terminate_instance_and_ebs_volumes( iprops )
-      #FIXME: Make ebs volume deletion opt-in
+    # Terminate an instance and wait for terminated. If requested,
+    # /dev/sdh# attached EBS volumes which are not otherwise marked
+    # for :delete_on_termination will _also_ be terminated.  The
+    # minimum required properties in iprops are :region and :id.
+    #
+    # _WARNING_: data _will_ be lost!
+    def aws_terminate_instance( iprops, delete_attached_storage = false )
       ec2 = AWS::EC2.new.regions[ iprops[ :region ] ]
       inst = ec2.instances[ iprops[ :id ] ]
       unless inst.exists?
         raise "Instance #{iprops[:id]} does not exist in #{iprops[:region]}"
       end
 
-      ebs_volumes = inst.block_devices.map do |dev|
-        ebs = dev[ :ebs ]
-        if ebs && dev[:device_name] =~ /dh\d+$/ && !ebs[:delete_on_termination]
-          ebs[ :volume_id ]
-        end
-      end.compact
+      ebs_volumes = []
+      if delete_attached_storage
+        ebs_volumes = inst.block_devices.map do |dev|
+          ebs = dev[ :ebs ]
+          if ebs && dev[:device_name] =~ /dh\d+$/ && !ebs[:delete_on_termination]
+            ebs[ :volume_id ]
+          end
+        end.compact
+      end
 
       inst.terminate
       wait_until( "termination of #{inst.id}", 2.0 ) { inst.status == :terminated }

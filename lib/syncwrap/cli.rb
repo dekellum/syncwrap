@@ -35,6 +35,7 @@ module SyncWrap
       @create_plan = []
       @import_regions = []
       @terminate_hosts = []
+      @delete_attached_storage = false
       @space = Space.new
     end
 
@@ -150,10 +151,17 @@ module SyncWrap
           @import_regions = rs.split( /[\s,]+/ )
         end
 
-        opts.on( "--destroy-host NAME",
+        opts.on( "--terminate-host NAME",
                  "Terminate the specified instance and data via provider",
                  "WARNING: potential for data loss!" ) do |name|
           @terminate_hosts << name
+        end
+
+        opts.on( "--delete-attached-storage",
+                 "When terminating hosts, also delete any attached storage",
+                 "volumes which wouldn't otherwise be deleted.",
+                 "WARNING: Data WILL be lost!" ) do
+          @delete_attached_storage = true
         end
 
       end
@@ -181,7 +189,9 @@ module SyncWrap
 
       if !@terminate_hosts.empty?
         if space.provider
-          space.provider.terminate_hosts( @terminate_hosts, @sw_file )
+          space.provider.terminate_hosts( @terminate_hosts,
+                                          @delete_attached_storage,
+                                          @sw_file )
           exit 0
         else
           raise "No provider set in sync file/registered with Space"
