@@ -56,7 +56,7 @@ module SyncWrap
         ebs_volumes:        0,
         ebs_volume_options: { size: 16 }, #gb
         lvm_volumes:        [ [ 1.00, '/data' ] ],
-        security_groups:    :default,
+        security_groups:    [ :default ],
         instance_type:      'm1.medium',
         region:             'us-east-1'
       }
@@ -91,7 +91,12 @@ module SyncWrap
       region = opts.delete( :region )
       ec2 = AWS::EC2.new.regions[ region ]
       unless ec2.security_groups.find { |sg| sg.name == name }
-        ec2.security_groups.create( name, opts )
+        sg = ec2.security_groups.create( name, opts )
+
+        # FIXME: Allow ssh on the "default" region named group
+        if name == region
+          sg.authorize_ingress(:tcp, 22)
+        end
       end
     end
 
@@ -128,8 +133,12 @@ module SyncWrap
         raise ":count #{iopts[ :count ]} != 1 is not supported"
       end
 
-      if iopts[ :security_groups ] == :default
-        iopts[ :security_groups ] = [ region ]
+      iopts[ :security_groups ].map! do |sg|
+        sg == :default ? region : sg
+      end
+
+      iopts[ :security_groups ].each do |sg|
+        aws_create_security_group( sg, region: region )
       end
 
       inst = ec2.instances.create( iopts )
@@ -159,7 +168,7 @@ module SyncWrap
       end
       #FIXME: end
 
-      aws_instance_to_props( region, inst )
+      instance_to_props( region, inst )
     end
 
     # Create a Route53 DNS CNAME from iprops :name to :internet_name.
