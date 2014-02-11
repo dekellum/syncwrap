@@ -134,6 +134,7 @@ module SyncWrap
     end
 
     def ec2_user_data( user = 'ec2-user' )
+      #FIXME: Utility module for this (+ Users sudoers)?
       script = <<-SH
         #!/bin/sh -e
         echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
