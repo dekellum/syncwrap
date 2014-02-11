@@ -85,6 +85,7 @@ module SyncWrap
         props = aws_create_instance( hname, profile )
         host = space.host( props )
         append_host_definitions( [ host ], nil, output_file )
+        host[ :just_created ] = true #after so this isn't written
       end
     end
 
