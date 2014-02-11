@@ -64,7 +64,8 @@ module SyncWrap
     # may be appropriate to set default overrides in a sync.rb.
     attr_reader :default_options
 
-    # A hosting/cloud provider for interaction with this space.
+    # A hosting/cloud provider for creating/removing hosts from this
+    # space.
     attr_accessor :provider
 
     attr_reader :formatter #:nodoc:
