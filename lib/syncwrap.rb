@@ -253,7 +253,7 @@ module SyncWrap
 
     # FIXME: Host name to ssh name strategies go here
     def ssh_host_name( host ) # :nodoc:
-      host.name
+      host[ :internet_name ] || host[ :internet_ip ] || host.name
     end
 
     private
