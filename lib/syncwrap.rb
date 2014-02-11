@@ -64,9 +64,14 @@ module SyncWrap
     # may be appropriate to set default overrides in a sync.rb.
     attr_reader :default_options
 
+    # A hosting/cloud provider for creating/removing hosts from this
+    # space.
+    attr_accessor :provider
+
     attr_reader :formatter #:nodoc:
 
     def initialize
+      @provider = nil
       @roles = Hash.new { |h,k| h[k] = [] }
       @hosts = {}
       @default_options = {
@@ -139,14 +144,21 @@ module SyncWrap
       end
     end
 
-    # Define/access a Host by name
-    # Additional args are interpreted as role symbols or (direct)
-    # Components to add to this Host. Each role will only be added
-    # once. A final Hash argument is interpreted as and reserved for
-    # future options.
-    def host( name, *args )
-      opts = args.last.is_a?( Hash ) && args.pop || {}
-      host = @hosts[ name ] ||= Host.new( self, name )
+    # Define/access a Host by name.
+    #
+    # If first arg is a String, it is interpreted as the name
+    # property.  The name property is also used for lookup and thus
+    # must be Space unique. Additional args are interpreted as role
+    # symbols or (direct) Components to add to this Host. Each role
+    # will only be added once. A final Hash argument is interpreted as
+    # properties to add or merge with the host.
+    def host( *args )
+      props = args.last.is_a?( Hash ) && args.pop || {}
+      name = args.first.is_a?( String ) && args.shift
+      props = props.merge( name: name ) if name
+      raise "Missing required name parameter" unless props[ :name ]
+      host = @hosts[ props[ :name ] ] ||= Host.new( self )
+      host.merge_props( props )
       host.add( *args )
       host
     end
@@ -154,6 +166,10 @@ module SyncWrap
     # All Host instances, in order added.
     def hosts
       @hosts.values
+    end
+
+    def host_names
+      @hosts.keys
     end
 
     # Return an ordered, unique set of component classes, direct or via
@@ -242,7 +258,7 @@ module SyncWrap
 
     # FIXME: Host name to ssh name strategies go here
     def ssh_host_name( host ) # :nodoc:
-      host.name
+      host[ :internet_name ] || host[ :internet_ip ] || host.name
     end
 
     private
@@ -341,13 +357,18 @@ module SyncWrap
   autoload :Iyyov,         'syncwrap/components/iyyov'
   autoload :IyyovDaemon,   'syncwrap/components/iyyov_daemon'
   autoload :JRubyVM,       'syncwrap/components/jruby_vm'
+  autoload :MDRaid,        'syncwrap/components/mdraid'
   autoload :Network,       'syncwrap/components/network'
   autoload :OpenJDK,       'syncwrap/components/open_jdk'
+  autoload :PostgreSQL,    'syncwrap/components/postgresql'
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
   autoload :Ubuntu,        'syncwrap/components/ubuntu'
   autoload :Users,         'syncwrap/components/users'
 
   # (Alpha sort class name)
+
+  # Additional autoloads (optional support)
+  autoload :AmazonEC2,     'syncwrap/amazon_ec2'
 
 end

@@ -32,6 +32,10 @@ module SyncWrap
       @component_plan = []
       @roles = []
       @host_patterns = []
+      @create_plan = []
+      @import_regions = []
+      @terminate_hosts = []
+      @delete_attached_storage = false
       @space = Space.new
     end
 
@@ -123,6 +127,43 @@ module SyncWrap
           @list_hosts = true
         end
 
+        opts.on( "-C", "--create-host P",
+                 "Create hosts where P has format: [N*]profile[:name]",
+                 "  N: number to create (default: 1)",
+                 "  profile: the profile name as setup in the sync file",
+                 "  name: Host name, or prefix in the case on N>1",
+                 "Hosts are appended to the sync file and space" ) do |h|
+          first,rest = h.split('*')
+          if rest
+            count = first.to_i
+          else
+            count = 1
+            rest = first
+          end
+          profile,name = rest.split(':')
+          profile = profile.to_sym
+          @create_plan << [ count, profile, name ]
+        end
+
+        opts.on( "-I", "--import-hosts REGIONS",
+                 "Import hosts form provider 'region' names, ",
+                 "append to sync file and exit." ) do |rs|
+          @import_regions = rs.split( /[\s,]+/ )
+        end
+
+        opts.on( "--terminate-host NAME",
+                 "Terminate the specified instance and data via provider",
+                 "WARNING: potential for data loss!" ) do |name|
+          @terminate_hosts << name
+        end
+
+        opts.on( "--delete-attached-storage",
+                 "When terminating hosts, also delete any attached storage",
+                 "volumes which wouldn't otherwise be deleted.",
+                 "WARNING: Data WILL be lost!" ) do
+          @delete_attached_storage = true
+        end
+
       end
 
       @component_plan = opts.parse!( args )
@@ -136,6 +177,35 @@ module SyncWrap
     def run( args )
       parse_cmd( args )
       space.load_sync_file( @sw_file )
+
+      if !@import_regions.empty?
+        if space.provider
+          space.provider.import_hosts( @import_regions, @sw_file )
+          exit 0
+        else
+          raise "No provider set in sync file/registered with Space"
+        end
+      end
+
+      if !@terminate_hosts.empty?
+        if space.provider
+          space.provider.terminate_hosts( @terminate_hosts,
+                                          @delete_attached_storage,
+                                          @sw_file )
+          exit 0
+        else
+          raise "No provider set in sync file/registered with Space"
+        end
+      end
+
+      if !@create_plan.empty?
+        unless space.provider
+          raise "No provider created in sync file/registered with Space"
+        end
+        @create_plan.each do |count, profile, name|
+          space.provider.create_hosts( count, profile, name, @sw_file )
+        end
+      end
 
       resolve_hosts
       lookup_component_plan

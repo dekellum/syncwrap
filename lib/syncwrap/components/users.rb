@@ -43,17 +43,32 @@ module SyncWrap
     # (Default: nil)
     attr_accessor :ssh_user_pem
 
+    # Users should be the first component to attempt ssh access. On
+    # new host creation, install may be run before the ssh port is
+    # actually available (boot completed, etc.). This provides an
+    # additional timeout in seconds for establishing the first ssh
+    # session. (default: 180 seconds)
+    attr_accessor :ssh_access_timeout
+
+    # Use the StrictHostKeyChecking=no ssh option when connected to a
+    # newly created host (whose key will surely not be known yet.)
+    # (Default: true)
+    attr_accessor :lenient_host_key
+
     def initialize( opts = {} )
       @home_users = nil
       @local_home_root = "home"
       @exclude_users = []
       @ssh_user = nil
       @ssh_user_pem = nil
-
+      @ssh_access_timeout = 180.0
+      @lenient_host_key = true
       super
     end
 
     def install
+      ensure_ssh_access if host[ :just_created ] && ssh_access_timeout > 0
+
       rdir = find_source( local_home_root )
       users = home_users
       users ||= rdir && Dir.entries( rdir ).select do |d|
@@ -76,6 +91,26 @@ module SyncWrap
       end
 
       #FIXME: Add special case for 'root' user?
+    end
+
+    def ensure_ssh_access
+      flags = ssh_flags
+      if lenient_host_key
+        flags = flags.merge( ssh_flags: %w[ -o StrictHostKeyChecking=no ] )
+      end
+
+      start = Time.now
+      loop do
+        accept  = [0]
+        # Allow non-sucess until timeout
+        # 255: ssh (i.e. can't connect, sshd not yet up)
+        # 1: sudo error (user_data sudoers update has not yet completed)
+        accept += [1, 255] unless ( Time.now - start ) >= ssh_access_timeout
+
+        code,_ = capture( 'sudo true', flags.merge( accept: accept ) )
+        break if code == 0
+        sleep 1 # ssh timeouts also apply, but make sure we don't spin
+      end
     end
 
     # Create user if not already present

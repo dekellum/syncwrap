@@ -5,7 +5,8 @@ Rakefile
 bin/syncwrap
 lib/syncwrap/base.rb
 lib/syncwrap.rb
-lib/syncwrap/aws.rb
+lib/syncwrap/amazon_aws.rb
+lib/syncwrap/amazon_ec2.rb
 lib/syncwrap/cli.rb
 lib/syncwrap/component.rb
 lib/syncwrap/context.rb
@@ -22,6 +23,7 @@ lib/syncwrap/components/hashdot.rb
 lib/syncwrap/components/iyyov.rb
 lib/syncwrap/components/iyyov_daemon.rb
 lib/syncwrap/components/jruby_vm.rb
+lib/syncwrap/components/mdraid.rb
 lib/syncwrap/components/network.rb
 lib/syncwrap/components/open_jdk.rb
 lib/syncwrap/components/postgresql.rb
