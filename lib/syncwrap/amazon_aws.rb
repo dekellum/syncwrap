@@ -24,9 +24,6 @@ module SyncWrap
   # attaching EBS volumes, creating Route53 record sets, and as a remote
   # task: building mdraid volumes.
   #
-  # This module also includes a disk based cache of meta-data on created
-  # instances which allows automated role assignment (i.e. create an
-  # instance and run deploy tasks on it in a single pass.)
   module AmazonAWS
 
     # The json configuration file, parsed and passed directly to
@@ -173,7 +170,7 @@ module SyncWrap
 
     # Create a Route53 DNS CNAME from iprops :name to :internet_name.
     # Options are per {AWS::Route53::ResourceRecordSetCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/Route53/ResourceRecordSetCollection.html#create-instance_method]
-    # (currently undocumented) with the following addition:
+    # (currently undocumented) with the following additions:
     #
     # :domain_name:: name of the hosted zone and suffix for
     #                CNAME. Should terminate in a DOT '.'
@@ -211,10 +208,11 @@ module SyncWrap
       end
     end
 
-    # Terminate an instance and wait for terminated. If requested,
-    # /dev/sdh# attached EBS volumes which are not otherwise marked
-    # for :delete_on_termination will _also_ be terminated.  The
-    # minimum required properties in iprops are :region and :id.
+    # Terminate an instance and wait for it to be terminated. If
+    # requested, /dev/sdh# attached EBS volumes which are not
+    # otherwise marked for :delete_on_termination will _also_ be
+    # terminated.  The minimum required properties in iprops are
+    # :region and :id.
     #
     # _WARNING_: data _will_ be lost!
     def aws_terminate_instance( iprops, delete_attached_storage = false )
@@ -297,9 +295,9 @@ module SyncWrap
       ( roles || "" ).split( /\s+/ ).map { |r| r.to_sym }
     end
 
-    # Wait until block returns truthy, sleeping for freq seconds between
-    # attempts. Writes desc and a sequence of DOTs on a single line
-    # until complete.
+    # Wait until block returns truthy, sleeping for freq seconds
+    # between attempts. Writes desc and a sequence of DOTs on a single
+    # line until complete.
     def wait_until( desc, freq = 1.0 )
       $stdout.write( "Waiting for " + desc )
       until (ret = yield) do

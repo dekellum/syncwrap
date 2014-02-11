@@ -21,11 +21,16 @@ require 'syncwrap/host'
 
 module SyncWrap
 
+  # Amazon EC2 host provider. Supports importing, creating, and
+  # terminating hosts.
   #
   # == Synopsis
+  #
   # Add the following to your sync.rb
   #
   #   ec2 = AmazonEC2.new( space )
+  #
+  # Then add profiles via #profile, as needed.
   #
   class AmazonEC2
     include AmazonAWS
