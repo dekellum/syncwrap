@@ -181,7 +181,7 @@ module SyncWrap
 
       if !@terminate_hosts.empty?
         if space.provider
-          space.provider.terminate_hosts( @terminate_hosts )
+          space.provider.terminate_hosts( @terminate_hosts, @sw_file )
           exit 0
         else
           raise "No provider set in sync file/registered with Space"

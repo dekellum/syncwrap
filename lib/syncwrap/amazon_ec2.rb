@@ -88,13 +88,14 @@ module SyncWrap
       end
     end
 
-    def terminate_hosts( names )
+    def terminate_hosts( names, sync_file )
       names.each do |name|
         if space.host_names.include?( name )
           host = space.host( name )
           raise "Host #{name} missing :id" unless host[:id]
           raise "Host #{name} missing :region" unless host[:region]
           aws_terminate_instance_and_ebs_volumes( host )
+          delete_host_definition( host, sync_file )
         else
           raise "Host #{name} not found in Space, sync file."
         end
@@ -128,8 +129,43 @@ module SyncWrap
           end.compact.join ",\n      "
 
           out.puts "host( '#{host.name}', #{roles}"
-          out.puts "      #{props} )"
+          out.puts "      #{props} ) # :auto-generated"
         end
+      end
+    end
+
+    def delete_host_definition( host, sync_file )
+      lines = IO.readlines( sync_file )
+      out_lines = []
+      state = :find
+      lines.each do |line|
+        if state == :find
+          if line =~ /^host\( '#{host.name}',/
+            state = :just_found
+          else
+            out_lines << line
+          end
+        end
+        if state == :just_found || state == :found
+          if state == :found && line =~ /^host\(/
+            state = :no_end
+            break
+          end
+          state = :found
+          if line =~ /^\s*[^#].*\) # :auto-generated$/
+            state = :deleted
+          end
+        elsif state == :deleted
+          out_lines << line
+        end
+      end
+
+      if state == :deleted
+        File.open( sync_file, "w" ) do |out|
+          out.puts out_lines
+        end
+      else
+        $stderr.puts( "WARNING: #{sync_file} entry not deleted (#{state})" )
       end
     end
 
