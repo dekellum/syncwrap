@@ -88,6 +88,19 @@ module SyncWrap
       end
     end
 
+    def terminate_hosts( names )
+      names.each do |name|
+        if space.host_names.include?( name )
+          host = space.host( name )
+          raise "Host #{name} missing :id" unless host[:id]
+          raise "Host #{name} missing :region" unless host[:region]
+          aws_terminate_instance_and_ebs_volumes( host )
+        else
+          raise "Host #{name} not found in Space, sync file."
+        end
+      end
+    end
+
     def find_name( prefix )
       host_names = space.host_names
       i = 1

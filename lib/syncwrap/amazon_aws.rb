@@ -216,6 +216,7 @@ module SyncWrap
     # loss! The minimum required propererties in iprops hash are :region
     # and :id.
     def aws_terminate_instance_and_ebs_volumes( iprops )
+      #FIXME: Make ebs volume deletion opt-in
       ec2 = AWS::EC2.new.regions[ iprops[ :region ] ]
       inst = ec2.instances[ iprops[ :id ] ]
       unless inst.exists?

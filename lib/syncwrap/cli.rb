@@ -34,6 +34,7 @@ module SyncWrap
       @host_patterns = []
       @create_plan = []
       @import_regions = []
+      @terminate_hosts = []
       @space = Space.new
     end
 
@@ -149,6 +150,12 @@ module SyncWrap
           @import_regions = rs.split( /[\s,]+/ )
         end
 
+        opts.on( "--destroy-host NAME",
+                 "Terminate the specified instance and data via provider",
+                 "WARNING: potential for data loss!" ) do |name|
+          @terminate_hosts << name
+        end
+
       end
 
       @component_plan = opts.parse!( args )
@@ -166,6 +173,15 @@ module SyncWrap
       if !@import_regions.empty?
         if space.provider
           space.provider.import_hosts( @import_regions, @sw_file )
+          exit 0
+        else
+          raise "No provider set in sync file/registered with Space"
+        end
+      end
+
+      if !@terminate_hosts.empty?
+        if space.provider
+          space.provider.terminate_hosts( @terminate_hosts )
           exit 0
         else
           raise "No provider set in sync file/registered with Space"
