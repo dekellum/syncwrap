@@ -335,11 +335,13 @@ module SyncWrap
   # any threads are in play.
 
   autoload :CommericalJDK, 'syncwrap/components/commmercial_jdk'
+  autoload :EtcHosts,      'syncwrap/components/etc_hosts'
   autoload :Geminabox,     'syncwrap/components/geminabox'
   autoload :Hashdot,       'syncwrap/components/hashdot'
   autoload :Iyyov,         'syncwrap/components/iyyov'
   autoload :IyyovDaemon,   'syncwrap/components/iyyov_daemon'
   autoload :JRubyVM,       'syncwrap/components/jruby_vm'
+  autoload :Network,       'syncwrap/components/network'
   autoload :OpenJDK,       'syncwrap/components/open_jdk'
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
