@@ -27,14 +27,14 @@ ec2.profile( :basic,
              user_data: :ec2_user_sudo,
              instance_type: 'm1.medium',
              key_name: 'dek-key-pair-1',
-             roles: [ :amazon_linux, :stack ] )
+             roles: [ :amazon_linux, :jruby_stack ] )
 
 role( :amazon_linux,
       Users.new( ssh_user: 'ec2-user', ssh_user_pem: 'private/key.pem' ),
       RHEL.new,
       Network.new )
 
-role( :stack,
+role( :jruby_stack,
       RunUser.new,
       OpenJDK.new,
       JRubyVM.new,
@@ -42,4 +42,4 @@ role( :stack,
       Iyyov.new,
       Geminabox.new )
 
-# Generated Hosts
+# Generated Hosts:
