@@ -29,10 +29,28 @@ ec2.profile( :basic,
              key_name: 'dek-key-pair-1',
              roles: [ :amazon_linux, :jruby_stack ] )
 
+ec2.profile( :postgres,
+             default_name: "pg",
+             image_id: "ami-ccf297fc", #Amazon Linux 2013.09.2 EBS 64 us-west-2
+             region: 'us-west-2',
+             user_data: :ec2_user_sudo,
+             instance_type: 'm1.medium',
+             key_name: 'dek-key-pair-1',
+             ebs_volumes: 4,
+             ebs_volume_options: { size: 2 }, #gb
+             roles: [ :amazon_linux, :postgres ] )
+
 role( :amazon_linux,
       Users.new( ssh_user: 'ec2-user', ssh_user_pem: 'private/key.pem' ),
       RHEL.new,
       Network.new )
+
+role( :postgres,
+      MDRaid.new( raw_devices: 4,
+                  lvm_volumes: [ [1.0, '/pg'] ],
+                  mount_opts: %w[ defaults auto noatime nodiratime
+                                  data=writeback barrier=0 ] ),
+      PostgreSQL.new )
 
 role( :jruby_stack,
       RunUser.new,
