@@ -167,6 +167,10 @@ module SyncWrap
       @hosts.values
     end
 
+    def host_names
+      @hosts.keys
+    end
+
     # Return an ordered, unique set of component classes, direct or via
     # roles, currently contained by the specified hosts or all hosts.
     def component_classes( hs = hosts )

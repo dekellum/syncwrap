@@ -43,31 +43,91 @@ module SyncWrap
       @space.provider = self
     end
 
-    def profile( symbol, profile )
-      @profiles[symbol] = profile
+    def profile( key, profile )
+      @profiles[ key ] = profile
     end
 
     def import_hosts( regions, output_file )
       hlist = import_host_props( regions )
       unless hlist.empty?
-        File.open( output_file, "a" ) do |out|
-          puts "# Import of #{regions.join ','} on #{Time.now.utc.iso8601}"
-          puts
 
-          hlist.each do |props|
-            props[:name] ||= props[:id].to_s
-            host = Host.new( space, props )
-            roles = host.roles.map { |s| ':' + s.to_s }.join ','
-            roles << ',' unless roles.empty?
-            props = host.props.map do |key,val|
-              "#{key}: #{val}" unless key == :name
-            end.compact.join ','
+        hlist.map! do |props|
+          props[:name] ||= props[:id].to_s
+          Host.new( space, props )
+        end
 
-            out.puts "host( '#{host.name}', #{roles}"
-            out.puts "      #{props} )"
-          end
+        time = Time.now.utc
+        cmt = "\n# Import of AWS #{regions.join ','} on #{time.iso8601}"
+        append_host_definitions( hlist, cmt, output_file )
+      end
+    end
+
+    def create_hosts( count, profile_key, name, output_file )
+      profile = @profiles[ profile_key ].dup or
+        raise "Profile #{profile_key} not registered"
+
+      if profile[ :user_data ] == :ec2_user_sudo
+        profile[ :user_data ] = ec2_user_data
+      end
+
+      dname = profile.delete( :default_name )
+      name ||= dname
+
+      count.times do
+        hname = if count == 1
+                  if space.host_names.include?( name )
+                    raise "Host #{name} already exists!"
+                  end
+                  name
+                else
+                  find_name( name )
+                end
+        props = aws_create_instance( hname, profile )
+        host = space.host( props )
+        append_host_definitions( [ host ], nil, output_file )
+      end
+    end
+
+    def find_name( prefix )
+      host_names = space.host_names
+      i = 1
+      name = nil
+      loop do
+        name = "%s-%2d" % [ prefix, i ]
+        break if ! host_names.include?( name )
+        i += 1
+      end
+      name
+    end
+
+    def append_host_definitions( hosts, comment, output_file )
+      File.open( output_file, "a" ) do |out|
+        out.puts comment if comment
+
+        hosts.each do |host|
+          props = host.props.dup
+          props.delete( :name )
+
+          roles = host.roles.map { |s| ':' + s.to_s }.join ', '
+          roles << ',' unless roles.empty?
+          props = host.props.map do |key,val|
+            "#{key}: #{val.inspect}" unless key == :name
+          end.compact.join ",\n      "
+
+          out.puts "host( '#{host.name}', #{roles}"
+          out.puts "      #{props} )"
         end
       end
+    end
+
+    def ec2_user_data( user = 'ec2-user' )
+      script = <<-SH
+        #!/bin/sh -e
+        echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
+        echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
+        chmod 440 /etc/sudoers.d/#{user}
+      SH
+      script.split( "\n" ).map { |l| l.strip }.join( "\n" )
     end
 
   end

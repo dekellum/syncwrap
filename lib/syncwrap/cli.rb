@@ -32,6 +32,7 @@ module SyncWrap
       @component_plan = []
       @roles = []
       @host_patterns = []
+      @create_plan = []
       @import_regions = []
       @space = Space.new
     end
@@ -124,8 +125,27 @@ module SyncWrap
           @list_hosts = true
         end
 
-        opts.on( "--import-hosts REGIONs",
-                 "Import hosts form regions and append to sync.rb and exit" ) do |rs|
+        opts.on( "-C", "--create-host P",
+                 "Create hosts where P has format: [N*]profile[:name]",
+                 "  N: number to create (default: 1)",
+                 "  profile: the profile name as setup in the sync file",
+                 "  name: Host name, or prefix in the case on N>1",
+                 "Hosts are appended to the sync file and space" ) do |h|
+          first,rest = h.split('*')
+          if rest
+            count = first.to_i
+          else
+            count = 1
+            rest = first
+          end
+          profile,name = rest.split(':')
+          profile = profile.to_sym
+          @create_plan << [ count, profile, name ]
+        end
+
+        opts.on( "-I", "--import-hosts REGIONS",
+                 "Import hosts form provider 'region' names, ",
+                 "append to sync file and exit." ) do |rs|
           @import_regions = rs.split( /[\s,]+/ )
         end
 
@@ -149,6 +169,15 @@ module SyncWrap
           exit 0
         else
           raise "No provider created in sync file/registered with Space"
+        end
+      end
+
+      if !@create_plan.empty?
+        unless space.provider
+          raise "No provider created in sync file/registered with Space"
+        end
+        @create_plan.each do |count, profile, name|
+          space.provider.create_hosts( count, profile, name, @sw_file )
         end
       end
 
