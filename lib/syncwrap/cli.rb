@@ -168,7 +168,7 @@ module SyncWrap
           space.provider.import_hosts( @import_regions, @sw_file )
           exit 0
         else
-          raise "No provider created in sync file/registered with Space"
+          raise "No provider set in sync file/registered with Space"
         end
       end
 
