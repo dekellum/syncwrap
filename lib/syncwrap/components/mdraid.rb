@@ -37,6 +37,18 @@ module SyncWrap
     # blocks. Default: 32
     attr_accessor :raw_read_ahead
 
+    # Numeric RAID level.
+    # (Default: 10 if there are at least 4 raw devices, otherwise 0.)
+    attr_accessor :raid_level
+
+    # RAID md device read-ahead setting, in 512-byte blocks.
+    # Default: 64
+    attr_accessor :raid_read_ahead
+
+    # RAID chunk size in KB
+    # Default: 246
+    attr_accessor :raid_chunk
+
     # A table of [ slice, path (,name) ] rows where; slice is a
     # floating point ratio in range (0.0,1.0], path is the mount
     # point, and name is the lvm name, defaulting if omitted to the
@@ -49,7 +61,7 @@ module SyncWrap
 
     # Array of FS specific options to pass as mkfs -t fs_type _OPTS_
     # Default: [] (none)
-    attr_acesssor :fs_opts
+    attr_accessor :fs_opts
 
     # Mount options Array
     # Default: [ defaults auto noatime nodiratime ]
