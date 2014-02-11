@@ -359,6 +359,7 @@ module SyncWrap
   autoload :MDRaid,        'syncwrap/components/mdraid'
   autoload :Network,       'syncwrap/components/network'
   autoload :OpenJDK,       'syncwrap/components/open_jdk'
+  autoload :PostgreSQL,    'syncwrap/components/postgresql'
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
   autoload :Ubuntu,        'syncwrap/components/ubuntu'

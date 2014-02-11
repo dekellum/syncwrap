@@ -57,9 +57,13 @@ module SyncWrap
 
     def install
       package_install
-      setup_data_dir
-      pg_configure
-      pg_start
+      changes = setup_data_dir
+      changes += pg_configure
+      if changes.empty?
+        pg_start
+      else
+        pg_restart
+      end
     end
 
     def package_install
@@ -72,43 +76,59 @@ module SyncWrap
     end
 
     def setup_data_dir
+      changes = []
+
       case distro
 
       when RHEL
         unless pg_data_dir == '/var/lib/pgsql9/data'
-          # (Per Amazon Linux)
-          # Install PGDATA var override for init.d/postgresql
-          rput( 'etc/sysconfig/pgsql/postgresql', :user => 'root' )
+          changes = rput( 'etc/sysconfig/pgsql/postgresql', :user => 'root' )
+        end
+
+        sudo( "if [ ! -d '#{pg_data_dir}/base' ]; then", close: "fi" ) do
+          unless pg_data_dir == '/var/lib/pgsql9/data'
+            # (Per Amazon Linux)
+            # Install PGDATA var override for init.d/postgresql
+            sudo <<-SH
+              mkdir -p #{pg_data_dir}
+              chown postgres:postgres #{pg_data_dir}
+              chmod 700 #{pg_data_dir}
+            SH
+          end
+          dist_service( 'postgresql', 'initdb' )
+        end
+
+      when Ubuntu
+        unless pg_data_dir == '/var/lib/postgresql/9.1/main'
           sudo <<-SH
             mkdir -p #{pg_data_dir}
             chown postgres:postgres #{pg_data_dir}
             chmod 700 #{pg_data_dir}
+            mv #{pg_default_data_dir}/* #{pg_data_dir}/
           SH
         end
-        dist_service( 'postgresql', 'initdb' )
-
-      when Ubuntu
-         unless pg_data_dir == '/var/lib/postgresql/9.1/main'
-           sudo <<-SH
-             mkdir -p #{pg_data_dir}
-             chown postgres:postgres #{pg_data_dir}
-             chmod 700 #{pg_data_dir}
-             mv #{pg_default_data_dir}/* #{pg_data_dir}/
-           SH
-         end
       else
         raise ContextError, "Distro #{distro.class.name} not supported"
       end
+
+      changes
     end
 
     # Update PostgreSQL config files
     def pg_configure
-      rput( "#{pg_deploy_config}/", pg_config_dir, :user => 'postgres' )
-      sudo( "chmod 700 #{pg_data_dir}" ) if pg_config_dir == pg_data_dir
+      changes = rput( "#{pg_deploy_config}/", pg_config_dir, :user => 'postgres' )
+      if !changes.empty? && pg_config_dir == pg_data_dir
+        sudo( "chmod 700 #{pg_data_dir}" )
+      end
+      changes
     end
 
     def pg_start
       dist_service( 'postgresql', 'start' )
+    end
+
+    def pg_restart
+      dist_service( 'postgresql', 'restart' )
     end
 
     def pg_stop
