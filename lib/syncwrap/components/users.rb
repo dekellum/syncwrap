@@ -47,7 +47,7 @@ module SyncWrap
     # new host creation, install may be run before the ssh port is
     # actually available (boot completed, etc.). This provides an
     # additional timeout in seconds for establishing the first ssh
-    # session. (default: 120 seconds)
+    # session. (default: 180 seconds)
     attr_accessor :ssh_access_timeout
 
     # Use the StrictHostKeyChecking=no ssh option when connected to a
@@ -61,7 +61,7 @@ module SyncWrap
       @exclude_users = []
       @ssh_user = nil
       @ssh_user_pem = nil
-      @ssh_access_timeout = 120.0
+      @ssh_access_timeout = 180.0
       @lenient_host_key = true
       super
     end
@@ -101,11 +101,15 @@ module SyncWrap
 
       start = Time.now
       loop do
-        accept = [0]
-        accept << 255 unless ( Time.now - start ) >= ssh_access_timeout
-        code,_ = capture( 'true', flags.merge( accept: accept ) )
-        sleep 1 # ssh timeouts also apply, but make sure we don't spin
+        accept  = [0]
+        # Allow non-sucess until timeout
+        # 255: ssh (i.e. can't connect, sshd not yet up)
+        # 1: sudo error (user_data sudoers update has not yet completed)
+        accept += [1, 255] unless ( Time.now - start ) >= ssh_access_timeout
+
+        code,_ = capture( 'sudo true', flags.merge( accept: accept ) )
         break if code == 0
+        sleep 1 # ssh timeouts also apply, but make sure we don't spin
       end
     end
 
