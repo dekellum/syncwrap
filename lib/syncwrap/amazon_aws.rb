@@ -148,7 +148,10 @@ module SyncWrap
 
       wait_for_running( inst )
 
-      #FIXME: Split method
+      # FIXME: Split method
+      # FIXME: Support alternative syntax, i.e
+      # { ebs_volumes: [ [4, size: 48], [2, size: 8] ] }
+
       if opts[ :ebs_volumes ] > 0
         vopts = { availability_zone: inst.availability_zone }.
           merge( opts[ :ebs_volume_options ] )

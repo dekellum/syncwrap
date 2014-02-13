@@ -71,6 +71,9 @@ module SyncWrap
       profile = @profiles[ profile_key ].dup or
         raise "Profile #{profile_key} not registered"
 
+      # FIXME: Support profiles overrides.
+      # Also add some targeted CLI overrides (like for :availability_zones)
+
       if profile[ :user_data ] == :ec2_user_sudo
         profile[ :user_data ] = ec2_user_data
       end
