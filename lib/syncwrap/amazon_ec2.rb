@@ -173,7 +173,7 @@ module SyncWrap
           props = host.props.dup
           props.delete( :name )
 
-          roles = host.roles.map { |s| ':' + s.to_s }.join ', '
+          roles = ( host.roles - [:all] ).map { |s| ':' + s.to_s }.join ', '
           roles << ',' unless roles.empty?
           props = host.props.map do |key,val|
             "#{key}: #{val.inspect}" unless key == :name
