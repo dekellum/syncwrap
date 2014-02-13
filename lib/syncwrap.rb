@@ -21,6 +21,7 @@ require 'syncwrap/component'
 require 'syncwrap/context'
 require 'syncwrap/host'
 require 'syncwrap/formatter'
+require 'syncwrap/path_util'
 
 module SyncWrap
 
@@ -49,6 +50,7 @@ module SyncWrap
   # Serves as the container for #hosts and roles and provides the top
   # level #execute.
   class Space
+    include PathUtil
 
     # Return the current space, as setup within a Space#with block, or
     # raise something fierce.
@@ -63,10 +65,6 @@ module SyncWrap
     # :shell_verbose => :x (from --expand-shell). In limited cases it
     # may be appropriate to set default overrides in a sync.rb.
     attr_reader :default_options
-
-    # A hosting/cloud provider for creating/removing hosts from this
-    # space.
-    attr_accessor :provider
 
     attr_reader :formatter #:nodoc:
 
@@ -114,6 +112,12 @@ module SyncWrap
       end
     end
 
+    # A hosting/cloud provider for creating/removing hosts from this
+    # space. See #use_provider
+    def provider
+      @provider or raise "No provider set via space.use_provider"
+    end
+
     # Merge the specified options to default_options
     def merge_default_options( opts )
       @default_options.merge!( opts )
@@ -131,6 +135,11 @@ module SyncWrap
       roots.delete( rpath ) # don't duplicate but move to front
       roots.unshift( rpath )
       roots.dup #return a copy
+    end
+
+    def use_provider( provider_class, opts = {} )
+      opts = opts.merge( sync_file_path: caller_path( caller ) )
+      @provider = provider_class.new( self, opts )
     end
 
     # Define/access a Role by symbol.
@@ -337,14 +346,6 @@ module SyncWrap
         end
       end
       false
-    end
-
-    def path_relative_to_caller( rpath, clr )
-      unless rpath =~ %r{^/}
-        from = clr.first =~ /^([^:]+):/ && $1
-        rpath = File.expand_path( rpath, File.dirname( from ) ) if from
-      end
-      rpath
     end
 
   end

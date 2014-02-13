@@ -16,7 +16,7 @@
 
 require 'time'
 
-require 'syncwrap/amazon_aws'
+require 'syncwrap/amazon_ws'
 require 'syncwrap/host'
 
 module SyncWrap
@@ -33,22 +33,60 @@ module SyncWrap
   # Then add profiles via #profile, as needed.
   #
   class AmazonEC2
-    include AmazonAWS
+    include AmazonWS
 
-    # FIXME: Interim strategy: use AmazonAWS and defer deciding final
+    # FIXME: Interim strategy: use AmazonWS and defer deciding final
     # organization.
 
-    attr_reader :space
+    # The json configuration file path, parsed and passed to
+    # AWS::config. This file should contain a json object with the
+    # minimal required keys: access_key_id, secret_access_key. A
+    # relative path is interpreted relative to the :sync_file_path
+    # option if provided on construction.  (default: private/aws.json)
+    attr_accessor :aws_config
 
     def initialize( space, opts = {} )
       super()
       @profiles = {}
       @space = space
+      @aws_config = 'private/aws.json'
+      opts = opts.dup
+      sync_file_path = opts.delete( :sync_file_path )
       opts.each { |name, val| send( name.to_s + '=', val ) }
-      @space.provider = self
+
+      # Look up aws_config (i.e. default private/aws.json) relative to
+      # the sync file path.
+      if @aws_config
+        if sync_file_path
+          aws_configure( File.expand_path( @aws_config, sync_file_path ) )
+        else
+          aws_configure( @aws_config )
+        end
+      end
     end
 
+    # Define a host profile by Symbol key and Hash value.
+    #
+    # Profiles may inherit properties from a :base_profile, either
+    # specified by that key, or the :default key profile. The
+    # base_profile must be defined in advance (above in the sync
+    # file). When merging profile to any base_profile, the :roles
+    # property is concatenated via set union. All other properties are
+    # overwritten.
+    #
+    # FIXME: All other profile properties are as currently defined by
+    # #aws_create_instance.
     def profile( key, profile )
+      profile = profile.dup
+      base = profile.delete( :base_profile ) || :default
+      base_profile = @profiles[ base ]
+      if base_profile
+        profile = base_profile.merge( profile )
+        if base_profile[ :roles ] && profile[ :roles ]
+          profile[ :roles ] = ( base_profile[ :roles ] | profile[ :roles ] )
+        end
+      end
+
       @profiles[ key ] = profile
     end
 
@@ -70,6 +108,9 @@ module SyncWrap
     def create_hosts( count, profile_key, name, output_file )
       profile = @profiles[ profile_key ].dup or
         raise "Profile #{profile_key} not registered"
+
+      # FIXME: Support profiles overrides.
+      # Also add some targeted CLI overrides (like for :availability_zones)
 
       if profile[ :user_data ] == :ec2_user_sudo
         profile[ :user_data ] = ec2_user_data
@@ -108,6 +149,10 @@ module SyncWrap
       end
     end
 
+    private
+
+    attr_reader :space
+
     def find_name( prefix )
       host_names = space.host_names
       i = 1
@@ -128,7 +173,7 @@ module SyncWrap
           props = host.props.dup
           props.delete( :name )
 
-          roles = host.roles.map { |s| ':' + s.to_s }.join ', '
+          roles = ( host.roles - [:all] ).map { |s| ':' + s.to_s }.join ', '
           roles << ',' unless roles.empty?
           props = host.props.map do |key,val|
             "#{key}: #{val.inspect}" unless key == :name

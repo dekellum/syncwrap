@@ -5,8 +5,8 @@ Rakefile
 bin/syncwrap
 lib/syncwrap/base.rb
 lib/syncwrap.rb
-lib/syncwrap/amazon_aws.rb
 lib/syncwrap/amazon_ec2.rb
+lib/syncwrap/amazon_ws.rb
 lib/syncwrap/cli.rb
 lib/syncwrap/component.rb
 lib/syncwrap/context.rb
@@ -14,6 +14,7 @@ lib/syncwrap/distro.rb
 lib/syncwrap/formatter.rb
 lib/syncwrap/host.rb
 lib/syncwrap/main.rb
+lib/syncwrap/path_util.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/components/commercial_jdk.rb

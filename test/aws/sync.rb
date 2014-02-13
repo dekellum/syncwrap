@@ -17,28 +17,26 @@
 include SyncWrap
 
 space.prepend_sync_path
+space.use_provider( AmazonEC2 )
 
-ec2 = AmazonEC2.new( space )
+profile( :default,
+         image_id: "ami-ccf297fc", #Amazon Linux 2013.09.2 EBS 64 us-west-2
+         region: 'us-west-2',
+         user_data: :ec2_user_sudo,
+         key_name: 'dek-key-pair-1',
+         roles: [ :amazon_linux ] )
 
-ec2.profile( :basic,
-             default_name: "basic",
-             image_id: "ami-ccf297fc", #Amazon Linux 2013.09.2 EBS 64 us-west-2
-             region: 'us-west-2',
-             user_data: :ec2_user_sudo,
-             instance_type: 'm1.medium',
-             key_name: 'dek-key-pair-1',
-             roles: [ :amazon_linux, :jruby_stack ] )
+profile( :basic,
+         default_name: "basic",
+         instance_type: 'm1.medium',
+         roles: [ :jruby_stack ] )
 
-ec2.profile( :postgres,
-             default_name: "pg",
-             image_id: "ami-ccf297fc", #Amazon Linux 2013.09.2 EBS 64 us-west-2
-             region: 'us-west-2',
-             user_data: :ec2_user_sudo,
-             instance_type: 'm1.medium',
-             key_name: 'dek-key-pair-1',
-             ebs_volumes: 4,
-             ebs_volume_options: { size: 2 }, #gb
-             roles: [ :amazon_linux, :postgres ] )
+profile( :postgres,
+         default_name: "pg",
+         instance_type: 'm1.medium',
+         ebs_volumes: 4,
+         ebs_volume_options: { size: 2 }, #gb
+         roles: [ :postgres ] )
 
 role( :amazon_linux,
       Users.new( ssh_user: 'ec2-user', ssh_user_pem: 'private/key.pem' ),

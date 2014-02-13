@@ -14,13 +14,12 @@
 # permissions and limitations under the License.
 #++
 
-require 'pathname'
-
-require 'syncwrap/shell'
+require 'syncwrap/path_util'
 
 module SyncWrap
 
   module Rsync
+    include PathUtil
 
     private
 
@@ -133,18 +132,6 @@ module SyncWrap
       end
 
       found && relativize( found )
-    end
-
-    # Return path relative to PWD if the result is shorter, otherwise
-    # return input path. Preserves any trailing '/'.
-    def relativize( path )
-      p = Pathname.new( path )
-      unless p.relative?
-        p = p.relative_path_from( Pathname.pwd ).to_s
-        p += '/' if path[-1] == '/'
-        path = p if p.length < path.length
-      end
-      path
     end
 
     # Given file path within src, return any sub-directory path needed
