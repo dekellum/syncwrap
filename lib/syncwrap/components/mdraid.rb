@@ -37,6 +37,12 @@ module SyncWrap
     # blocks. Default: 32
     attr_accessor :raw_read_ahead
 
+    # Attempt to unmount and remove from fstab any existing mount of
+    # the specified raw devices. _WARNING:_ this may increase the
+    # danger of data loss!
+    # (Default: false)
+    attr_accessor :do_unmount
+
     # Numeric RAID level.
     # (Default: 10 if there are at least 4 raw devices, otherwise 0.)
     attr_accessor :raid_level
@@ -72,6 +78,7 @@ module SyncWrap
 
       @raw_volumes = 0
       @raw_read_ahead = 32 #512B blocks
+      @do_unmount = false
 
       @raid_level = nil #default_raid_level
       @raid_read_ahead  = 64  #512B blocks
@@ -81,7 +88,7 @@ module SyncWrap
       @fs_type = 'ext4'
       @fs_opts = []
       @mount_opts = %w[ defaults auto noatime nodiratime ]
-      #FIXME: Of interest: data=writeback,barrier=0
+
       super
     end
 
@@ -116,6 +123,7 @@ module SyncWrap
         dist_install( "mdadm", "lvm2", minimal: true )
 
         raw_devices.each do |d|
+          unmount_device( d ) if do_unmount
           sudo "blockdev --setra #{raw_read_ahead} #{d}"
         end
 
@@ -132,6 +140,15 @@ module SyncWrap
     end
 
     private
+
+    def unmount_device( dev )
+      sudo <<-SH
+        if mount | grep -q '^#{dev} '; then
+          umount #{dev}
+          sed -r -i '\\|^#{dev}\\s|d' /etc/fstab
+        fi
+      SH
+    end
 
     def create_raid( md )
       rlevel = raid_level || default_raid_level
