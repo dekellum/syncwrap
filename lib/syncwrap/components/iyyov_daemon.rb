@@ -70,9 +70,7 @@ module SyncWrap
     def standard_install
 
       create_service_dir( name, instance )
-      changes = rput( config_source,
-                      "#{daemon_service_dir}/config.rb",
-                      user: run_user )
+      changes = rput_service_config
 
       # Shorten if the desired versioned process is already running.
       pid, ver = capture_running_version( name, instance )
@@ -86,6 +84,10 @@ module SyncWrap
         rudo( "kill #{pid} || true" ) # ..and let Iyyov restart it
       end
       changes
+    end
+
+    def rput_service_config
+      rput( config_source, "#{daemon_service_dir}/config.rb", user: run_user )
     end
 
     def daemon_service_dir
