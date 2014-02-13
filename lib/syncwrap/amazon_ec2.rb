@@ -16,7 +16,7 @@
 
 require 'time'
 
-require 'syncwrap/amazon_aws'
+require 'syncwrap/amazon_ws'
 require 'syncwrap/host'
 
 module SyncWrap
@@ -33,9 +33,9 @@ module SyncWrap
   # Then add profiles via #profile, as needed.
   #
   class AmazonEC2
-    include AmazonAWS
+    include AmazonWS
 
-    # FIXME: Interim strategy: use AmazonAWS and defer deciding final
+    # FIXME: Interim strategy: use AmazonWS and defer deciding final
     # organization.
 
     # The json configuration file path, parsed and passed to

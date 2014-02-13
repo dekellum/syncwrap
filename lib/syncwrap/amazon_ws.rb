@@ -21,8 +21,8 @@ require 'json'
 module SyncWrap
 
   # Supports host provisioning in EC2 via AWS APIs, creating and
-  # attaching EBS volumes, creating Route53 record sets.
-  module AmazonAWS
+  # attaching EBS volumes, and creating Route53 record sets.
+  module AmazonWS
 
     # Default options for Route53 record set creation
     attr_accessor :route53_default_rs_options
