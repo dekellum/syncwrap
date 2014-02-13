@@ -21,9 +21,7 @@ require 'json'
 module SyncWrap
 
   # Supports host provisioning in EC2 via AWS APIs, creating and
-  # attaching EBS volumes, creating Route53 record sets, and as a remote
-  # task: building mdraid volumes.
-  #
+  # attaching EBS volumes, creating Route53 record sets.
   module AmazonAWS
 
     # The json configuration file, parsed and passed directly to
