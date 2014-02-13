@@ -47,6 +47,10 @@ module SyncWrap
       "#{jruby_dist_path}/etc"
     end
 
+    def jruby_gem_home
+      "#{local_root}/lib/jruby/gems"
+    end
+
     # Install jruby if the jruby_version is not already present.
     def install
       jruby_install
