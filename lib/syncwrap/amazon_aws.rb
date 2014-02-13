@@ -24,20 +24,6 @@ module SyncWrap
   # attaching EBS volumes, creating Route53 record sets.
   module AmazonAWS
 
-    # The json configuration file, parsed and passed directly to
-    # AWS::config method. This file should contain a json object with
-    # the minimal required keys: access_key_id, secret_access_key
-    # (default: ./private/aws.json)
-    attr_accessor :aws_config_json
-
-    # Default options (which may be overridden) in call to
-    # aws_create_instance.
-    attr_accessor :default_instance_options
-
-    # Default options (which may be overridden) in call to
-    # aws_create_security_group.
-    attr_accessor :default_sg_options
-
     # Default options for Route53 record set creation
     attr_accessor :route53_default_rs_options
 
@@ -46,7 +32,6 @@ module SyncWrap
     attr_accessor :resolver_options
 
     def initialize
-      @aws_config_json   = 'private/aws.json'
       @default_instance_options = {
         ebs_volumes:        0,
         ebs_volume_options: { size: 16 }, #gb
@@ -55,10 +40,6 @@ module SyncWrap
         instance_type:      'm1.medium',
         region:             'us-east-1'
       }
-      @default_sg_options = {
-        region:             'us-east-1'
-      }
-
       @route53_default_rs_options = {
         ttl:  300,
         wait: true
@@ -69,20 +50,20 @@ module SyncWrap
       }
 
       super
-
-      aws_configure if File.exist?( @aws_config_json )
     end
 
-    def aws_configure
-      AWS.config( JSON.parse( IO.read( @aws_config_json ),
+    protected
+
+    def aws_configure( json_file )
+      AWS.config( JSON.parse( IO.read( json_file ),
                               symbolize_names: true ) )
     end
 
     # Create a security_group given name and options. :region is the
-    # only required option, :description is a good to have. Currently
+    # only required option, :description is good to have. Currently
     # this is a no-op if the security group already exists.
     def aws_create_security_group( name, opts = {} )
-      opts = deep_merge_hashes( @default_sg_options, opts )
+      opts = opts.dup
       region = opts.delete( :region )
       ec2 = AWS::EC2.new.regions[ region ]
       unless ec2.security_groups.find { |sg| sg.name == name }
@@ -104,7 +85,7 @@ module SyncWrap
     # :region:: Default 'us-east-1'
     # :security_groups:: As per aws-sdk, but the special :default value
     #                    is replaced with a single security group with
-    #                    same name as the :region option.
+    #                    same name as the :region.
     # :ebs_volumes:: The number of EBS volumes to create an attach to this instance.
     # :ebs_volume_options:: A nested Hash of options, as per
     #                       {AWS::EC2::VolumeCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/VolumeCollection.html#create-instance_method]

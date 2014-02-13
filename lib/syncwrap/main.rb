@@ -35,7 +35,7 @@ module SyncWrap
       space.role( *args )
     end
 
-    # Shorthand for host.role
+    # Shorthand for space.role
     def host( *args ) # :doc:
       space.host( *args )
     end
@@ -47,6 +47,11 @@ module SyncWrap
       else
         space.default_options
       end
+    end
+
+    # Shorthand for space.provider.profile
+    def profile( *args )
+      space.provider.profile( *args )
     end
 
   end
