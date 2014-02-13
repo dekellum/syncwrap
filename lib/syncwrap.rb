@@ -256,8 +256,11 @@ module SyncWrap
       # standard ruby stack trace and immediate exit.
     end
 
-    # FIXME: Host name to ssh name strategies go here
-    def ssh_host_name( host ) # :nodoc:
+    # Given a Host, determine the address to use for ssh (incl. rsync)
+    # access. The following properties are used in order of decreasing
+    # preference: internet_name, internet_ip and host.name.
+    def ssh_host_name( host )
+      # This is included here for expected Space-wide policy settings.
       host[ :internet_name ] || host[ :internet_ip ] || host.name
     end
 
