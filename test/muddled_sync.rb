@@ -10,4 +10,4 @@ def service_dir( *args )
   raise "This is bad!"
 end
 
-host 'test', RunUser.new, IyyovDaemon.new
+host 'test', RunUser.new, IyyovDaemon.new( name: 'goo', version: '0.0.0' )

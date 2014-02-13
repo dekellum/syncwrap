@@ -52,6 +52,9 @@ module SyncWrap
       @instance = nil
 
       super
+
+      raise "IyyovDaemon#name property not set" unless name
+      raise "IyyovDaemon#version property not set" unless version
     end
 
     def gem_name
@@ -65,8 +68,6 @@ module SyncWrap
     protected
 
     def standard_install
-      raise "IyyovDaemon#name is nil" unless name
-      raise "IyyovDaemon#version is nil" unless version
 
       create_service_dir( name, instance )
       changes = rput( config_source,
