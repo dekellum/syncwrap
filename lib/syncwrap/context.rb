@@ -187,7 +187,7 @@ module SyncWrap
       if erbs.empty?
         []
       else
-        Dir.mktmpdir( 'syncwrap' ) do |tmp_dir|
+        mktmpdir( 'syncwrap' ) do |tmp_dir|
           out_dir = File.join( tmp_dir, 'd' ) #for default perms
           outname = nil
           erbs.each do |erb|
@@ -208,6 +208,25 @@ module SyncWrap
           end
         end
       end
+    end
+
+    # Just like Dir.mktmpdir but with an attempt to workaround a JRuby
+    # 1.6.x bug. See https://jira.codehaus.org/browse/JRUBY-5678
+    def mktmpdir( prefix )
+      old_env_tmpdir = nil
+      newdir = nil
+      if defined?( JRUBY_VERSION ) && JRUBY_VERSION =~ /^1.6/
+        old_env_tmpdir = ENV['TMPDIR']
+        newdir = "/tmp/syncwrap.#{ENV['USER']}"
+        FileUtils.mkdir_p( newdir, mode: 0700 )
+        ENV['TMPDIR'] = newdir
+      end
+      Dir.mktmpdir( 'syncwrap' ) do |tmp_dir|
+        yield tmp_dir
+      end
+    ensure
+      FileUtils.rmdir( newdir ) if newdir
+      ENV['TMPDIR'] = old_env_tmpdir if old_env_tmpdir
     end
 
     def rsync( srcs, target, opts )

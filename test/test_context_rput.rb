@@ -257,7 +257,7 @@ class TestContextRput < MiniTest::Unit::TestCase
 
     # Make the template target non-executable temporarily. On re-rput,
     # only change is that file should have its exec bits reset.
-    FileUtils.chmod( "-x", "#{TEST_DIR}/d2/foo" )
+    FileUtils.chmod( 0664, "#{TEST_DIR}/d2/foo" )
     changes = ctx.rput( 'd3/', "#{TEST_DIR}" )
     assert_equal( [ %w[ .f...p..... d2/foo ] ], changes )
     assert( File.executable?( "#{TEST_DIR}/d2/foo" ) )
