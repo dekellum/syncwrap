@@ -21,6 +21,7 @@ require 'syncwrap/component'
 require 'syncwrap/context'
 require 'syncwrap/host'
 require 'syncwrap/formatter'
+require 'syncwrap/path_util'
 
 module SyncWrap
 
@@ -49,6 +50,7 @@ module SyncWrap
   # Serves as the container for #hosts and roles and provides the top
   # level #execute.
   class Space
+    include PathUtil
 
     # Return the current space, as setup within a Space#with block, or
     # raise something fierce.
@@ -334,14 +336,6 @@ module SyncWrap
         end
       end
       false
-    end
-
-    def path_relative_to_caller( rpath, clr )
-      unless rpath =~ %r{^/}
-        from = clr.first =~ /^([^:]+):/ && $1
-        rpath = File.expand_path( rpath, File.dirname( from ) ) if from
-      end
-      rpath
     end
 
   end
