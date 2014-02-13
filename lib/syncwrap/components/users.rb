@@ -15,12 +15,14 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/path_util'
 
 module SyncWrap
 
   # Provision developer user accounts, sudo access, and synchronize
   # home directory files.
   class Users < Component
+    include PathUtil
 
     # The list of user names to install. If default nil, home_users
     # will be determined by the set of home directories found in
@@ -39,7 +41,10 @@ module SyncWrap
     # yet been created or given sudo access.  (Default: nil)
     attr_accessor :ssh_user
 
-    # PEM file for ssh_user.
+    # A PEM file for the ssh_user. A relative path in interpreted as
+    # relative to the sync file from which this component is
+    # created. If the pem file is not found, a warning will be issued
+    # and ssh_user and ssh_user_pem will not be used.
     # (Default: nil)
     attr_accessor :ssh_user_pem
 
@@ -64,6 +69,18 @@ module SyncWrap
       @ssh_access_timeout = 180.0
       @lenient_host_key = true
       super
+
+      if @ssh_user_pem
+        @ssh_user_pem =
+          relativize( path_relative_to_caller( @ssh_user_pem, caller ) )
+        unless File.exist?( @ssh_user_pem )
+          warn( "WARNING: Users pem #{@ssh_user_pem} not found. " +
+                "Will not use #{@ssh_user}.\n" +
+                "Components may fail without sudo access" )
+          @ssh_user = nil
+          @ssh_user_pem = nil
+        end
+      end
     end
 
     def install
