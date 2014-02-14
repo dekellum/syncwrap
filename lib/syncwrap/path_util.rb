@@ -40,7 +40,7 @@ module SyncWrap
 
     # Return path relative to PWD if the result is shorter, otherwise
     # return input path. Preserves any trailing '/'.
-    def relativize( path )
+    def relativize( path ) # :doc:
       p = Pathname.new( path )
       unless p.relative?
         p = p.relative_path_from( Pathname.pwd ).to_s
