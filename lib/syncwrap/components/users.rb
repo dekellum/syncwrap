@@ -113,7 +113,8 @@ module SyncWrap
     def ensure_ssh_access
       flags = ssh_flags
       if lenient_host_key
-        flags = flags.merge( ssh_flags: %w[ -o StrictHostKeyChecking=no ] )
+        flags[ :ssh_options ] ||= {}
+        flags[ :ssh_options ][ 'StrictHostKeyChecking' ] = 'no'
       end
 
       start = Time.now
@@ -186,7 +187,10 @@ module SyncWrap
       flags = {}
       if ssh_user
         flags[ :ssh_user ] = ssh_user
-        flags[ :ssh_user_pem ] = ssh_user_pem if ssh_user_pem
+        if ssh_user_pem
+          flags[ :ssh_user_pem ] = ssh_user_pem
+          flags[ :ssh_options ] = { 'IdentitiesOnly' => 'yes' }
+        end
       end
       flags
     end
