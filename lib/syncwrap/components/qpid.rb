@@ -152,14 +152,7 @@ module SyncWrap
       sudo <<-SH
         cd #{qpid_src}
         make install #{redirect?}
-      SH
-
-      sh <<-SH
-        cd #{qpid_src}
         make check #{redirect?}
-      SH
-
-      sudo <<-SH
         cd /usr/local
         rm -f /tmp/qpidc-#{qpid_version}-1-#{qpid_distro}-x64.tar.gz
         tar -zc \
