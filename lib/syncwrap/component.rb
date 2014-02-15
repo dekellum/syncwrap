@@ -188,22 +188,21 @@ module SyncWrap
     end
 
     # Capture and return [exit_code, stdout] from command, where
-    # stdout is the entire stream read into a String. Specify the
-    # :coalesce option if you want stderr merged with stdout in the
-    # return. The :coalesce option will not be inherited from the
-    # Space/Context default options and must be explicitly passed.
+    # stdout is the entire stream read into a String. Any commands
+    # already queued via #sh are executed via #flush beforehand, to
+    # avoid ambiguous order of remote changes. Raises a CommandFailure
+    # if the resulting exit_code is outside the specified :accept
+    # option codes (by default, [0] only).
     #
-    # Any commands already queued via #sh are executed via #flush
-    # beforehand, to avoid ambiguous order of remote changes.
+    # Specify :coalesce if you want stderr merged with stdout in the
+    # return. See #sh for additional options.  The options :coalesce,
+    # and :dryrun are not inherited from the Space/Context default
+    # options and must be explicitly passed.
     #
-    # Raises a CommandFailure if the resulting exit_code is outside
-    # the specified :accept option codes (by default, [0] only).
-    #
-    # See #sh for additional options.  For the better performance
-    # achieved with larger script fragments and fewer ssh sessions,
-    # you should attempt to use #sh remote conditionals instead of
-    # testing with #capture on the local side. But sometimes this
-    # can't be avoided.
+    # For the better performance achieved with larger script fragments
+    # and fewer ssh sessions, you should attempt to use #sh remote
+    # conditionals instead of testing with #capture on the local
+    # side. But sometimes this can't be easily avoided.
     def capture( command, opts = {} )
       ctx.capture( command, opts )
     end
