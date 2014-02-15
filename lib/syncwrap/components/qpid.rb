@@ -227,13 +227,14 @@ module SyncWrap
 
   # Simplify qpid install by using pre-built binaries (for example,
   # archived from the build in Qpid)
-  class QpidBin < Qpid
+  class QpidRepo < Qpid
 
     attr_accessor :qpid_prebuild_repo
 
     def initialize( opt = {} )
       @qpid_prebuild_repo = nil
       super
+      raise "qpid_prebuild_repo required, but not set" unless qpid_prebuild_repo
     end
 
     def qpid_install
@@ -242,7 +243,6 @@ module SyncWrap
     end
 
     def qpid_install!
-      raise "qpid_prebuild_repo required, but not set" unless qpid_prebuild_repo
 
       dist_install( %w[ boost cyrus-sasl ] )
 
@@ -253,7 +253,6 @@ module SyncWrap
     end
 
     def corosync_install!( opts = {} )
-      raise "qpid_prebuild_repo required, but not set" unless qpid_prebuild_repo
       packs = corosync_packages
       curls = packs.map do |p|
         "curl -sS -O #{qpid_prebuild_repo}/#{p}"
