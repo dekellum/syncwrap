@@ -34,7 +34,7 @@ module SyncWrap
     def initialize( opt = {} )
       @qpid_src_root = '/tmp/src'
 
-      @qpid_version = '0.18'
+      @qpid_version = '0.24'
       @qpid_repo = 'http://archive.us.apache.org/dist/qpid'
       # FIXME: Usable only for the newest builds
       # @qpid_repo = 'http://apache.osuosl.org/qpid'
