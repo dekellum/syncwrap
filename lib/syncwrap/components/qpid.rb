@@ -181,12 +181,12 @@ module SyncWrap
     def qpid_install_build_deps
       dist_install( %w[ gcc gcc-c++ make autogen autoconf
                         help2man libtool pkgconfig rpm-build ] )
-      #FIXME: Add 'iproute' for check tests?
     end
 
     def qpid_install_deps
       dist_install( %w[ nss-devel boost-devel libuuid-devel swig
-                        ruby-devel python-devel cyrus-sasl-devel ] )
+                        ruby-devel python-devel
+                        cyrus-sasl-devel cyrus-sasl-plain cyrus-sasl-md5 ] )
     end
 
     def corosync_build
