@@ -22,13 +22,16 @@ require 'open3'
 
 module SyncWrap
 
+  # Low level command construction and process opening output capture.
+  #
+  # == Supported Options
   # Local:
-  # sh [-v|-x -e -n] -c STRING
-  # sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
+  #   sh [-v|-x -e -n] -c STRING
+  #   sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
   #
   # Remote:
-  # ssh :ssh_flags host sh [-v|-x -e -n] -c STRING
-  # ssh :ssh_flags host sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
+  #   ssh :ssh_flags host sh [-v|-x -e -n] -c STRING
+  #   ssh :ssh_flags host sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
   #
   # Example ssh_flags: -i ./key.pem -l ec2-user
   # Example sudo_flags: -H
