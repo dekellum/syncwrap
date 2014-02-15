@@ -63,6 +63,7 @@ test/test_rsync.rb
 test/test_shell.rb
 test/test_space.rb
 test/test_space_main.rb
+test/zfile
 test/sync/d1/bar
 test/sync/d1/foo.erb
 test/sync/d3/d2/bar

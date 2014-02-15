@@ -25,6 +25,8 @@ class TestShell < MiniTest::Unit::TestCase
   include TestOptions
   include SyncWrap::Shell
 
+  ZFILE = File.expand_path( "../zfile", __FILE__ )
+
   def test_command_lines_cleanup
     cmd = command_lines_cleanup( [ "", "  a\nb", "\n c\n", "d m n \n \n" ] )
     assert_equal( (%w[a b c] << "d m n").join( "\n" ), cmd )
@@ -66,6 +68,12 @@ class TestShell < MiniTest::Unit::TestCase
     assert_equal( [ [:err, "echo foo\n"],
                     [:out, "foo\n"] ],
                   outputs.sort ) #order uncertain
+  end
+
+  def test_capture_big
+    exit_code, outputs = capture3( %w[bash -v -c] << "dd if=#{ZFILE} bs=1M" )
+    assert_equal( 0, exit_code )
+    assert_equal( IO.read( ZFILE ), collect_stream( :out, outputs ) )
   end
 
   def test_capture_output_interleaved
@@ -153,6 +161,27 @@ class TestShell < MiniTest::Unit::TestCase
                   merged, merged )
     post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
     assert_equal( merged[0][1], post_merged )
+  end
+
+  def test_ssh_capture_big
+    skip unless SAFE_SSH
+    cmd = ssh_args( SAFE_SSH, "dd if=#{ZFILE} bs=1M" )
+    exit_code, outputs = capture3( cmd )
+    assert_equal( 0, exit_code )
+    assert_equal( IO.read( ZFILE ), collect_stream( :out, outputs ) )
+  end
+
+  def test_ssh_capture_big_2
+    skip unless SAFE_SSH
+    cmd = ssh_args( SAFE_SSH, <<-SH, coalesce:true )
+      for i in {1..1000}; do
+        echo "this is to stdout"
+        echo "this is to stderr" >&2
+      done
+    SH
+    exit_code, outputs = capture3( cmd )
+    assert_equal( 36_000, collect_stream( :err, outputs ).length )
+    assert_equal( 0, collect_stream( :out, outputs ).length )
   end
 
   def test_ssh_sudo
