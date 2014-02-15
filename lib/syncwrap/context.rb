@@ -76,6 +76,11 @@ module SyncWrap
       @default_options[ :dryrun ]
     end
 
+    # Return true if :verbose is set in constructed default options.
+    def verbose?
+      @default_options[ :verbose ]
+    end
+
     # See Component#sh for interface details
     def sh( command, opts = {} )
       opts = @default_options.merge( opts )
