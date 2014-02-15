@@ -77,11 +77,6 @@ module SyncWrap
       (code == 0)
     end
 
-    def exist?( file )
-      code,_ = capture( "test -e #{file}", accept:[0,1] )
-      (code == 0)
-    end
-
     def qpid_install_init!
       sudo <<-SH
         if ! id qpidd >/dev/null 2>&1; then
@@ -108,6 +103,17 @@ module SyncWrap
       qpid_build
     end
 
+    def corosync_install( opts = {} )
+      unless exist?( "/usr/sbin/corosync" )
+        corosync_install!( opts )
+      end
+    end
+
+    def corosync_install!( opts = {} )
+      corosync_build
+      dist_install( "#{corosync_src}/x86_64/*.rpm", succeed: true )
+    end
+
     def qpid_tools_install!
       dist_install( 'python-setuptools' )
       qpid_src = "#{qpid_src_root}/qpid-#{qpid_version}"
@@ -125,6 +131,8 @@ module SyncWrap
       SH
     end
 
+    protected
+
     def qpid_build
       qpid_install_build_deps
       qpid_install_deps
@@ -137,18 +145,18 @@ module SyncWrap
         cd #{qpid_src_root}
         curl -sSL #{qpid_src_tarball} | tar -zxf -
         cd #{qpid_src}
-        ./configure --enable-deprecated-autotools
-        make
+        ./configure --enable-deprecated-autotools #{redirect?}
+        make #{redirect?}
       SH
 
       sudo <<-SH
         cd #{qpid_src}
-        make install
+        make install #{redirect?}
       SH
 
       sh <<-SH
         cd #{qpid_src}
-        make check
+        make check #{redirect?}
       SH
 
       sudo <<-SH
@@ -181,17 +189,6 @@ module SyncWrap
                         ruby-devel python-devel cyrus-sasl-devel ] )
     end
 
-    def corosync_install( opts = {} )
-      unless exist?( "/usr/sbin/corosync" )
-        corosync_install!( opts )
-      end
-    end
-
-    def corosync_install!( opts = {} )
-      corosync_build
-      dist_install( "#{corosync_src}/x86_64/*.rpm", succeed: true )
-    end
-
     def corosync_build
       qpid_install_build_deps
       corosync_install_build_deps
@@ -202,9 +199,9 @@ module SyncWrap
         cd #{qpid_src_root}
         curl -sSL #{corosync_repo}/corosync-#{corosync_version}.tar.gz | tar -zxf -
         cd #{corosync_src}
-        ./autogen.sh
-        ./configure
-        make rpm
+        ./autogen.sh #{redirect?}
+        ./configure #{redirect?}
+        make rpm #{redirect?}
       SH
 
     end
@@ -222,6 +219,15 @@ module SyncWrap
 
     def corosync_src
       "#{qpid_src_root}/corosync-#{corosync_version}"
+    end
+
+    def exist?( file )
+      code,_ = capture( "test -e #{file}", accept:[0,1] )
+      (code == 0)
+    end
+
+    def redirect?
+      verbose? ? "" : ">/dev/null"
     end
 
   end
@@ -268,6 +274,8 @@ module SyncWrap
       SH
       dist_install( "/tmp/rpm-drop/*.rpm", succeed: true )
     end
+
+    protected
 
     # Where uploaded qpid-python-tools-M.N.tar.gz contains the
     # ./python ./tools ./extras/qmf packages for easy_install.
