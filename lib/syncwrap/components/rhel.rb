@@ -58,6 +58,10 @@ module SyncWrap
       sudo "/sbin/chkconfig --add #{name}"
     end
 
+    def dist_enable_init_service( name )
+      sudo "/sbin/chkconfig #{name} on"
+    end
+
     def dist_service( *args )
       sudo( [ '/sbin/service', *args ].join( ' ' ) )
     end

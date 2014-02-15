@@ -70,6 +70,10 @@ module SyncWrap
       sudo "/usr/sbin/update-rc.d #{name} defaults"
     end
 
+    def dist_enable_init_service( name )
+      sudo "/usr/sbin/update-rc.d #{name} enable"
+    end
+
     def dist_service( *args )
       sudo( [ '/usr/sbin/service', *args ].join( ' ' ) )
     end
