@@ -46,6 +46,9 @@ module SyncWrap
         coalesce = opts.delete( :coalesce )
         args = [ 'ssh' ]
         args += opts[ :ssh_flags ] if opts[ :ssh_flags ]
+        if opts[ :ssh_options ]
+          args += opts[ :ssh_options ].map { |o| [ '-o', o.join('=') ] }.flatten
+        end
         if opts[ :ssh_user ]
           args += [ '-l', opts[ :ssh_user ] ]
           args += [ '-i', opts[ :ssh_user_pem ] ] if opts[ :ssh_user_pem ]

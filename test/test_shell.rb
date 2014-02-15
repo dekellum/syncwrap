@@ -50,6 +50,11 @@ class TestShell < MiniTest::Unit::TestCase
     assert_equal( expected, command_lines_cleanup( expected ) )
   end
 
+  def test_ssh_opts
+    args = ssh_args( 'test', 'true', ssh_options: {'IdentitiesOnly' => 'yes'} )
+    assert_equal( %w[ ssh -o IdentitiesOnly=yes test ], args[0..3] )
+  end
+
   def test_capture_noop
     exit_code, outputs = capture3( %w[bash -c true])
     assert_equal( 0, exit_code )

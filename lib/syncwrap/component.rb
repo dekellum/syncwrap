@@ -130,8 +130,11 @@ module SyncWrap
     # :sudo_flags:: Additional Array of arguments to sudo, if used
     #               (see :user) Default: []
     #
-    # :ssh_flags::  Array of additional flags to ssh in addition to, or
-    #               overridden by, :ssh_user (-l) and :ssh_user_pem (-i).
+    # :ssh_flags:: Array of flags in addition to, or overridden by
+    #              :ssh_options (-o), :ssh_user (-l) and :ssh_user_pem
+    #              (-i).
+    #
+    # :ssh_options:: Hash of ssh option key, value strings.
     #
     # :ssh_user::   The ssh -l (login_name) flag.
     #
@@ -317,9 +320,11 @@ module SyncWrap
     # :user::      Files should be owned on destination by a user other
     #              than installer (ex: 'root'). See also :ssh_user
     #
-    # :ssh_flags:: Array of flags to give to ssh via rsync -e, in
-    #              addition to, or overridden by, :ssh_user (-l) and
-    #              :ssh_user_pem (-i).
+    # :ssh_flags:: Array of flags to ssh via rsync -e, in addition to
+    #              or overridden by :ssh_options (-o), :ssh_user (-l)
+    #              and :ssh_user_pem (-i).
+    #
+    # :ssh_options:: Hash of ssh option key, value strings.
     #
     # :ssh_user::  The ssh -l (login_name) flag.
     #

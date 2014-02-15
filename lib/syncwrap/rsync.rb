@@ -56,6 +56,9 @@ module SyncWrap
       # Pass ssh options via -e (--rsh) flag
       ssh_flags = []
       ssh_flags += opts[ :ssh_flags ] if opts[ :ssh_flags ]
+      if opts[ :ssh_options ]
+        ssh_flags += opts[:ssh_options].map { |o| ['-o', o.join('=')] }.flatten
+      end
       if opts[ :ssh_user ]
         ssh_flags += [ '-l', opts[ :ssh_user ] ]
         ssh_flags += [ '-i', opts[ :ssh_user_pem ] ] if opts[ :ssh_user_pem ]
