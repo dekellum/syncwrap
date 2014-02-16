@@ -216,6 +216,11 @@ module SyncWrap
       ctx.dryrun?
     end
 
+    # Return true if :verbose is set in default options.
+    def verbose?
+      ctx.verbose?
+    end
+
     # Return the path to the the specified src, as first found in the
     # :sync_paths option as per #rput, Source Resolution.  Return nil
     # if not found.  This allows optional, local behavior based on the
