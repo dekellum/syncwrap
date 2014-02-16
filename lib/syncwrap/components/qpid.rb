@@ -18,17 +18,34 @@ require 'syncwrap/component'
 require 'syncwrap/components/rhel'
 
 module SyncWrap
-  # Qpid AMQP broker provisioning. Currently this is RHEL/AmazonLinux
-  # centric.
+
+  # Qpid AMQP broker provisioning. Currently this is RHEL (CentoOS,
+  # Amazon Linux) centric; it has not been ported to Debian/Ubuntu.
   class Qpid < Component
 
+    # Root directory for src and build
+    # (Default: /tmp/src)
     attr_accessor :qpid_src_root
 
+    # The qpidd version to build, install
     attr_accessor :qpid_version
+
+    # Base HTTP url to qpid source repo.
     attr_accessor :qpid_repo
+
+    # Output package naming modifier, i.e. "amzn1"
     attr_accessor :qpid_distro
 
+    # Distro package base name for boost. On Amazon Linux you may want
+    # to set this to "boost141", depending on the qpid version.
+    # (Default: "boost")
+    attr_accessor :boost_pkg
+
+    # Corosync version to build, isntall
+    # (Default: '1.4.4')
     attr_accessor :corosync_version
+
+    # Base HTTP url to corosync source repo.
     attr_accessor :corosync_repo
 
     def initialize( opt = {} )
@@ -40,9 +57,10 @@ module SyncWrap
       # @qpid_repo = 'http://apache.osuosl.org/qpid'
       @qpid_distro = 'amzn1'
 
+      @boost_pkg = 'boost'
+
       @corosync_version = '1.4.4'
       @corosync_repo = 'http://corosync.org/download'
-
       super
     end
 
@@ -177,7 +195,8 @@ module SyncWrap
     end
 
     def qpid_install_deps
-      dist_install( %w[ nss-devel boost-devel libuuid-devel swig
+      dist_install( [ "#{boost_pkg}-devel" ] +
+                    %w[ nss-devel libuuid-devel swig
                         ruby-devel python-devel
                         cyrus-sasl-devel cyrus-sasl-plain cyrus-sasl-md5 ] )
     end
@@ -244,7 +263,7 @@ module SyncWrap
 
     def qpid_install!
 
-      dist_install( %w[ boost cyrus-sasl ] )
+      dist_install( [ boost_pkg, 'cyrus-sasl' ] )
 
       sudo <<-SH
        cd /usr/local
