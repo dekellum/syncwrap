@@ -42,5 +42,6 @@ PLATFORMS
 DEPENDENCIES
   aws-sdk (~> 1.34.0)
   minitest (~> 4.7.4)
+  rdoc (~> 4.0.1)
   rjack-tarpit (~> 2.1)
   syncwrap!
