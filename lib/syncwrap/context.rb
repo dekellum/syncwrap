@@ -257,13 +257,8 @@ module SyncWrap
     end
 
     def capture_stream( args, host, mode, opts )
-      if mode == :capture
-        accept = opts[:accept]
-        success = "accepted"
-      else
-        accept = [ 0 ]
-        success = "success"
-      end
+      accept = opts[ :accept ] || [ 0 ]
+      success_msg = ( accept == [ 0 ] ) ? "success" : "accepted"
 
       # When :verbose -> nil -> try_lock
       stream_output = opts[ :verbose ] ? nil : false
@@ -294,7 +289,7 @@ module SyncWrap
 
         if stream_output
           fmt.output_terminate
-          fmt.write_result( "Exit #{exit_code} (#{success})" ) unless failed
+          fmt.write_result( "Exit #{exit_code} (#{success_msg})" ) unless failed
         end
       ensure
         fmt.lock.unlock if stream_output
@@ -307,7 +302,7 @@ module SyncWrap
             fmt.write_command_output( :cmd, args.join(' ') + "\n", do_color )
           end
           fmt.write_command_outputs( outputs, do_color )
-          fmt.write_result( "Exit #{exit_code} (#{success})" ) unless failed
+          fmt.write_result( "Exit #{exit_code} (#{success_msg})" ) unless failed
         end
       end
 

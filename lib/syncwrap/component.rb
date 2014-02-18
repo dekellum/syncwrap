@@ -169,8 +169,9 @@ module SyncWrap
     #               enqueued. See usage example above. Default: nil
     #
     # :accept::     An array of Integer exit codes that will be accepted,
-    #               and not result in a CommandFailure being raised.
-    #               Default: [0]
+    #               and not result in a CommandFailure being
+    #               raised. Generally this is only used with
+    #               #capture. Default: [0]
     #
     def sh( command, opts = {}, &block )
       ctx.sh( command, opts, &block )
