@@ -45,10 +45,9 @@ module SyncWrap
         install_hashdot
       else
         # Just update config as needed.
-        # FIXME: Should be templates here
         rput( 'src/hashdot/profiles/',
               "#{local_root}/lib/hashdot/profiles/",
-              :excludes => :dev, :user => 'root' )
+              excludes: :dev, user: :root )
       end
     end
 
