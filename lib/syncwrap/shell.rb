@@ -39,7 +39,7 @@ module SyncWrap
 
     private
 
-    def ssh_args( host, command, opts = {} )
+    def ssh_args( host, command, opts = {} ) # :doc:
       args = []
       if host != 'localhost'
         opts = opts.dup
@@ -65,7 +65,7 @@ module SyncWrap
       end
     end
 
-    def sudo_args( command, opts = {} )
+    def sudo_args( command, opts = {} ) # :doc:
       args = []
       if opts[ :user ]
         args = [ 'sudo' ]
@@ -76,7 +76,7 @@ module SyncWrap
       args + sh_args( command, opts )
     end
 
-    def sh_args( command, opts = {} )
+    def sh_args( command, opts = {} ) # :doc:
       args = [ 'bash' ]
       args << '-e' if opts[ :error ].nil? || opts[ :error ] == :exit
       args << '-n' if opts[ :dryrun ]
@@ -107,7 +107,7 @@ module SyncWrap
 
     # Given one or an Array of commands, apply #block_trim_padding to
     # each and join all with newlines.
-    def command_lines_cleanup( commands )
+    def command_lines_cleanup( commands ) # :doc:
       Array( commands )
         .map { |cmd| block_trim_padding( cmd.split( $/ ) ) }
         .flatten
@@ -116,7 +116,7 @@ module SyncWrap
 
     # Left strip lines, but preserve increased indentation in
     # subsequent lines. Also right strip and drop blank lines
-    def block_trim_padding( lines )
+    def block_trim_padding( lines ) # :doc:
       pad = nil
       lines
         .reject { |l| l =~ /^\s*$/ } #blank lines
@@ -139,7 +139,7 @@ module SyncWrap
     # is often the same order you would see them in a real interactive
     # terminal, but not always, as buffering or timing issues in the
     # underlying implementation may cause some out of order results.
-    def capture3( args )
+    def capture3( args ) # :doc:
       status = nil
       outputs = []
       Open3::popen3( *args ) do |inp, out, err, wait_thread|
@@ -186,7 +186,7 @@ module SyncWrap
 
     # Select and merge the output buffers of the specific stream from
     # outputs (as returned by #capture3)
-    def collect_stream( stream, outputs )
+    def collect_stream( stream, outputs ) # :doc:
       outputs.
         select { |o| o[0] == stream }.
         map { |o| o[1] }. #the buffers

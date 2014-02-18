@@ -14,16 +14,22 @@
 # permissions and limitations under the License.
 #++
 
+require 'tmpdir'
+require 'erb'
+require 'fileutils'
+
 require 'syncwrap/path_util'
 
 module SyncWrap
 
+  # Low level support for rsync command construction and template
+  # processing.
   module Rsync
     include PathUtil
 
     private
 
-    def rsync_args( host, srcs, target, opts = {} )
+    def rsync_args( host, srcs, target, opts = {} ) # :doc:
 
       # -i --itemize-changes, used for counting changed files
       flags = %w[ -i ]
@@ -91,7 +97,7 @@ module SyncWrap
       [ 'rsync', flags, srcs, target ].flatten.compact
     end
 
-    def expand_implied_target( srcs )
+    def expand_implied_target( srcs ) # :doc:
       #FIXME: Honor absolute arg paths?
       if srcs.length == 1
         target = "/" + srcs.first
@@ -104,13 +110,13 @@ module SyncWrap
 
     # Preserves any trailing '/'.
     # Raises SourceNotFound if any not found.
-    def resolve_sources( srcs, sync_paths )
+    def resolve_sources( srcs, sync_paths ) # :doc:
       srcs.map { |path| resolve_source!( path, sync_paths ) }
     end
 
     # Preserves any trailing '/'.
     # Raises SourceNotFound if not found.
-    def resolve_source!( path, sync_paths )
+    def resolve_source!( path, sync_paths ) # :doc:
       resolve_source( path, sync_paths ) or
         raise( SourceNotFound,
               "#{path.inspect} not found in :sync_paths #{sync_paths.inspect}" )
@@ -118,7 +124,7 @@ module SyncWrap
 
     # Preserves any trailing '/'.
     # Returns nil if not found.
-    def resolve_source( path, sync_paths )
+    def resolve_source( path, sync_paths ) # :doc:
       #FIXME: Honor absolute arg paths?
       found = nil
       sync_paths.each do |r|
@@ -140,9 +146,60 @@ module SyncWrap
     # Given file path within src, return any sub-directory path needed
     # to reach file, or the empty string.  This is also src trailing
     # '/' aware.
-    def subpath( src, file )
+    def subpath( src, file ) # :doc:
       src = src.sub( %r{/[^/]*$}, '' ) #remove trail slash or last element
       File.dirname( file ).sub( /^#{src}\/?/, '' )
+    end
+
+    # Process templates in tmpdir and yield post-processed sources to
+    # block, cleaning up on exit.
+    def process_templates( srcs, opts ) # :doc:
+      bnd = opts[ :erb_binding ] or raise "required :erb_binding param missing"
+      erb_mode = opts[ :erb_mode ] || '<>' #Trim new line on "<% ... %>\n"
+      mktmpdir( 'syncwrap' ) do |tmp_dir|
+        processed_sources = []
+        out_dir = File.join( tmp_dir, 'd' ) #for default perms
+        srcs.each do |src|
+          erbs = find_source_erbs( src )
+          outname = nil
+          erbs.each do |erb|
+            spath = subpath( src, erb )
+            outname = File.join( out_dir, spath, File.basename( erb, '.erb' ) )
+            FileUtils.mkdir_p( File.dirname( outname ) )
+            perm = File.stat( erb ).mode
+            File.open( outname, "w", perm ) do |fout|
+              template = ERB.new( IO.read( erb ), nil, erb_mode )
+              template.filename = erb
+              fout.puts( template.result( bnd ) )
+            end
+          end
+          if erbs.length == 1 && src == erbs.first
+            processed_sources << outname
+          elsif !erbs.empty?
+            processed_sources << ( out_dir + '/' )
+          end
+        end
+        yield processed_sources
+      end
+    end
+
+    # Just like Dir.mktmpdir but with an attempt to workaround a JRuby
+    # 1.6.x bug. See https://jira.codehaus.org/browse/JRUBY-5678
+    def mktmpdir( prefix ) # :doc:
+      old_env_tmpdir = nil
+      newdir = nil
+      if defined?( JRUBY_VERSION ) && JRUBY_VERSION =~ /^1.6/
+        old_env_tmpdir = ENV['TMPDIR']
+        newdir = "/tmp/syncwrap.#{ENV['USER']}"
+        FileUtils.mkdir_p( newdir, mode: 0700 )
+        ENV['TMPDIR'] = newdir
+      end
+      Dir.mktmpdir( 'syncwrap' ) do |tmp_dir|
+        yield tmp_dir
+      end
+    ensure
+      FileUtils.rmdir( newdir ) if newdir
+      ENV['TMPDIR'] = old_env_tmpdir if old_env_tmpdir
     end
 
     def find_source_erbs( sources )
