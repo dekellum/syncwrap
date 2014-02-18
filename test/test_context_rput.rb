@@ -37,6 +37,19 @@ class TestContextRput < MiniTest::Unit::TestCase
     FileUtils.rm_rf( "#{TEST_DIR}/baz" )
   end
 
+  class TestContext < Context
+    attr_accessor :rsync_count
+
+    def initialize( *args )
+      @rsync_count = 0
+      super
+    end
+    def rsync( *args )
+      @rsync_count += 1
+      super
+    end
+  end
+
   def sp
     @sp ||= Space.new.tap do |s|
       s.merge_default_options( sync_paths: SYNC_PATHS,
@@ -47,9 +60,8 @@ class TestContextRput < MiniTest::Unit::TestCase
 
   def test_rput_file
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd1/bar', "#{TEST_DIR}/d2/" )
         if i == 0
@@ -60,15 +72,15 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( IO.read( "#{SYNC_DIR}/d1/bar" ),
                       IO.read( "#{TEST_DIR}/d2/bar" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_file_sudo
     skip unless TestOptions::SAFE_SUDO
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd1/bar', "#{TEST_DIR}/d2/", user: ENV['USER'] )
         if i == 0
@@ -79,14 +91,14 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( IO.read( "#{SYNC_DIR}/d1/bar" ),
                       IO.read( "#{TEST_DIR}/d2/bar" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_erb_no_suffix
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd1/foo', "#{TEST_DIR}/d2/" )
         if i == 0
@@ -97,14 +109,14 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d2/foo" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_erb_suffix
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd1/foo.erb', "#{TEST_DIR}/d2/" )
         if i == 0
@@ -115,14 +127,14 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d2/foo" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_erb_rename
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd1/foo.erb', "#{TEST_DIR}/baz" )
         if i == 0
@@ -134,12 +146,13 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/baz" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_missing_dir
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
+    ctx = TestContext.new( host, sp.default_options )
     begin
       ctx.rput( 'nodir/', "#{TEST_DIR}/" )
       flunk "Expected SourceNotFound exception"
@@ -147,11 +160,12 @@ class TestContextRput < MiniTest::Unit::TestCase
       refute_match( /.erb/, e.message )
       pass
     end
+    assert_equal( 0, ctx.rsync_count )
   end
 
   def test_rput_missing_file
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
+    ctx = TestContext.new( host, sp.default_options )
     begin
       ctx.rput( 'd1/goo', "#{TEST_DIR}/" )
       flunk "Expected SourceNotFound exception"
@@ -159,13 +173,13 @@ class TestContextRput < MiniTest::Unit::TestCase
       refute_match( /.erb/, e.message )
       pass
     end
+    assert_equal( 0, ctx.rsync_count )
   end
 
   def test_rput_contents_with_erb
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd1/', "#{TEST_DIR}/d2" )
         if i == 0
@@ -178,14 +192,14 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d2/foo" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_dir_with_erb
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd1', "#{TEST_DIR}" )
         if i == 0
@@ -200,14 +214,14 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d1/foo" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_subdir_with_erb
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd3', "#{TEST_DIR}" )
         if i == 0
@@ -223,14 +237,14 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d3/d2/foo" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_subdir_contents_with_erb
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
-
     2.times do |i|
+      ctx = TestContext.new( host, sp.default_options )
       ctx.with do
         changes = ctx.rput( 'd3/', "#{TEST_DIR}" )
         if i == 0
@@ -245,22 +259,26 @@ class TestContextRput < MiniTest::Unit::TestCase
         assert_equal( "barfoobar\n",
                       IO.read( "#{TEST_DIR}/d2/foo" ) )
       end
+      assert_equal( 1, ctx.rsync_count )
     end
   end
 
   def test_rput_erb_perm_change_only
     host = sp.host( 'localhost' )
-    ctx = Context.new( host, sp.default_options )
+    ctx = TestContext.new( host, sp.default_options )
     changes = ctx.rput( 'd3/', "#{TEST_DIR}" )
     assert_equal( %w[ d2/ d2/bar d2/foo ], changes.map { |c| c[1] } )
     assert( File.executable?( "#{TEST_DIR}/d2/foo" ) )
+    assert_equal( 1, ctx.rsync_count )
 
     # Make the template target non-executable temporarily. On re-rput,
     # only change is that file should have its exec bits reset.
+    ctx = TestContext.new( host, sp.default_options )
     FileUtils.chmod( 0664, "#{TEST_DIR}/d2/foo" )
     changes = ctx.rput( 'd3/', "#{TEST_DIR}" )
     assert_equal( [ %w[ .f...p..... d2/foo ] ], changes )
     assert( File.executable?( "#{TEST_DIR}/d2/foo" ) )
+    assert_equal( 1, ctx.rsync_count )
   end
 
   def binding_under_test

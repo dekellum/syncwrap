@@ -138,19 +138,28 @@ module SyncWrap
 
       srcs = resolve_sources( srcs, Array( opts[ :sync_paths ] ) )
 
-      if opts[:erb_process] != false
-        st_opts = opts.dup
-        st_opts[ :excludes ] = Array( opts[ :excludes ] ) + [ '*.erb' ]
-      else
-        st_opts = opts
-      end
-
-      changes = rsync( srcs, target, st_opts )
+      changes = []
 
       if opts[:erb_process] != false
-        srcs.each do |src|
-          changes += rsync_templates( src, target, opts )
+        sdirs, sfiles =   srcs.partition { |src| File.directory?( src ) }
+        serbs, sfiles = sfiles.partition { |src| src =~ /\.erb$/ }
+        plains = sdirs + sfiles #might not have/is not templates
+        maybes = sdirs + serbs  #might have/is templates
+
+        if maybes.empty?
+          changes = rsync(plains, target, opts ) unless plains.empty?
+        else
+          process_templates( maybes, opts ) do |processed|
+            unless processed.empty? || plains.empty?
+              opts = opts.dup
+              opts[ :excludes ] = Array( opts[ :excludes ] ) + [ '*.erb' ]
+            end
+            new_srcs = plains + processed
+            changes = rsync( new_srcs, target, opts ) unless new_srcs.empty?
+          end
         end
+      else
+        changes = rsync( srcs, target, opts ) unless srcs.empty?
       end
 
       changes
@@ -185,15 +194,16 @@ module SyncWrap
       [ exit_code, collect_stream( opts[ :coalesce ] ? :err : :out, outputs ) ]
     end
 
-    def rsync_templates( src, target, opts )
+    # Process templates in tmpdir and yield post-processed sources to
+    # block, cleaning up on exit.
+    def process_templates( srcs, opts )
       bnd = opts[ :erb_binding ] or raise "required :erb_binding param missing"
       erb_mode = opts[ :erb_mode ] || '<>' #Trim new line on "<% ... %>\n"
-      erbs = find_source_erbs( src )
-      if erbs.empty?
-        []
-      else
-        mktmpdir( 'syncwrap' ) do |tmp_dir|
-          out_dir = File.join( tmp_dir, 'd' ) #for default perms
+      mktmpdir( 'syncwrap' ) do |tmp_dir|
+        processed_sources = []
+        out_dir = File.join( tmp_dir, 'd' ) #for default perms
+        srcs.each do |src|
+          erbs = find_source_erbs( src )
           outname = nil
           erbs.each do |erb|
             spath = subpath( src, erb )
@@ -207,11 +217,12 @@ module SyncWrap
             end
           end
           if erbs.length == 1 && src == erbs.first
-            rsync( outname, target, opts )
-          else
-            rsync( out_dir + '/', target, opts )
+            processed_sources << outname
+          elsif !erbs.empty?
+            processed_sources << ( out_dir + '/' )
           end
         end
+        yield processed_sources
       end
     end
 
