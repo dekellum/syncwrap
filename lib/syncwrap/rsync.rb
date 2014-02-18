@@ -108,22 +108,25 @@ module SyncWrap
       [ srcs, target ]
     end
 
-    # Preserves any trailing '/'.
-    # Raises SourceNotFound if any not found.
+    # Resolves each srcs path via #resolve_source! Raises SourceNotFound
+    # if any not found.
     def resolve_sources( srcs, sync_paths ) # :doc:
       srcs.map { |path| resolve_source!( path, sync_paths ) }
     end
 
-    # Preserves any trailing '/'.
-    # Raises SourceNotFound if not found.
+    # Resolve the specified source path via #resolve_source. Raises
+    # SourceNotFound if not found.
     def resolve_source!( path, sync_paths ) # :doc:
       resolve_source( path, sync_paths ) or
         raise( SourceNotFound,
               "#{path.inspect} not found in :sync_paths #{sync_paths.inspect}" )
     end
 
-    # Preserves any trailing '/'.
-    # Returns nil if not found.
+    # Resolve the specified source path to the first existing
+    # file/directory in sync_paths roots and returns a #relativize
+    # path.  Also tries with an .erb suffix if a src does not have a
+    # trailing '/'. Preserves any trailing '/'. Returns nil if not
+    # found.
     def resolve_source( path, sync_paths ) # :doc:
       #FIXME: Honor absolute arg paths?
       found = nil
@@ -202,7 +205,7 @@ module SyncWrap
       ENV['TMPDIR'] = old_env_tmpdir if old_env_tmpdir
     end
 
-    def find_source_erbs( sources )
+    def find_source_erbs( sources ) # :doc:
       Array( sources ).inject([]) do |list, src|
         if File.directory?( src )
           list += find_source_erbs( expand_entries( src ) )
@@ -213,7 +216,7 @@ module SyncWrap
       end
     end
 
-    def expand_entries( src )
+    def expand_entries( src ) # :doc:
       Dir.entries( src ).
         reject { |e| e =~ /^\.+$/ }.
         map { |e| File.join( src, e ) }

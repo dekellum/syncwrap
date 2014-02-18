@@ -34,6 +34,7 @@ module SyncWrap
   #   ssh :ssh_flags host sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
   #
   # Example ssh_flags: -i ./key.pem -l ec2-user
+  #
   # Example sudo_flags: -H
   module Shell
 
