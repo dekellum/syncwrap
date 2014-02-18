@@ -38,8 +38,8 @@ module SyncWrap
   # diagnostic methods or uninstall.
   #
   # Components may also expose public utility methods (with or without
-  # arguments) that will be dynamical bound and may be used by higher
-  # (later) component instances stacked on the same Host.
+  # arguments) that will be dynamically bound and may be used by
+  # higher (later) component instances stacked on the same Host.
   class Component
 
     # Construct given options that are applied via same name setters
