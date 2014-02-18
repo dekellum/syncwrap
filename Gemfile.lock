@@ -2,7 +2,12 @@ PATH
   remote: .
   specs:
     syncwrap (2.0.0)
+      aws-sdk (~> 1.34.0)
+      json (>= 1.7.1, < 1.9)
+      nokogiri (>= 1.5.9, < 1.7)
       term-ansicolor (~> 1.2.2)
+      tins (~> 0.13.2)
+      uuidtools (~> 2.1.3)
 
 GEM
   remote: https://rubygems.org/
@@ -32,7 +37,7 @@ GEM
       rjack-maven (~> 3.0.4)
     term-ansicolor (1.2.2)
       tins (~> 0.8)
-    tins (0.13.1)
+    tins (0.13.2)
     uuidtools (2.1.4)
 
 PLATFORMS
@@ -40,7 +45,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aws-sdk (~> 1.34.0)
   minitest (~> 4.7.4)
   rdoc (~> 4.0.1)
   rjack-tarpit (~> 2.1)
