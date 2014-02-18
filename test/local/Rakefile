@@ -1,0 +1,15 @@
+# -*- ruby -*-
+
+# Stupid simple Rakefile integration example.
+# See SyncWrap::Space#execute for additional customization options
+
+require 'rubygems'
+require 'bundler/setup'
+require 'syncwrap'
+
+desc "Execute default components on all hosts in SyncWrap sync.rb"
+task :deploy do
+  sp = SyncWrap::Space.new
+  sp.load_sync_file_relative
+  sp.execute
+end
