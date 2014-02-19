@@ -94,11 +94,9 @@ module SyncWrap
         args << '-c'
         cmd = "exec 1>&2\n"
         if opts[ :sh_verbose ]
-          cmd += "set "
-          cmd += opts[ :sh_verbose ] == :x ? '-x' : '-v'
-          cmd += "\n"
+          cmd << "set " << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' ) << "\n"
         end
-        cmd += command_lines_cleanup( command )
+        cmd << command_lines_cleanup( command )
         args << cmd
       else
         if opts[ :sh_verbose ]
