@@ -60,6 +60,12 @@ sync/postgresql/ubuntu/pg_hba.conf
 sync/postgresql/ubuntu/pg_ident.conf
 sync/postgresql/ubuntu/postgresql.conf
 sync/postgresql/ubuntu/start.conf
+sync/src/hashdot/Makefile.erb
+sync/src/hashdot/profiles/default.hdp.erb
+sync/src/hashdot/profiles/jruby-common.hdp
+sync/src/hashdot/profiles/jruby-shortlived.hdp
+sync/src/hashdot/profiles/jruby.hdp.erb
+sync/src/hashdot/profiles/shortlived.hdp
 sync/usr/local/bin/jgem
 sync/usr/local/etc/qpidd.conf
 sync/var/iyyov/jobs.rb.erb
