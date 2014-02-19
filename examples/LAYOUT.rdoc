@@ -32,7 +32,7 @@ Here is what a complete end-user project setup might look like:
           └── config.rb.erb
 
 sync.rb:: The aforementioned default named sync-file, containing
-roles, components, hosts, and possibly profiles.
+          roles, components, hosts, and possibly profiles.
 
 sync/:: The default named sync root containing a tree of static files
         and templates for pushing to hosts. See the rput.rb example
