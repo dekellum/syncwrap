@@ -18,8 +18,8 @@ command queue, and a few powerful methods like rput (augmented rsync).
 
 * Multi-line shell support (often via here-document), command queue,
   and composition support in SyncWrap::Component#sh for more natural
-  script embedding.  You'll know your provisioning with bash, in all
-  its syntactic glory.
+  script embedding.  You'll know you are provisioning with bash, in
+  all its syntactic glory.
 
 * SyncWrap::Component#rput wraps rsync, with support for multiple
   source roots, transparent ERB templates, and target file
