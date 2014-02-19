@@ -1,0 +1,4 @@
+/* SETUP: Replace with the real pem file */
+{ "access_key_id": "AKiiiiiiiiiiiiiiiiii",
+  "secret_access_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

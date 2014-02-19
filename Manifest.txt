@@ -3,6 +3,16 @@ Manifest.txt
 README.rdoc
 Rakefile
 bin/syncwrap
+examples/LAYOUT.rdoc
+examples/Rakefile
+examples/ec2.rb
+examples/hello.rb
+examples/hello_binding.rb
+examples/jruby.rb
+examples/rput.rb
+examples/private/aws.json
+examples/sync/home/bob/.ssh/authorized_keys
+examples/sync/tmp/sample.erb
 lib/syncwrap/base.rb
 lib/syncwrap.rb
 lib/syncwrap/amazon_ec2.rb

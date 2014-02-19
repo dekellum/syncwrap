@@ -28,7 +28,7 @@ module SyncWrap
     # type to the same host.  Default: 0
     attr_accessor :instance
 
-    # A number, range, or array of raw device names. See #raw_devices
+    # A number, range, or array of raw device names. See #raw_devices=
     # for interpretation.  Software raid is only used for >1 raw
     # device. Default: 0
     attr_reader :raw_devices

@@ -22,16 +22,17 @@ require 'open3'
 
 module SyncWrap
 
-  # Low level command construction and process opening output capture.
+  # Low level command construction and process output capture.
   #
-  # == Supported Options
+  # == Supported Commands
+  #
   # Local:
-  #   sh [-v|-x -e -n] -c STRING
-  #   sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
+  #   bash [-v|-x -e -n] -c COMMANDS
+  #   sudo :sudo_flags [-u user] bash [-v|-x -e -n] -c COMMANDS
   #
   # Remote:
-  #   ssh :ssh_flags host sh [-v|-x -e -n] -c STRING
-  #   ssh :ssh_flags host sudo :sudo_flags [-u user] sh [-v|-x -e -n] -c STRING
+  #   ssh :ssh_flags :host bash [-v|-x -e -n] -c "COMMANDS"
+  #   ssh :ssh_flags :host sudo :sudo_flags [-u user] bash [-v|-x -e -n] -c "COMMANDS"
   #
   # Example ssh_flags: -i ./key.pem -l ec2-user
   #
@@ -40,6 +41,9 @@ module SyncWrap
 
     private
 
+    # When host is not 'localhost' return ssh command, flags,
+    # arguments on top of #sudo_args. Otherwise pass through to
+    # #sudo_args.
     def ssh_args( host, command, opts = {} ) # :doc:
       args = []
       if host != 'localhost'
@@ -66,6 +70,8 @@ module SyncWrap
       end
     end
 
+    # Return sudo command, flags, arguments on top of #sh_args if the
+    # :user option is specified. Otherwise pass through to #sh_args.
     def sudo_args( command, opts = {} ) # :doc:
       args = []
       if opts[ :user ]
@@ -77,6 +83,8 @@ module SyncWrap
       args + sh_args( command, opts )
     end
 
+    # Return bash command, flags, arguments for the given command(s)
+    # passed to #commmand_lines_cleanup.
     def sh_args( command, opts = {} ) # :doc:
       args = [ 'bash' ]
       args << '-e' if opts[ :error ].nil? || opts[ :error ] == :exit
@@ -102,7 +110,9 @@ module SyncWrap
       args
     end
 
-    def shell_escape_cmd( cmd )
+    # Escape the provided cmd string for inclusion in a bash quoted
+    # string command.  This is only needed when using ssh.
+    def shell_escape_cmd( cmd ) # :doc:
       cmd.gsub( /["$`\\]/ ) { |c| '\\' + c }
     end
 

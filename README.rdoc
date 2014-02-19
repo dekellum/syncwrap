@@ -5,46 +5,126 @@
 
 == Description
 
-A generalized and modular set of provisioning and deployment routines.
-
-The DSL-heavy Capistrano, Vlad suffer from lack of objects and the
-ability to customize and mix-in behavior. SyncWrap offers a unique
-Component Object system.
+A rather direct provisioning and deployment system in ruby, bash over
+ssh, and rsync. SyncWrap is a refreshingly straightforward, DSL-free
+non-framework with no central server or repository requirements. The
+"magic", if any, lies in the elegant component model, the shell
+command queue, and a few powerful methods like rput (augmented rsync).
 
 == Features
 
-* Multi-line shell support in SyncWrap::Common#run,
-  SyncWrap::Common#sudo for more natural script embedding
+* Default Thread-per-host parallel operation, with synchronized
+  block/live console output for debugging.
 
-* SyncWrap::Context::rput wraps rsync, adding multiple source roots,
-  ERB template support, and target file owner/permissions control.
+* Multi-line shell support (often via here-document), command queue,
+  and composition support in SyncWrap::Component#sh for more natural
+  script embedding.  You'll know your provisioning with bash, in all
+  its sintantic glory.
 
-* Distro differences are factored out into distro-specific classes.
+* SyncWrap::Component#rput wraps rsync, with support for multiple
+  source roots, transparent ERB templates, and target file
+  owner/permissions control. Returns the file change status allowing
+  reactive scripting (i.e. restart daemon since config has changed.)
 
-* Gem install utilities. e.g. SyncWrap::JRubyVM#jruby_check_gem,
-  SyncWrap::JRubyVM#jruby_install_gem
+* Distro differences are factored out into distro-specific components
+  with utility methods.
 
-== Components
+* SyncWrap::AmazonEC2 provider with host profiles: create and
+  provision hosts in a single step.
 
-Currently the following Components are built in:
+* Independent of (but may be easily intergrated into) rake
 
-* SyncWrap::AWS for EC2 instances, mdraid over EBS volumes, and
-  Route53 DNS updates.
-
-* SyncWrap::PostgreSQL
-
-* Complete SyncWrap::Java, SyncWrap::Hashdot, SyncWrap::JRuby stack
-
-* SyncWrap::Iyyov job scheduler and process monitor
-
-* SyncWrap::Users for setup of developer accounts, files
-
-* SyncWrap::UserRun for setup of a run user for deployed daemons, jobs
-  and var directories.
+* Depends only on ruby 1.9+ stdlib Open3 for interaction with ssh and
+  rsync processes. Actually really works on jruby 1.6.8 (--1.9 mode)
+  and 1.7+
 
 == Synopsis
 
-_TBD_
+Simplest example. Place the following in a sync.rb file:
+
+  class Greeter < SyncWrap::Component
+    def install
+      say_it
+    end
+
+    def say_it
+      sh <<-SH
+        echo "Hello from #{host.name}"
+      SH
+    end
+  end
+
+  host 'localhost', Greeter.new
+
+Try it via the command line:
+
+  gem install syncwrap
+  syncwrap --help
+  syncwrap -f ./sync.rb --list  # -f default; list
+  syncwrap                      # Run it
+  syncwrap -v                   # Run it with full verbose output
+  syncwrap -v Greeter.say_it    # Without Greeter#install default
+
+Output from syncwrap -v (minus the terminal color):
+
+  == localhost #<Module:0x00000001e95678>::Greeter#install: enqueue
+  <-- sh localhost (-v coalesce live)
+  echo "Hello from localhost"
+  Hello from localhost
+  --> Exit 0 (success)
+
+See more elaborate examples, including ec2 provider support, in the
+examples directory and LAYOUT.
+
+== Components
+
+Components implementing SyncWrap::Distro, to expose common utilty
+methods like dist_install:
+
+* SyncWrap::RHEL (also supports CentOS, Amazon Linux)
+* SyncWrap::Ubuntu
+
+Components implementing \#install:
+
+* SyncWrap::MDRaid - Software raid, lvm volumes, filesystems, mounts
+
+* SyncWrap::Network and SyncWrap::EtcHosts - hostname, static names,
+  resolver config
+
+* SyncWrap::Users - developer accounts, home directory files (incl. ssh
+  keys), sudoers access
+
+* SyncWrap::RunUser - a user for running deployed daemons, jobs, in
+  var directories.
+
+* SyncWrap::PostgreSQL
+
+* SyncWrap::OpenJDK or SyncWrap::CommericalJDK
+
+* SyncWrap::JRubyVM
+
+* SyncWrap::Iyyov - job scheduler and process monitor with
+  utilities for SyncWrap::IyyovDaemon deployment.
+
+* SyncWrap::Geminabox - private gem server
+
+* SyncWrap::Qpid - AMQP broker
+
+=== Component wish list
+
+The above only represents my more recent project needs. Pull requests
+to add, for example, the following would be well received:
+
+* MRI Ruby by source compile and/or distro-packages
+* Bundler install, for example for Sinatra apps
+* Bluepill
+* Rails (extra credit: without git fetch or per-host asset compile)
+* Nginx
+* Mongo
+* Redis
+
+\SyncWrap makes it reasonable to implement any of the above in the
+privacy of your own office.
 
 == License
 

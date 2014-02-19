@@ -2,4 +2,4 @@
 .bundle/
 pkg/
 doc/
-private/
+/private

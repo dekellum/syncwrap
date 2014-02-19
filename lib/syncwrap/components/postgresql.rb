@@ -20,9 +20,9 @@ require 'syncwrap/component'
 require 'syncwrap/components/rhel'
 require 'syncwrap/components/ubuntu'
 
-# Provisions for install and configuration of PostgreSQL
 module SyncWrap
 
+  # Provisions for install and configuration of PostgreSQL
   class PostgreSQL < Component
 
     # Location of postgresql data dir

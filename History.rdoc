@@ -1,4 +1,21 @@
 === 2.0.0 (TBD)
+* Major rewrite with only very limited conceptual compatibility with
+  1.x. See README, LAYOUT, and examples.
+* Now requires ruby 1.9 stdlib. Internally makes extensive use of new
+  Hash syntax.
+* New CLI, `syncwrap` command and sync.rb file replaces
+  Vlad/RemoteTask and rake (though rake integration is still
+  possible.) SyncWrap 2 is a standalone complete solution.
+* Component classes and dynamic binding replaces the subject-oriented
+  module mixins.
+* Block oriented, thread safe, colored console output
+* SyncWrap::Component#sh replaces `run`, includes a command queue
+  and compossible scripts.
+* SyncWrap::Component#rput with multiple sync_paths and transparent
+  ERB template support.
+* Extensive updates, templating, reliability improvements, and
+  optimization of existing provisions (now Components)
+* New Iyyov jobs.d support and standardized SyncWrap::IyyovDeamon
 
 === 1.5.2 (2013-4-10)
 * Add check for init, aws_configure only if aws_config_json file

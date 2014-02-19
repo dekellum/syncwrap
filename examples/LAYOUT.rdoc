@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+
+== Examples
+
+The examples/ directory contains several independent sync-file
+examples. Normally you would just have one named the default "sync.rb"
+Use the syncwrap command -f <file> option to load each.
+
+There is also an example Rakefile demonstrating basic rake integration.
+
+The sub-directories private/ and sync/ are standard named and shared
+by multiple examples.
+
+== Common Project Layout
+
+Here is what a complete end-user project setup might look like:
+
+  deploy/
+  ├── lib/
+  │   └── my_component.rb
+  ├── .gitignore
+  ├── private/
+  │   ├── aws.json
+  │   └── sec.pem
+  ├── sync.rb
+  └── sync/
+      ├── home
+      │   └── bob
+      │       └── .ssh
+      │           └── authorized_keys
+      └── my/
+          └── config.rb.erb
+
+sync.rb:: The aforementioned default named sync-file, containing
+roles, components, hosts, and possibly profiles.
+
+sync/:: The default named sync root containing a tree of static files
+        and templates for pushing to hosts. See the rput.rb example
+        for usage.  The local sync root can contain overrides to the
+        syncwrap gem provided files/directories as well as new
+        files. Home directories and in particular
+        .ssh/authorized_keys is commonly used with the
+        SyncWrap::Users component.
+
+lib/:: Place project-specific components here. Once these are
+       non-trivial its nicer to `require_relative` them into the
+       sync.rb. It best to namespace these in your own module.
+
+private/:: This directory is for sensitive files like credentials
+           that likely shouldn't be checked in. The files shown are
+           for a typical project using the SyncWrap::AmazonEC2
+           provider. See the ec2.rb example. Similarly you can use a
+           sync/private/ for sensitive files/templates that will be
+           deployed, and include this as the first sync_root in your
+           sync.rb You'll have to externally arrange for sharing
+           these files with other users. Assuming you will check this
+           into a git repo (either its own, or for example, in a
+           deploy/ directory of a larger project repo), its a good
+           idea to add a .gitignore file containing the following at
+           minimum:
+
+             private/
+
+           ...which ignores and avoids check-in by mistake of any so
+           named sub-directory and its contents.
+
+Without the private/ directories and sync.rb file, and adjusting lib/
+accordingly, you could also package this as a gem. This makes it easy
+to reuse components and files/templates across projects.  Include a
+bundler Gemfile in each deploy directory for precise version control
+of all gems involved, including syncwrap.

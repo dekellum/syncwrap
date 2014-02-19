@@ -22,4 +22,5 @@ RJack::TarPit.specify do |s|
   s.depend 'rdoc',     '~> 4.0.1', :dev
 
   s.required_ruby_version = '>= 1.9.1'
+  s.extra_rdoc_files |= %w[ README.rdoc History.rdoc examples/LAYOUT.rdoc ]
 end

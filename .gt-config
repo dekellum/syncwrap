@@ -7,6 +7,7 @@ Gravitext::DevTools.configure do |c|
     h.inception = 2011
     h.license = :apache
     h.exclusions += %w[ .travis.yml sync/**/*
+                        examples/**/* examples/sync/home/bob/.ssh/*
                         test/muddled_sync.rb test/sync/**/* test/zfile ]
   end
 
