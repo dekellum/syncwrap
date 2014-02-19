@@ -50,17 +50,6 @@ module SyncWrap
       sudo( "apt-get -yq install #{args.join ' '}" )
     end
 
-    def first_apt?
-      @apt_update_state_lock.synchronize do
-        if @apt_update_state[ host ]
-          false
-        else
-          @apt_update_state[ host ] = true
-          true
-        end
-      end
-    end
-
     def dist_uninstall( *pkgs )
       pkgs = dist_map_packages( pkgs )
       sudo "aptitude -yq purge #{pkgs.join ' '}"
@@ -76,6 +65,19 @@ module SyncWrap
 
     def dist_service( *args )
       sudo( [ '/usr/sbin/service', *args ].join( ' ' ) )
+    end
+
+    protected
+
+    def first_apt?
+      @apt_update_state_lock.synchronize do
+        if @apt_update_state[ host ]
+          false
+        else
+          @apt_update_state[ host ] = true
+          true
+        end
+      end
     end
 
   end
