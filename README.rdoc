@@ -19,20 +19,20 @@ command queue, and a few powerful methods like rput (augmented rsync).
 * Multi-line shell support (often via here-document), command queue,
   and composition support in SyncWrap::Component#sh for more natural
   script embedding.  You'll know your provisioning with bash, in all
-  its sintantic glory.
+  its syntactic glory.
 
 * SyncWrap::Component#rput wraps rsync, with support for multiple
   source roots, transparent ERB templates, and target file
   owner/permissions control. Returns the file change status allowing
   reactive scripting (i.e. restart daemon since config has changed.)
 
-* Distro differences are factored out into distro-specific components
-  with utility methods.
+* Linux distro differences are factored out into distro-specific
+  components with utility methods exposed in host context.
 
 * SyncWrap::AmazonEC2 provider with host profiles: create and
   provision hosts in a single step.
 
-* Independent of (but may be easily intergrated into) rake
+* Independent of (but easily integrated into) rake
 
 * Depends only on ruby 1.9+ stdlib Open3 for interaction with ssh and
   rsync processes. Actually really works on jruby 1.6.8 (--1.9 mode)
@@ -78,7 +78,7 @@ examples directory and LAYOUT.
 
 == Components
 
-Components implementing SyncWrap::Distro, to expose common utilty
+Components implementing SyncWrap::Distro, to expose common utility
 methods like dist_install:
 
 * SyncWrap::RHEL (also supports CentOS, Amazon Linux)
