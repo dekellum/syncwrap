@@ -16,48 +16,55 @@
 
 require 'syncwrap/component'
 require 'syncwrap/components/rhel'
+require 'syncwrap/ruby_support'
 
 module SyncWrap
 
-  # Provision C Ruby (ruby-lang.org - Matz Ruby Interpreter or
-  # MRI). Also includes utility methods for installing RubyGems.
+  # Provision 'C' Ruby (ruby-lang.org - Matz Ruby Interpreter, MRI)
+  # from source code, compiled on the target host.  This is currently
+  # the most reliable way for staying up-to-date on stable Ruby
+  # releases across the bulk of Linux server distros (which have
+  # conservative update policies).
+  #
+  # A reasonable alternative is to use distro provided packages. Since
+  # this varies so much based on distro particulars, but it is
+  # otherwise relatively easy to achieve (setup alt repos,
+  # dist_install, set alternatives) you are currently left to do this
+  # in your own component. Include RubySupport in that component for
+  # some common utility methods.
+  #
+  # Alternatives like RVM, rbenv, etc. are disfavored by this author
+  # for server provisioning because of their often arcane shell and
+  # environment modifications and obscure interations with non-/login
+  # or non-/interactive sessions. These are fine tools if needed for
+  # development however. Again you are currently on your own (beyond
+  # RubySupport) if you wish to go this route.
   class CRubyVM < Component
+    include RubySupport
 
-    # Ruby version to install
+    # The ruby version to install, like it appears in source packages
+    # from ruby-lang.org.
+    # (Default: 2.0.0-p353)
     attr_accessor :ruby_version
 
-    # The name of the gem command to be installed/used (default: gem)
-    attr_accessor :gem_command
-
-    # Default gem install arguments (default: --no-rdoc, --no-ri)
-    attr_accessor :gem_install_args
-
+    # If true, attempt to uninstall any pre-existing distro packaged
+    # ruby, which might otherwise lead to errors and confusion.
+    # (Default: true)
     attr_accessor :do_uninstall_distro_ruby
 
     def initialize( opts = {} )
       @ruby_version = "2.0.0-p353"
-      @gem_command = 'gem'
-      @do_uninstall_distro_ruby = true #FIXME
-      gem_install_args = %w[ --no-rdoc --no-ri ]
+      @do_uninstall_distro_ruby = true
 
       super
     end
 
-    def gemrc_path
-      "/etc/gemrc"
-    end
-
     def install
       install_ruby
-      install_gemrc
+      install_gemrc # from RubySupport
     end
 
-    # Install gemrc file to gemrc_path
-    def install_gemrc
-      rput( 'etc/gemrc', gemrc_path, user: :root )
-    end
-
-    def ruby_binary
+    def ruby_command
       "#{local_root}/bin/ruby"
     end
 
@@ -65,60 +72,22 @@ module SyncWrap
       ruby_version.sub( '-', '' )
     end
 
+    # If the current ruby_command is not at the desired ruby_version,
+    # download source, configure, make and install.
     def install_ruby
       cond = <<-SH
-        rvr=`[ -x #{ruby_binary} ] \
-             && #{ruby_binary} -v | grep -o -E '[0-9]+(\\.[0-9]+)+(p[0-9]+)?' \
+        rvr=`[ -x #{ruby_command} ] \
+             && #{ruby_command} -v | grep -o -E '[0-9]+(\\.[0-9]+)+(p[0-9]+)?' \
              || true`
         if [ "$rvr" != "#{compact_version}" ]; then
       SH
       sudo( cond, close: "fi" ) do
         install_build_deps
         make_and_install
+
+        # only after a successful source install:
         uninstall_distro_ruby if do_uninstall_distro_ruby
       end
-    end
-
-    # Install the specified gem.
-    #
-    # ==== Options
-    # :version:: Version specifier array, like in spec. files
-    #            (default: none, i.e. latest)
-    # :user_install:: If true, perform a --user-install as the current
-    #                 user, else system install with sudo (the default)
-    # :check:: If true, captures output and returns the number of gems
-    #          actually installed.  Combine with :minimize to only
-    #          install what is required, and short circuit when zero
-    #          gems installed.
-    # :minimize:: Use --conservative and --minimal-deps (rubygems
-    #             2.1.5+) flags to reduce installs to the minimum
-    #             required to satisfy the version requirments.
-    def install_gem( gem, opts = {} )
-      cmd = [ gem_command, 'install',
-              gem_install_args,
-              ( '--user-install' if opts[ :user_install ] ),
-              ( '--conservative' if opts[ :minimize] != false ),
-              ( '--minimal-deps' if opts[ :minimize] != false && min_deps_supported? ),
-              gem_version_flags( opts[ :version ] ),
-              gem ].flatten.compact.join( ' ' )
-
-      shopts = opts[ :user_install ] ? {} : {user: :root}
-
-      if opts[ :check ]
-        _,out = capture( cmd, shopts.merge!( accept: 0 ) )
-
-        count = 0
-        out.split( "\n" ).each do |oline|
-          if oline =~ /^\s+(\d+)\s+gem(s)?\s+installed/
-            count = $1.to_i
-          end
-        end
-        count
-      else
-        sh( cmd, shopts )
-      end
-
-      # FIXME: CommonRuby or some such module for above?
     end
 
     def uninstall_distro_ruby
@@ -138,11 +107,15 @@ module SyncWrap
       else
         dist_install( %w[ gcc make autoconf zlib1g-dev
                           libssl-dev libreadline-dev libyaml-dev ] )
-        # libreadline6-dev
       end
     end
 
     def make_and_install
+      # FIXME: Arguably all but the final install should be run by an
+      # unprivledged user. But its more likely to be merged if its
+      # left running via root, and in the larger context the amount of
+      # risk increase seems small. (i.e. if configure can be hacked,
+      # so can make install)
       sudo <<-SH
         [ -e /tmp/src/ruby ] && rm -rf /tmp/src/ruby || true
         mkdir -p /tmp/src/ruby
@@ -160,14 +133,6 @@ module SyncWrap
       [ 'http://cache.ruby-lang.org/pub/ruby',
         ruby_version =~ /^(\d+\.\d+)/ && $1,
         "ruby-#{ruby_version}.tar.gz" ].join( '/' )
-    end
-
-    def min_deps_supported?
-      true
-    end
-
-    def gem_version_flags( reqs )
-      Array( reqs ).flatten.compact.map { |req| "-v'#{req}'" }
     end
 
     def redirect?

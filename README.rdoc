@@ -101,7 +101,7 @@ Components implementing \#install:
 
 * SyncWrap::OpenJDK or SyncWrap::CommercialJDK
 
-* SyncWrap::JRubyVM
+* SyncWrap::JRubyVM and/or SyncWrap::CRubyVM (MRI, from source)
 
 * SyncWrap::Iyyov - job scheduler and process monitor with
   utilities for SyncWrap::IyyovDaemon deployment.
@@ -115,7 +115,6 @@ Components implementing \#install:
 The above only represents my more recent project needs. Pull requests
 to add, for example, the following would be well received:
 
-* MRI Ruby by source compile and/or distro-packages
 * Bundler install, for example for Sinatra apps
 * Bluepill
 * Rails (extra credit: without git fetch or per-host asset compile)

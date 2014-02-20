@@ -26,6 +26,7 @@ lib/syncwrap/host.rb
 lib/syncwrap/main.rb
 lib/syncwrap/path_util.rb
 lib/syncwrap/rsync.rb
+lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/cruby_vm.rb
