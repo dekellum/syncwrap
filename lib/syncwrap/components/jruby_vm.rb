@@ -18,8 +18,9 @@ require 'syncwrap/component'
 
 module SyncWrap
 
-  # Provision JRuby by direct download from public S3 repo. Includes
-  # utility methods for checking and installing JRuby gems.
+  # Provision JRuby (jruby.org - Ruby on the Java Virtual Machine) by
+  # direct download from public S3 repo. Includes utility methods for
+  # checking and installing JRuby gems.
   class JRubyVM < Component
 
     # JRuby version to install (default: 1.7.10)
