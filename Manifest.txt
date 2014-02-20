@@ -28,6 +28,7 @@ lib/syncwrap/path_util.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/components/commercial_jdk.rb
+lib/syncwrap/components/cruby_vm.rb
 lib/syncwrap/components/etc_hosts.rb
 lib/syncwrap/components/geminabox.rb
 lib/syncwrap/components/hashdot.rb

@@ -355,6 +355,7 @@ module SyncWrap
   # any threads are in play.
 
   autoload :CommercialJDK, 'syncwrap/components/commercial_jdk'
+  autoload :CRubyVM,       'syncwrap/components/cruby_vm'
   autoload :EtcHosts,      'syncwrap/components/etc_hosts'
   autoload :Geminabox,     'syncwrap/components/geminabox'
   autoload :Hashdot,       'syncwrap/components/hashdot'
