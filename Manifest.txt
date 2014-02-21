@@ -73,6 +73,7 @@ sync/var/iyyov/default/config.rb
 sync/var/iyyov/default/daemon.rb.erb
 test/muddled_sync.rb
 test/setup.rb
+test/test_components.rb
 test/test_context.rb
 test/test_context_rput.rb
 test/test_rsync.rb
