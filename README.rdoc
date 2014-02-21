@@ -99,7 +99,7 @@ Components implementing \#install:
 
 * SyncWrap::PostgreSQL
 
-* SyncWrap::OpenJDK or SyncWrap::CommericalJDK
+* SyncWrap::OpenJDK or SyncWrap::CommercialJDK
 
 * SyncWrap::JRubyVM
 
