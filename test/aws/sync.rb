@@ -38,10 +38,17 @@ profile( :postgres,
          ebs_volume_options: { size: 2 }, #gb
          roles: [ :postgres ] )
 
+profile( :cruby,
+         instance_type: 'm1.medium',
+         roles: [ :cruby ] )
+
 role( :amazon_linux,
       Users.new( ssh_user: 'ec2-user', ssh_user_pem: 'private/key.pem' ),
       RHEL.new,
       Network.new )
+
+role( :cruby,
+      CRubyVM.new )
 
 role( :postgres,
       MDRaid.new( raw_devices: 4,
