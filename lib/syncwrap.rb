@@ -354,7 +354,7 @@ module SyncWrap
   # risky in SyncWrap given that all of these should be loaded before
   # any threads are in play.
 
-  autoload :CommericalJDK, 'syncwrap/components/commmercial_jdk'
+  autoload :CommercialJDK, 'syncwrap/components/commercial_jdk'
   autoload :EtcHosts,      'syncwrap/components/etc_hosts'
   autoload :Geminabox,     'syncwrap/components/geminabox'
   autoload :Hashdot,       'syncwrap/components/hashdot'
