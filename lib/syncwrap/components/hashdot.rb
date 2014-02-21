@@ -20,6 +20,8 @@ module SyncWrap
 
   # Provision the {Hashdot}[http://hashdot.sourceforge.net/] JVM/script
   # launcher by building it with gcc on the target host.
+  #
+  # Host component dependencies: <Distro>, <JDK>, JRubyVM
   class Hashdot < Component
 
     # Hashdot version (default: 1.4.0)

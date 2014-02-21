@@ -23,6 +23,8 @@ module SyncWrap
 
   # Provision the {Iyyov}[http://rubydoc.info/gems/iyyov/] job
   # scheduler and process monitor via jruby_install_gem
+  #
+  # Host component dependencies: <Distro>, JRubyVM, RunUser
   class Iyyov < Component
 
     attr_accessor :iyyov_version

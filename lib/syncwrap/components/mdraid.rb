@@ -21,6 +21,8 @@ module SyncWrap
   # Handles assembling mdraid (Linux Software RAID) arrays, lvm
   # volumes, creating and mounting filesystems from previously
   # attached raw devices.
+  #
+  # Host component dependencies: <Distro>
   class MDRaid < Component
 
     # An instance number used for mdraid and volume group

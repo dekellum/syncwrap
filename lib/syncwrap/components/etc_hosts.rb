@@ -21,6 +21,8 @@ module SyncWrap
   # Provision/update an RFC 952 /etc/hosts file for "internal"
   # intra-Space host resolution. This can be used for simple internal
   # network resolution instead of DNS.
+  #
+  # Host component dependencies: none
   class EtcHosts < Component
 
     def initialize( opts = {} )

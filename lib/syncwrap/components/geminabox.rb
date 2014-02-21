@@ -21,6 +21,8 @@ module SyncWrap
   # Provision the
   # {boxed-geminabox}[https://github.com/dekellum/boxed-geminabox/]
   # gem server as a simple specialization of IyyovDaemon.
+  #
+  # Host component dependencies: JrubyVM, RunUser, Iyyov
   class Geminabox < IyyovDaemon
 
     def initialize( opts = {} )

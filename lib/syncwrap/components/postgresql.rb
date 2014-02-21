@@ -23,6 +23,8 @@ require 'syncwrap/components/ubuntu'
 module SyncWrap
 
   # Provisions for install and configuration of PostgreSQL
+  #
+  # Host component dependencies: <Distro>
   class PostgreSQL < Component
 
     # Location of postgresql data dir

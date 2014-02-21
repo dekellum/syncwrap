@@ -28,7 +28,7 @@ module SyncWrap
   # default/jobs.rb.erb is used. Again, these will work in the common
   # case.
   #
-  # Direct component dependencies: JRubyVM, Iyyov, RunUser
+  # Host component dependencies: JRubyVM, RunUser, Iyyov
   class IyyovDaemon < Component
 
     # The daemon process name, also used for service_dir (along with any

@@ -27,6 +27,8 @@ module SyncWrap
   #
   # Oracle and Java are registered trademarks of Oracle and/or its
   # affiliates.
+  #
+  # Host component dependencies: <Distro>
   class CommercialJDK < Component
 
     # HTTP URL to repo base directory. Note that the default

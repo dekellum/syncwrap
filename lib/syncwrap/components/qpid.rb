@@ -21,6 +21,8 @@ module SyncWrap
 
   # Qpid AMQP broker provisioning. Currently this is RHEL (CentoOS,
   # Amazon Linux) centric; it has not been ported to Debian/Ubuntu.
+  #
+  # Host component dependencies: RHEL
   class Qpid < Component
 
     # Root directory for src and build
@@ -246,6 +248,8 @@ module SyncWrap
 
   # Simplify qpid install by using pre-built binaries (for example,
   # archived from the build in Qpid)
+  #
+  # Host component dependencies: RHEL
   class QpidRepo < Qpid
 
     attr_accessor :qpid_prebuild_repo

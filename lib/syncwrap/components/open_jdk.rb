@@ -27,6 +27,8 @@ module SyncWrap
   # Oracle, Java, and OpenJDK are registered trademarks of Oracle
   # and/or its affiliates.
   # See http://openjdk.java.net/legal/openjdk-trademark-notice.html.
+  #
+  # Host component dependencies: <Distro>
   class OpenJDK < Component
 
     # The JDK major and/or minor version number, i.e "1.7" or "7" is 7.

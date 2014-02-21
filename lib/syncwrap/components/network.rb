@@ -23,6 +23,8 @@ module SyncWrap
 
   # Make updates to system configration for hostname and name
   # resolution. These changes are distro specific.
+  #
+  # Host component dependencies: <Distro>
   class Network < Component
 
     # A default DNS domain name to use for name search, for addition
