@@ -113,7 +113,7 @@ module SyncWrap
 
     # Ensure install of same gem version as init.d/iyyov script
     def install_iyyov_gem
-      jruby_install_gem( 'iyyov', version: "=#{iyyov_version}", minimize: true )
+      jruby_gem_install( 'iyyov', version: iyyov_version )
     end
 
     # Install iyyov daemon init.d script and add to init daemons

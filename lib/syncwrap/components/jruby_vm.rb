@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/ruby_support'
 
 module SyncWrap
 
@@ -24,29 +25,22 @@ module SyncWrap
   #
   # Host component dependencies: <Distro>
   class JRubyVM < Component
+    include RubySupport
 
     # JRuby version to install (default: 1.7.10)
     attr_accessor :jruby_version
 
-    # The name of the gem command to be installed/used (default: jgem)
-    attr_accessor :jruby_gem_command
-
-    # Default gem install arguments (default: --no-rdoc, --no-ri)
-    attr_accessor :jruby_gem_install_args
-
     def initialize( opts = {} )
       @jruby_version = '1.7.10'
-      @jruby_gem_command = 'jgem'
-      @jruby_gem_install_args = %w[ --no-rdoc --no-ri ]
 
-      super
+      super( { gem_command: 'jgem' }.merge( opts ) )
     end
 
     def jruby_dist_path
       "#{local_root}/lib/jruby/jruby-#{jruby_version}"
     end
 
-    def jruby_gemrc_path
+    def gemrc_path
       "#{jruby_dist_path}/etc"
     end
 
@@ -57,12 +51,7 @@ module SyncWrap
     # Install jruby if the jruby_version is not already present.
     def install
       jruby_install
-      jruby_install_gemrc
-    end
-
-    # Install gemrc file to jruby_gemrc_path
-    def jruby_install_gemrc
-      rput( 'etc/gemrc', jruby_gemrc_path, user: :root )
+      install_gemrc
     end
 
     def jruby_bin_url
@@ -81,55 +70,43 @@ module SyncWrap
           mkdir -p #{root}
           mkdir -p #{root}/gems
           curl -sSL #{jruby_bin_url} | tar -C #{root} -zxf -
-          mkdir -p #{jruby_gemrc_path}
+          mkdir -p #{gemrc_path}
           cd #{root} && ln -sfn jruby-#{jruby_version} jruby
           cd #{local_root}/bin && ln -sf ../lib/jruby/jruby/bin/jirb .
         fi
       SH
 
-      # FIXME: Assumes /usr/local. Move to jruby/bin/*
-      rput( 'usr/local/bin/', excludes: :dev, user: :root )
+      rput( 'jruby/bin/', "#{local_root}/bin/", excludes: :dev, user: :root )
     end
 
-    # Install the specified gem.
+    # See RubySupport#gem_install for usage.
     #
-    # ==== Options
-    # :version:: Version specifier array, like in spec. files
-    #            (default: none, i.e. latest)
-    # :user_install:: If true, perform a --user-install as the current
-    #                 user, else system install with sudo (the default)
-    # :check:: If true, captures output and returns the number of gems
-    #          actually installed.  Combine with :minimize to only
-    #          install what is required, and short circuit when zero
-    #          gems installed.
-    # :minimize:: Use --conservative and --minimal-deps (rubygems
-    #             2.1.5+) flags to reduce installs to the minimum
-    #             required to satisfy the version requirments.
-    def jruby_install_gem( gem, opts = {} )
-      cmd = [ jruby_gem_command, 'install',
-              jruby_gem_install_args,
-              ( '--user-install' if opts[ :user_install ] ),
-              ( '--conservative' if opts[ :minimize] ),
-              ( '--minimal-deps' if opts[ :minimize] && min_deps_supported? ),
-              jruby_gem_version_flags( opts[ :version ] ),
-              gem ].flatten.compact.join( ' ' )
+    # The jruby jgem command tends to be slow on virtual hardware.
+    # This implementation adds a faster short-circuit when an exact,
+    # single :version is given that avoids calling gem if the rubygems
+    # same version gemspec file is found.
+    def gem_install( gem, opts = {} )
+      version = Array( opts[ :version ] )
+      ver = (version.length == 1) && version[0] =~ /^=?\s*([0-9]\S+)/ && $1
 
-      shopts = opts[ :user_install ] ? {} : {user: :root}
+      unless ( opts[:check] || opts[:user_install] ||
+               opts[:minimize] == false || opts[:spec_check] == false ||
+               !version )
 
-      if opts[ :check ]
-        _,out = capture( cmd, shopts.merge!( accept: 0 ) )
+        specs = [ "#{jruby_gem_home}/specifications/#{gem}-#{ver}-java.gemspec",
+                  "#{jruby_gem_home}/specifications/#{gem}-#{ver}.gemspec" ]
 
-        count = 0
-        out.split( "\n" ).each do |oline|
-          if oline =~ /^\s+(\d+)\s+gem(s)?\s+installed/
-            count = $1.to_i
-          end
+        sudo( "if [ ! -e '#{specs[0]}' -a ! -e '#{specs[1]}' ]; then",
+              close: "fi" ) do
+          super
         end
-        count
       else
-        sh( cmd, shopts )
+        super
       end
+
     end
+
+    alias :jruby_gem_install :gem_install
 
     def min_deps_supported?
       varray = jruby_version.split('.').map { |n| n.to_i }

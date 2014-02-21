@@ -44,16 +44,20 @@ module SyncWrap
 
     # Install the specified gem.
     #
-    # ==== Options
+    # === Options
     #
-    # :version:: Version specifier array, like in spec. files
-    #            (default: none, i.e. latest)
+    # :version:: Version specifier array or single value, like in a
+    #            gemspec. (Default: nil -> latest) Examples:
+    #
+    #              '1.1.0'
+    #              '~> 1.1'
+    #              ['>=1.0', '<1.2']
     #
     # :user_install:: If true, perform a --user-install as the current
-    #                 user, else system install with sudo (the
-    #                 default)
+    #                 user.  Otherwise system install with sudo (the
+    #                 default, false).
     #
-    # :check:: If true, captures output and returns the number of gems
+    # :check:: If true, capture output and return the number of gems
     #          actually installed.  Combine with :minimize to only
     #          install what is required, and short circuit when zero
     #          gems installed. (Default: false)
@@ -61,7 +65,7 @@ module SyncWrap
     # :minimize:: Use --conservative and --minimal-deps (rubygems
     #             2.1.5+, #min_deps_supported?) flags to reduce
     #             installs to the minimum required to satisfy the
-    #             version requirments.  (Default: true)
+    #             version requirements.  (Default: true)
     #
     def gem_install( gem, opts = {} )
       cmd = [ gem_command, 'install',

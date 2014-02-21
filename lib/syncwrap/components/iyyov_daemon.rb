@@ -75,7 +75,7 @@ module SyncWrap
       # Shorten if the desired versioned process is already running.
       pid, ver = capture_running_version( name, instance )
       if ver != version
-        jruby_install_gem( gem_name, version: '=' + version, minimize: true )
+        gem_install( gem_name, version: version )
         changes += rput( job_source,
                          "#{iyyov_run_dir}/jobs.d/#{name_instance}.rb",
                          user: run_user )
