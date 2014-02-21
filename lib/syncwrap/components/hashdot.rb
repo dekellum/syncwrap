@@ -74,16 +74,20 @@ module SyncWrap
       src_root = '/tmp/src/hashdot'
       src = "#{src_root}/hashdot-#{hashdot_version}"
 
-      sudo "rm -rf #{src_root}"
-
       sh <<-SH
+        sudo rm -rf /tmp/src
         mkdir -p #{src_root}
         curl -sSL #{hashdot_bin_url} | tar -C #{src_root} -zxf -
       SH
 
       rput( 'src/hashdot/', "#{src}/", :excludes => :dev )
-      sh "cd #{src} && make"
-      sudo "cd #{src} && make install"
+
+      sh <<-SH
+        cd #{src}
+        make
+        sudo make install
+      SH
+
     end
 
   end
