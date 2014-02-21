@@ -76,7 +76,7 @@ module SyncWrap
     def initialize( opts = {} )
       @instance = 0 #FIXME: Or compute from existing volumes?
 
-      @raw_volumes = 0
+      @raw_devices = []
       @raw_read_ahead = 32 #512B blocks
       @do_unmount = false
 
