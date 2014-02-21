@@ -23,11 +23,12 @@ require 'syncwrap'
 
 module SyncWrap
 
-  # Each of the following are default auto test construction plans
-  # used below.
-  # The last component is under test and run via #install if provided
-  # The prior components are known dependencies
-  # A trailing Hash is used to populate required component options,
+  # Each of the following are default auto test construction plans,
+  # for all components, used below.  The last component is under test
+  # and run via #install if implemented.  The prior components are
+  # known dependencies. A trailing Hash is used to populate required
+  # or test-worthy component options. RHEL and Ubuntu are used
+  # semi-randomly for <Distro> dep.
   AUTO_TESTS =
     [ [ RHEL, CommercialJDK ],
       [ EtcHosts ],
@@ -36,7 +37,7 @@ module SyncWrap
       [ RHEL, JRubyVM, RunUser, Iyyov ],
       [ JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
       [ RHEL, JRubyVM ],
-      [ MDRaid ],
+      [ Ubuntu, MDRaid, raw_devices: 1 ],
       [ RHEL, Network ],
       [ Ubuntu, OpenJDK ],
       [ Ubuntu, PostgreSQL ],
