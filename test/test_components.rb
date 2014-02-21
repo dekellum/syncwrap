@@ -31,6 +31,7 @@ module SyncWrap
   # semi-randomly for <Distro> dep.
   AUTO_TESTS =
     [ [ RHEL, CommercialJDK ],
+      [ Ubuntu, CRubyVM ],
       [ EtcHosts ],
       [ RHEL, JRubyVM, RunUser, Iyyov, Geminabox ],
       [ Ubuntu, OpenJDK, JRubyVM, Hashdot ],
