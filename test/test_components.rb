@@ -46,10 +46,10 @@ module SyncWrap
       [ RHEL ],
       [ RunUser ],
       [ Ubuntu ],
-      [ Users ] ]
+      [ Users, home_users: [ 'bob' ] ] ]
 
   class TestContext < Context
-    attr_accessor :rsync_count
+    attr_accessor :commands
 
     def initialize( *args )
       @commands = []
@@ -87,10 +87,11 @@ module SyncWrap
         host.add( comp )
         pass
         if comp.respond_to?( :install )
-          with_test_context( sp, host ) do | ctx|
+          with_test_context( sp, host ) do |ctx|
             comp.install
+            ctx.flush
+            assert_operator( ctx.commands.length, :>, 0 )
           end
-          pass
         end
       end
 
