@@ -34,8 +34,8 @@ command queue, and a few powerful methods like rput (augmented rsync).
 
 * Independent of (but easily integrated into) rake
 
-* Depends only on ruby 1.9+ stdlib Open3 for interaction with ssh and
-  rsync processes. Actually really works on jruby 1.6.8 (--1.9 mode)
+* Depends only on ruby 1.9+ stdlib Open3 for interaction with bash,
+  ssh and rsync. Actually, really works on jruby 1.6.8 (--1.9 mode)
   and 1.7+
 
 == Synopsis
