@@ -44,20 +44,19 @@ sync/:: The default named sync root containing a tree of static files
 
 lib/:: Place project-specific components here. Once these are
        non-trivial its nicer to `require_relative` them into the
-       sync.rb. It best to namespace these in your own module.
+       sync.rb. Its best to namespace these in your own module.
 
-private/:: This directory is for sensitive files like credentials
-           that likely shouldn't be checked in. The files shown are
-           for a typical project using the SyncWrap::AmazonEC2
-           provider. See the ec2.rb example. Similarly you can use a
-           sync/private/ for sensitive files/templates that will be
-           deployed, and include this as the first sync_root in your
-           sync.rb You'll have to externally arrange for sharing
-           these files with other users. Assuming you will check this
-           into a git repo (either its own, or for example, in a
-           deploy/ directory of a larger project repo), its a good
-           idea to add a .gitignore file containing the following at
-           minimum:
+private/:: This directory is for sensitive files like credentials that
+           shouldn't be checked in. The files shown are for a typical
+           project using the SyncWrap::AmazonEC2 provider. See the
+           ec2.rb example. Similarly you can use a sync/private/ for
+           sensitive files/templates that will be deployed, and
+           include this as the first sync_root in your sync.rb You'll
+           have to externally arrange for sharing these files with
+           other users. Assuming you will check this into a git repo
+           (either its own, or for example, in a deploy/ directory of
+           a larger project repo), its a good idea to add a .gitignore
+           file containing the following at minimum:
 
              private/
 
