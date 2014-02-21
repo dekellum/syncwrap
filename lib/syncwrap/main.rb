@@ -50,7 +50,7 @@ module SyncWrap
     end
 
     # Shorthand for space.provider.profile
-    def profile( *args )
+    def profile( *args ) # :doc:
       space.provider.profile( *args )
     end
 
