@@ -137,6 +137,8 @@ module SyncWrap
       roots.dup #return a copy
     end
 
+    # Create a new instance of the specified provider class for use,
+    # passing self and the given options.
     def use_provider( provider_class, opts = {} )
       opts = opts.merge( sync_file_path: caller_path( caller ) )
       @provider = provider_class.new( self, opts )

@@ -188,23 +188,14 @@ module SyncWrap
       end
 
       if !@terminate_hosts.empty?
-        if space.provider
-          space.provider.terminate_hosts( @terminate_hosts,
-                                          @delete_attached_storage,
-                                          @sw_file )
-          exit 0
-        else
-          raise "No provider set in sync file/registered with Space"
-        end
+        space.provider.terminate_hosts( @terminate_hosts,
+                                        @delete_attached_storage,
+                                        @sw_file )
+        exit 0
       end
 
-      if !@create_plan.empty?
-        unless space.provider
-          raise "No provider created in sync file/registered with Space"
-        end
-        @create_plan.each do |count, profile, name|
-          space.provider.create_hosts( count, profile, name, @sw_file )
-        end
+      @create_plan.each do |count, profile, name|
+        space.provider.create_hosts( count, profile, name, @sw_file )
       end
 
       resolve_hosts
