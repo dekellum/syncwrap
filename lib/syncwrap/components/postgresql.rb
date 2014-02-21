@@ -28,9 +28,26 @@ module SyncWrap
     # Location of postgresql data dir
     attr_accessor :pg_data_dir
 
+    # The distro default data dir (set if known to be different than
+    # distro-specific default, nil -> computed in accessor)
+    attr_writer :pg_default_data_dir
+
     def initialize( opts = {} )
       @pg_data_dir = '/pg/data'
+      @pg_default_data_dir = nil
       super
+    end
+
+    def pg_default_data_dir
+      @pg_default_data_dir ||
+        case distro
+        when RHEL
+          '/var/lib/pgsql9/data'
+        when Ubuntu
+          '/var/lib/postgresql/9.1/main'
+        else
+          raise ContextError, "Distro #{distro.class.name} not supported"
+        end
     end
 
     def pg_deploy_config
@@ -81,12 +98,12 @@ module SyncWrap
       case distro
 
       when RHEL
-        unless pg_data_dir == '/var/lib/pgsql9/data'
+        unless pg_data_dir == pg_default_data_dir
           changes = rput( 'etc/sysconfig/pgsql/postgresql', :user => 'root' )
         end
 
         sudo( "if [ ! -d '#{pg_data_dir}/base' ]; then", close: "fi" ) do
-          unless pg_data_dir == '/var/lib/pgsql9/data'
+          unless pg_data_dir == pg_default_data_dir
             # (Per Amazon Linux)
             # Install PGDATA var override for init.d/postgresql
             sudo <<-SH
@@ -99,7 +116,7 @@ module SyncWrap
         end
 
       when Ubuntu
-        unless pg_data_dir == '/var/lib/postgresql/9.1/main'
+        unless pg_data_dir == pg_default_data_dir
           sudo <<-SH
             mkdir -p #{pg_data_dir}
             chown postgres:postgres #{pg_data_dir}
