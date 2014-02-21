@@ -28,20 +28,25 @@ module SyncWrap
   # and run via #install if implemented.  The prior components are
   # known dependencies. A trailing Hash is used to populate required
   # or test-worthy component options. RHEL and Ubuntu are used
-  # semi-randomly for <Distro> dep.
+  # semi-randomly for <Distro> deps, or both are tested in the case of
+  # non-trivial differentiation.
   AUTO_TESTS =
     [ [ RHEL, CommercialJDK ],
       [ Ubuntu, CRubyVM ],
+      [ RHEL,   CRubyVM ],
       [ EtcHosts ],
       [ RHEL, JRubyVM, RunUser, Iyyov, Geminabox ],
       [ Ubuntu, OpenJDK, JRubyVM, Hashdot ],
       [ RHEL, JRubyVM, RunUser, Iyyov ],
       [ Ubuntu, JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
       [ RHEL, JRubyVM ],
-      [ Ubuntu, MDRaid, raw_devices: 1 ],
+      [ RHEL,   MDRaid, raw_devices: 1 ],
+      [ Ubuntu, MDRaid, raw_devices: 2 ],
+      [ Ubuntu, Network ],
       [ RHEL, Network ],
       [ Ubuntu, OpenJDK ],
       [ Ubuntu, PostgreSQL ],
+      [ RHEL,   PostgreSQL ],
       [ RHEL, Qpid ],
       [ RHEL, QpidRepo, qpid_prebuild_repo: 'http://localhost' ],
       [ RHEL ],
@@ -72,13 +77,13 @@ module SyncWrap
       end
     end
 
-    AUTO_TESTS.each do |comps|
+    AUTO_TESTS.each_with_index do |comps, i|
       comps = comps.dup
       comp_class_opts = comps.last.is_a?( Hash ) ? comps.pop : {}
       comp_class = comps.pop
       cname = ( comp_class.name =~ /([a-zA-Z0-9]+)$/ ) && $1.downcase
 
-      define_method( "test_#{cname}" ) do
+      define_method( "test_#{cname}_#{i}" ) do
         sp = Space.new
         host = sp.host( 'testhost' )
         comps.each do |dep|
