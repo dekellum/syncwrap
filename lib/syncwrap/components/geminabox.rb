@@ -22,7 +22,7 @@ module SyncWrap
   # {boxed-geminabox}[https://github.com/dekellum/boxed-geminabox/]
   # gem server as a simple specialization of IyyovDaemon.
   #
-  # Host component dependencies: JrubyVM, RunUser, Iyyov
+  # Host component dependencies: <Distro>, JrubyVM, RunUser, Iyyov
   class Geminabox < IyyovDaemon
 
     def initialize( opts = {} )

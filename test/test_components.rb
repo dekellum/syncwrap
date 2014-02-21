@@ -32,10 +32,10 @@ module SyncWrap
   AUTO_TESTS =
     [ [ RHEL, CommercialJDK ],
       [ EtcHosts ],
-      [ JRubyVM, RunUser, Iyyov, Geminabox ],
+      [ RHEL, JRubyVM, RunUser, Iyyov, Geminabox ],
       [ Ubuntu, OpenJDK, JRubyVM, Hashdot ],
       [ RHEL, JRubyVM, RunUser, Iyyov ],
-      [ JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
+      [ Ubuntu, JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
       [ RHEL, JRubyVM ],
       [ Ubuntu, MDRaid, raw_devices: 1 ],
       [ RHEL, Network ],
