@@ -76,8 +76,8 @@ module SyncWrap
     # download source, configure, make and install.
     def install_ruby
       cond = <<-SH
-        rvr=`[ -x #{ruby_command} ] \
-             && #{ruby_command} -v | grep -o -E '[0-9]+(\\.[0-9]+)+(p[0-9]+)?' \
+        rvr=`[ -x #{ruby_command} ] &&
+             #{ruby_command} -v | grep -o -E '[0-9]+(\\.[0-9]+)+(p[0-9]+)?' \
              || true`
         if [ "$rvr" != "#{compact_version}" ]; then
       SH
@@ -98,6 +98,8 @@ module SyncWrap
       end
     end
 
+    alias :cruby_gem_install :gem_install
+
     protected
 
     def install_build_deps
@@ -111,13 +113,11 @@ module SyncWrap
     end
 
     def make_and_install
-      # FIXME: Arguably all but the final install should be run by an
-      # unprivledged user. But its more likely to be merged if its
-      # left running via root, and in the larger context the amount of
-      # risk increase seems small. (i.e. if configure can be hacked,
-      # so can make install)
+      # Arguably all but the final install should be run by an
+      # unprivileged user. But its more likely merged this way, and if
+      # "configure" or "make" can be exploited, so can "make install".
       sudo <<-SH
-        [ -e /tmp/src/ruby ] && rm -rf /tmp/src/ruby || true
+        [ -e /tmp/src ] && rm -rf /tmp/src || true
         mkdir -p /tmp/src/ruby
         cd /tmp/src/ruby
         curl -sSL #{src_url} | tar -zxf -
@@ -125,7 +125,7 @@ module SyncWrap
         ./configure --prefix=#{local_root} #{redirect?}
         make #{redirect?}
         make install #{redirect?}
-        cd / && rm -rf /tmp/src/ruby
+        cd / && rm -rf /tmp/src
       SH
     end
 
