@@ -25,7 +25,7 @@ module SyncWrap
   # Two :sync_paths files are searched for deployment: a config.rb and
   # a jobs.d/<name>.rb.  If concrete or .erb variants of these are not
   # found than an (empty) default/config.rb and a generic
-  # default/jobs.rb.erb is used. Again, these will work in the common
+  # default/daemon.rb.erb is used. Again, these will work in the common
   # case.
   #
   # Host component dependencies: <Distro>, JRubyVM, RunUser, Iyyov

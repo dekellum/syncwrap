@@ -22,7 +22,9 @@ require 'syncwrap/components/ubuntu'
 module SyncWrap
 
   # Provision the {Iyyov}[http://rubydoc.info/gems/iyyov/] job
-  # scheduler and process monitor via jruby_install_gem
+  # scheduler and process monitor via jruby_gem_install. The
+  # installation setup and configuration templates assume use of a
+  # jobs.d directory, as supported in \Iyyov 1.3.0.
   #
   # Host component dependencies: <Distro>, JRubyVM, RunUser
   class Iyyov < Component
@@ -30,7 +32,7 @@ module SyncWrap
     attr_accessor :iyyov_version
 
     def initialize( opts = {} )
-      @iyyov_version = '1.2.0'
+      @iyyov_version = '1.3.0'
 
       super
     end

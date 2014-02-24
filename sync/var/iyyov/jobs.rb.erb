@@ -1,22 +1,4 @@
-module JobsDirectory
-  def add_watch_directory( dir )
-    @files[ dir ] = File.stat( dir ).mtime
-  end
-
-  def load_directory( dir )
-    add_watch_directory( dir )
-    Dir.glob( File.join( dir, '*.rb' ) ) do |file|
-      load_file( file ) if File.executable?( file )
-    end
-  end
-end
-
 Iyyov.context do |c|
-
   c.base_dir = '<%= run_dir %>'
-
-  c.extend( JobsDirectory )
-
   c.load_directory( File.join( File.dirname( __FILE__ ), 'jobs.d' ) )
-
 end
