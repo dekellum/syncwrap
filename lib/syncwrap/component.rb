@@ -64,9 +64,9 @@ module SyncWrap
     # for readability:
     #
     #   sh <<-SH
-    #      if [ ! -e /var/#{fname} ]; then
-    #        touch /var/#{fname}
-    #      fi
+    #     if [ ! -e /var/#{fname} ]; then
+    #       touch /var/#{fname}
+    #     fi
     #   SH
     #   #=> nil
     #
