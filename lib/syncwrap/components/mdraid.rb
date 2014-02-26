@@ -54,7 +54,7 @@ module SyncWrap
     attr_accessor :raid_read_ahead
 
     # RAID chunk size in KB
-    # Default: 246
+    # Default: 256
     attr_accessor :raid_chunk
 
     # A table of [ slice, path (,name) ] rows where; slice is a
