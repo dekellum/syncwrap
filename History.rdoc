@@ -1,4 +1,4 @@
-=== 2.0.0 (TBD)
+=== 2.0.0 (2014-2-26)
 * Major rewrite with only very limited conceptual compatibility with
   1.x. See README, LAYOUT, and examples.
 * Now requires ruby 1.9 stdlib. Internally makes extensive use of new
