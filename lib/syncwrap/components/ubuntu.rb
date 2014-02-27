@@ -16,7 +16,6 @@
 
 require 'syncwrap/component'
 require 'syncwrap/distro'
-require 'thread'
 
 module SyncWrap
 
@@ -26,9 +25,6 @@ module SyncWrap
     include SyncWrap::Distro
 
     def initialize( opts = {} )
-      @apt_update_state_lock = Mutex.new
-      @apt_update_state = {}
-
       super
 
       packages_map.merge!( 'apr'       => 'libapr1',
@@ -70,13 +66,12 @@ module SyncWrap
     protected
 
     def first_apt?
-      @apt_update_state_lock.synchronize do
-        if @apt_update_state[ host ]
-          false
-        else
-          @apt_update_state[ host ] = true
-          true
-        end
+      s = state
+      if s[ :ubuntu_apt_updated ]
+        false
+      else
+        s[ :ubuntu_apt_updated ] = true
+        true
       end
     end
 
