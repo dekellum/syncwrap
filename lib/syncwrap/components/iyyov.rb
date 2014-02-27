@@ -41,11 +41,14 @@ module SyncWrap
     def install
       # Shorten if the desired iyyov version is already running
       pid, ver = capture_running_version( 'iyyov' )
-      unless ver == iyyov_version
+      if ver != iyyov_version
         install_run_dir    #as root
         install_iyyov_gem  #as root
         install_iyyov_init #as root
         iyyov_restart      #as root
+        true
+      elsif state[ :hashdot_updated ]
+        iyyov_restart
         true
       end
 

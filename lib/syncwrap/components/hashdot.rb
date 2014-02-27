@@ -45,12 +45,17 @@ module SyncWrap
       if !test_hashdot_binary
         install_system_deps
         install_hashdot
+        changes = [ :installed ]
       else
         # Just update config as needed.
-        rput( 'src/hashdot/profiles/',
-              "#{local_root}/lib/hashdot/profiles/",
-              excludes: :dev, user: :root )
+        changes = rput( 'src/hashdot/profiles/',
+                        "#{local_root}/lib/hashdot/profiles/",
+                        excludes: :dev, user: :root )
       end
+      unless changes.empty?
+        state[ :hashdot_updated ] = changes
+      end
+      changes
     end
 
     def install_system_deps

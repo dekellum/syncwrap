@@ -80,7 +80,7 @@ module SyncWrap
                          "#{iyyov_run_dir}/jobs.d/#{name_instance}.rb",
                          user: run_user )
         changes += iyyov_install_jobs
-      elsif !changes.empty?
+      elsif !changes.empty? || state[ :hashdot_updated ]
         rudo( "kill #{pid} || true" ) # ..and let Iyyov restart it
       end
       changes

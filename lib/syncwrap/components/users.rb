@@ -84,7 +84,7 @@ module SyncWrap
     end
 
     def install
-      ensure_ssh_access if host[ :just_created ] && ssh_access_timeout > 0
+      ensure_ssh_access if state[ :just_created ] && ssh_access_timeout > 0
 
       rdir = find_source( local_home_root )
       users = home_users
