@@ -48,6 +48,13 @@ module SyncWrap
         iyyov_restart      #as root
         true
       end
+
+      # FIXME: There is a potential race condition brewing here. If
+      # Iyyov is restarted, then job changes (i.e. jobs.d files) are
+      # immediately made before Iyyov is done reloading, then those
+      # changes may not be detected. Thus job upgrades may not occur.
+      # This might be best fixed in Iyyov itself.
+
       false
     end
 
