@@ -32,8 +32,8 @@ module SyncWrap
     def initialize( space, props = {} )
       @space = space
       @props = {}
-      merge_props( props )
       @contents = [ :all ]
+      merge_props( props )
     end
 
     # Return the :name property.
