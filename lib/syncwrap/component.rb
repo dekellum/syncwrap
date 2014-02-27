@@ -58,6 +58,14 @@ module SyncWrap
       ctx.host
     end
 
+    # A Hash-like interface of Symbol keys to arbitrary values, backed
+    # read-only by the host properties. Use this for stashing any
+    # execution time state on a per context/host basis; as doing so on
+    # the cross-context Component instances themselves is inadvisable.
+    def state
+      ctx.state
+    end
+
     # Enqueue a bash shell command or script fragment to be run on the
     # host of the current Context. Newlines in command are interpreted
     # as per bash. For example, it is common to use a here-document

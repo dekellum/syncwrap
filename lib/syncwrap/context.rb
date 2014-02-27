@@ -45,10 +45,15 @@ module SyncWrap
     # The current Host of this context
     attr_reader :host
 
+    # A Hash-like interface of keys/values backed read-only by the
+    # host properties.
+    attr_reader :state
+
     # Construct given host and default_options to use for all #sh and
     # #rput calls.
     def initialize( host, opts = {} )
       @host = host
+      @state = StateHash.new( host )
       reset_queue
       @queue_locked = false
       @default_options = opts
@@ -255,6 +260,23 @@ module SyncWrap
       [ exit_code, outputs ]
     end
 
+  end
+
+  # The Context#state Hash-like implementation, backed read-only by
+  # the associated host properties.
+  class StateHash
+    def initialize( host )
+      @host = host
+      @props = {}
+    end
+
+    def []( key )
+      @props[ key ] || @host[ key ]
+    end
+
+    def []=( key, val )
+      @props[ key.to_sym ] = val
+    end
   end
 
 end
