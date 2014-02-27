@@ -81,7 +81,7 @@ module SyncWrap
 
     # Load the specified file path as per a sync.rb, into this
     # Space. If relative, path is assumed to be relative to the caller
-    # (i.e. Rakefile, etc.) as with the conventional 'sync' directory.
+    # (i.e. Rakefile, etc.) as with the conventional 'sync.rb'.
     def load_sync_file_relative( fpath = './sync.rb' )
       load_sync_file( path_relative_to_caller( fpath, caller ) )
     end
