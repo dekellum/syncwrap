@@ -264,6 +264,7 @@ module SyncWrap
 
       { id:      inst.id,
         region:  region,
+        availability_zone: inst.availability_zone,
         ami:     inst.image_id,
         name:    tags[ 'Name' ],
         internet_name:  inst.dns_name,
