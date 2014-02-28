@@ -109,8 +109,8 @@ module SyncWrap
       profile = @profiles[ profile_key ].dup or
         raise "Profile #{profile_key} not registered"
 
-      # FIXME: Support profiles overrides.
-      # Also add some targeted CLI overrides (like for :availability_zones)
+      # FIXME: Support profile overrides? Also add some targeted CLI
+      # overrides (like for :availability_zone)?
 
       if profile[ :user_data ] == :ec2_user_sudo
         profile[ :user_data ] = ec2_user_data
@@ -131,7 +131,10 @@ module SyncWrap
         props = aws_create_instance( hname, profile )
         host = space.host( props )
         append_host_definitions( [ host ], nil, output_file )
-        host[ :just_created ] = true #after so this isn't written
+        host[ :just_created ] = true
+        # Need to use a host prop for this since context(s) do not
+        # exist yet. Note it is set after append_host_definitions, to
+        # avoid permanently writing this property to the sync_file.
       end
     end
 
