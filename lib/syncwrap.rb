@@ -380,5 +380,6 @@ module SyncWrap
 
   # Additional autoloads (optional support)
   autoload :AmazonEC2,     'syncwrap/amazon_ec2'
+  autoload :GitHelp,       'syncwrap/git_help'
 
 end
