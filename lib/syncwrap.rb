@@ -174,13 +174,14 @@ module SyncWrap
       host
     end
 
+    # Return host by name, or nil if not defined.
+    def get_host( name )
+      @hosts[ name ]
+    end
+
     # All Host instances, in order added.
     def hosts
       @hosts.values
-    end
-
-    def host_names
-      @hosts.keys
     end
 
     # Return an ordered, unique set of component classes, direct or via

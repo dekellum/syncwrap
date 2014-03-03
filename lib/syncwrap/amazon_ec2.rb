@@ -121,9 +121,7 @@ module SyncWrap
 
       count.times do
         hname = if count == 1
-                  if space.host_names.include?( name )
-                    raise "Host #{name} already exists!"
-                  end
+                  raise "Host #{name} already exists!" if space.get_host( name )
                   name
                 else
                   find_name( name )
@@ -140,15 +138,12 @@ module SyncWrap
 
     def terminate_hosts( names, delete_attached_storage, sync_file )
       names.each do |name|
-        if space.host_names.include?( name )
-          host = space.host( name )
-          raise "Host #{name} missing :id" unless host[:id]
-          raise "Host #{name} missing :region" unless host[:region]
-          aws_terminate_instance( host, delete_attached_storage )
-          delete_host_definition( host, sync_file )
-        else
-          raise "Host #{name} not found in Space, sync file."
-        end
+        host = space.get_host( name )
+        raise "Host #{name} not found in Space, sync file." unless host
+        raise "Host #{name} missing :id" unless host[:id]
+        raise "Host #{name} missing :region" unless host[:region]
+        aws_terminate_instance( host, delete_attached_storage )
+        delete_host_definition( host, sync_file )
       end
     end
 
@@ -157,12 +152,11 @@ module SyncWrap
     attr_reader :space
 
     def find_name( prefix )
-      host_names = space.host_names
       i = 1
       name = nil
       loop do
         name = "%s-%2d" % [ prefix, i ]
-        break if ! host_names.include?( name )
+        break if !space.get_host( name )
         i += 1
       end
       name
