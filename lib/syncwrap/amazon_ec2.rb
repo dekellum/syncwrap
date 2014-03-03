@@ -68,7 +68,7 @@ module SyncWrap
     # Define a host profile by Symbol key and Hash value.
     #
     # Profiles may inherit properties from a :base_profile, either
-    # specified by that key, or the :default key profile. The
+    # specified by that key, or the :default profile. The
     # base_profile must be defined in advance (above in the sync
     # file). When merging profile to any base_profile, the :roles
     # property is concatenated via set union. All other properties are
