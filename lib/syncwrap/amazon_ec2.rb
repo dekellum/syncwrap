@@ -140,13 +140,13 @@ module SyncWrap
       end
     end
 
-    def terminate_hosts( names, delete_attached_storage, sync_file )
+    def terminate_hosts( names, delete_attached_storage, sync_file, do_wait = true )
       names.each do |name|
         host = space.get_host( name )
         raise "Host #{name} not found in Space, sync file." unless host
         raise "Host #{name} missing :id" unless host[:id]
         raise "Host #{name} missing :region" unless host[:region]
-        aws_terminate_instance( host, delete_attached_storage )
+        aws_terminate_instance( host, delete_attached_storage, do_wait )
         delete_host_definition( host, sync_file )
       end
     end

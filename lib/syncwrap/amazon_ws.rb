@@ -209,7 +209,7 @@ module SyncWrap
     # :region and :id.
     #
     # _WARNING_: data _will_ be lost!
-    def aws_terminate_instance( iprops, delete_attached_storage = false )
+    def aws_terminate_instance( iprops, delete_attached_storage = false, do_wait = true )
       ec2 = AWS::EC2.new.regions[ iprops[ :region ] ]
       inst = ec2.instances[ iprops[ :id ] ]
       unless inst.exists?
@@ -227,7 +227,9 @@ module SyncWrap
       end
 
       inst.terminate
-      wait_until( "termination of #{inst.id}", 2.0 ) { inst.status == :terminated }
+      if do_wait || !ebs_volumes.empty?
+        wait_until( "termination of #{inst.id}", 2.0 ) { inst.status == :terminated }
+      end
 
       ebs_volumes = ebs_volumes.map do |vid|
         volume = ec2.volumes[ vid ]
