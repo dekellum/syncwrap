@@ -15,6 +15,7 @@
 #++
 
 require 'time'
+require 'securerandom'
 
 require 'syncwrap/amazon_ws'
 require 'syncwrap/host'
@@ -138,6 +139,43 @@ module SyncWrap
         # exist yet. Note it is set after append_host_definitions, to
         # avoid permanently writing this property to the sync_file.
       end
+    end
+
+    # Create a temporary host using the specified profile, yield to
+    # block for provisioning, then create a machine image and
+    # terminate the host. If block returns false, then the image will
+    # not be created nor will the host be terminated.
+    # On success, returns image_id (ami-*) and name.
+    def create_image_from_profile( profile_key, sync_file )
+      profile = get_profile( profile_key ).dup
+      tag = profile[ :tag ]
+      profile[ :tag ] = tag = tag.call if tag.is_a?( Proc )
+
+      opts = {}
+      opts[ :name ] = profile_key.to_s
+      opts[ :name ] += ( '-' + tag ) if tag
+      opts[ :description ] = profile[ :description ]
+
+      if image_name_exist?( profile[ :region ], opts[ :name ] )
+        raise "Image name #{opts[:name]} (profile-tag) already exists."
+      end
+
+      hname = nil
+      loop do
+        hname = SecureRandom::hex(4)
+        break unless space.get_host( hname )
+      end
+      create_hosts( 1, profile, hname, sync_file )
+      host = space.host( hname, imaging: true )
+
+      success = yield( host )
+
+      if success
+        image_id = create_image( host, opts )
+        terminate_hosts( [ hname ], false, sync_file, false )
+        [ image_id, opts[ :name ] ]
+      end
+
     end
 
     def terminate_hosts( names, delete_attached_storage, sync_file, do_wait = true )

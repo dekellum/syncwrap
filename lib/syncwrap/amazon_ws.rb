@@ -162,6 +162,50 @@ module SyncWrap
       instance_to_props( region, inst )
     end
 
+    # Return true if the authenticated AWS user in the sepecified
+    # region already owns an image of the specified name
+    def image_name_exist?( region, name )
+      ec2 = AWS::EC2.new.regions[ region ]
+      images = ec2.images.with_owner( :self )
+      images.any? { |img| img.name == name }
+    end
+
+    # Create an image for the specified host which will be stopped
+    # before imaging and not restarted
+    #
+    # === Options
+    #
+    # :name:: Required, image compatable (i.e. no spaces, identifier) name
+    #
+    # :description:: Image description
+    #
+    def create_image( host, opts = {} )
+      opts = opts.dup
+      name = opts.delete( :name ) or raise "Missing required name for image"
+      region = host[ :region ]
+      ec2 = AWS::EC2.new.regions[ region ]
+      inst = ec2.instances[ host[ :id ] ]
+      raise "Host ID #{host[:id]} does not exist?" unless inst.exists?
+
+      inst.stop
+      stat = wait_until( "instance #{inst.id} to stop", 2.0 ) do
+        s = inst.status
+        s if s == :stopped || s == :terminated
+      end
+      raise "Instance #{inst.id} has status #{stat}" unless stat == :stopped
+
+      image = inst.create_image( name, { no_reboot: true }.merge( opts ) )
+      stat = wait_until( "image #{image.id} to be available", 2.0 ) do
+        s = image.state
+        s if s != :pending
+      end
+      unless stat == :available
+        raise "Image #{image.id} failed: #{image.state_reason}"
+      end
+
+      image.image_id
+    end
+
     # Create a Route53 DNS CNAME from iprops :name to :internet_name.
     # Options are per {AWS::Route53::ResourceRecordSetCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/Route53/ResourceRecordSetCollection.html#create-instance_method]
     # (currently undocumented) with the following additions:

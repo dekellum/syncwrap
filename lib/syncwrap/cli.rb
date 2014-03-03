@@ -33,6 +33,7 @@ module SyncWrap
       @roles = []
       @host_patterns = []
       @create_plan = []
+      @image_plan = []
       @import_regions = []
       @terminate_hosts = []
       @delete_attached_storage = false
@@ -152,6 +153,13 @@ module SyncWrap
           @create_plan << [ count, profile, name ]
         end
 
+        opts.on( "--create-image PROFILE",
+                 "Create a machine image using a temporary host of the",
+                 "specified PROFILE, provisioning only that host,",
+                 "stopping, imaging, and terminating it." ) do |profile|
+          @image_plan << profile.to_sym
+        end
+
         opts.on( "--import-hosts REGIONS",
                  "Import hosts form provider 'region' names, ",
                  "append to sync file and exit." ) do |rs|
@@ -199,6 +207,19 @@ module SyncWrap
         space.provider.terminate_hosts( @terminate_hosts,
                                         @delete_attached_storage,
                                         @sw_file )
+        exit 0
+      end
+
+      if !@image_plan.empty?
+        success = nil
+        p = space.provider
+        @image_plan.each do |profile_key|
+          ami,name = p.create_image_from_profile(profile_key, @sw_file) do |host|
+            space.execute( [ host ], [], @options )
+          end
+          exit( 1 ) unless ami
+          puts "Image #{ami} (#{name}) created for profile #{profile_key}"
+        end
         exit 0
       end
 
