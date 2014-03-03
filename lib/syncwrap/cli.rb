@@ -36,6 +36,7 @@ module SyncWrap
       @import_regions = []
       @terminate_hosts = []
       @delete_attached_storage = false
+      @ssh_session = nil
       @space = Space.new
     end
 
@@ -79,7 +80,7 @@ module SyncWrap
           @options[ :flush_component ] = true
         end
 
-        opts.on( "-s", "--no-coalesce",
+        opts.on( "--no-coalesce",
                  "Do not coalesce streams (as is the default)" ) do
           @options[ :coalesce ] = false
         end
@@ -127,6 +128,12 @@ module SyncWrap
           @list_hosts = true
         end
 
+        opts.on( "-S", "--ssh-session HOST",
+                 "exec an interactive ssh session on HOST name",
+                 "(ssh args can be passed after an '--')" ) do |h|
+          @ssh_session = h
+        end
+
         opts.on( "-C", "--create-host P",
                  "Create hosts where P has format: [N*]profile[:name]",
                  "  N: number to create (default: 1)",
@@ -167,6 +174,7 @@ module SyncWrap
       end
 
       @component_plan = opts.parse!( args )
+      # Usually; but treat these as ssh args if --ssh-session
 
     rescue OptionParser::ParseError => e
       $stderr.puts e.message
@@ -196,6 +204,16 @@ module SyncWrap
 
       @create_plan.each do |count, profile, name|
         space.provider.create_hosts( count, profile, name, @sw_file )
+      end
+
+      if @ssh_session
+        host = space.get_host( @ssh_session )
+        host = space.ssh_host_name( host )
+        raise "Host #{@ssh_session} not found in sync file" unless host
+        extra_args = @component_plan
+        raise "SSH args? #{extra_args.inspect}" if extra_args.first =~ /^[^\-]/
+        @component_plan = []
+        Kernel.exec( 'ssh', *extra_args, host )
       end
 
       resolve_hosts
