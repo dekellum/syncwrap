@@ -103,7 +103,9 @@ module SyncWrap
       iopts = opts.dup
       iopts.delete( :ebs_volumes )
       iopts.delete( :ebs_volume_options )
-      iopts.delete( :roles )
+      iopts.delete( :roles ) #-> tags
+      iopts.delete( :description ) #-> tags
+      iopts.delete( :tag ) #-> tags
 
       if iopts[ :count ] && iopts[ :count ] != 1
         raise ":count #{iopts[ :count ]} != 1 is not supported"
@@ -123,6 +125,16 @@ module SyncWrap
 
       if opts[ :roles ]
         inst.add_tag( 'Roles', value: opts[ :roles ].join(' ') )
+      end
+
+      if opts[ :description ]
+        inst.add_tag( 'Description', value: opts[ :description ] )
+      end
+
+      tag = opts[ :tag ]
+      if tag
+        tag = tag.call if tag.is_a?( Proc )
+        inst.add_tag( 'Tag', value: tag )
       end
 
       wait_for_running( inst )
