@@ -152,7 +152,7 @@ module SyncWrap
           @create_plan << [ count, profile, name ]
         end
 
-        opts.on( "-I", "--import-hosts REGIONS",
+        opts.on( "--import-hosts REGIONS",
                  "Import hosts form provider 'region' names, ",
                  "append to sync file and exit." ) do |rs|
           @import_regions = rs.split( /[\s,]+/ )
