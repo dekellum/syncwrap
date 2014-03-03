@@ -90,6 +90,10 @@ module SyncWrap
       @profiles[ key ] = profile
     end
 
+    def get_profile( key )
+      @profiles[ key ] or raise "Profile #{key} not registered"
+    end
+
     def import_hosts( regions, output_file )
       hlist = import_host_props( regions )
       unless hlist.empty?
@@ -105,9 +109,9 @@ module SyncWrap
       end
     end
 
-    def create_hosts( count, profile_key, name, output_file )
-      profile = @profiles[ profile_key ].dup or
-        raise "Profile #{profile_key} not registered"
+    def create_hosts( count, profile, name, output_file )
+      profile = get_profile( profile ) if profile.is_a?( Symbol )
+      profile = profile.dup
 
       # FIXME: Support profile overrides? Also add some targeted CLI
       # overrides (like for :availability_zone)?
