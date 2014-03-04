@@ -94,12 +94,18 @@ module SyncWrap
     # including any forced mtime update.
     def iyyov_install_jobs( force = false )
 
-      changes = rput( 'var/iyyov/jobs.rb', iyyov_run_dir, user: run_user )
+      changes = []
+
+      if force || !state[ :iyyov_root_jobs_installed ]
+        changes += rput( 'var/iyyov/jobs.rb', iyyov_run_dir, user: run_user )
+        state[ :iyyov_root_jobs_installed ] = true
+      end
 
       if force && changes.empty?
         rudo "touch #{iyyov_run_dir}/jobs.rb"
         changes << [ '.f..T......', "#{iyyov_run_dir}/jobs.rb" ]
       end
+
       changes
     end
 
