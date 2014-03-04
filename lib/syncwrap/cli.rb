@@ -95,6 +95,11 @@ module SyncWrap
           @options[ :verbose ] = true
         end
 
+        opts.on( "-c", "--verbose-changes",
+                 "Show any rput changes that occur, as if verbose" ) do
+          @options[ :verbose_changes ] = true
+        end
+
         opts.on( "-x", "--expand-shell",
                  "Use -x (expand) instead of -v shell verbose output",
                  "(sh_verbose: :x, typically combined with -v)" ) do

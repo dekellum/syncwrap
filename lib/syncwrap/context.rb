@@ -245,7 +245,9 @@ module SyncWrap
         fmt.lock.unlock if stream_output
       end
 
-      if !stream_output && ( failed || opts[ :verbose ] )
+      if !stream_output &&
+          ( failed || opts[ :verbose ] ||
+            ( opts[ :verbose_changes ] && !outputs.empty? && mode == :rsync ) )
         fmt.sync do
           fmt.write_header( host, mode, opts )
           if mode == :rsync
