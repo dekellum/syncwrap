@@ -74,9 +74,9 @@ module SyncWrap
         @ssh_user_pem =
           relativize( path_relative_to_caller( @ssh_user_pem, caller ) )
         unless File.exist?( @ssh_user_pem )
-          warn( "WARNING: Users pem #{@ssh_user_pem} not found. " +
-                "Will not use #{@ssh_user}.\n" +
-                "Components may fail without sudo access" )
+          warn( "WARNING: #{@ssh_user_pem} not found, " +
+                "Users will not use #{@ssh_user}.\n" +
+                "         Expect failures if user #{ENV['USER']} isn't already a sudoer." )
           @ssh_user = nil
           @ssh_user_pem = nil
         end
