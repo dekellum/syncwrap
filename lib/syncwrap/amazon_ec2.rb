@@ -95,7 +95,7 @@ module SyncWrap
       @profiles[ key ] or raise "Profile #{key} not registered"
     end
 
-    def import_hosts( regions, output_file )
+    def import_hosts( regions, sync_file )
       hlist = import_host_props( regions )
       unless hlist.empty?
 
@@ -106,11 +106,11 @@ module SyncWrap
 
         time = Time.now.utc
         cmt = "\n# Import of AWS #{regions.join ','} on #{time.iso8601}"
-        append_host_definitions( hlist, cmt, output_file )
+        append_host_definitions( hlist, cmt, sync_file )
       end
     end
 
-    def create_hosts( count, profile, name, output_file )
+    def create_hosts( count, profile, name, sync_file )
       profile = get_profile( profile ) if profile.is_a?( Symbol )
       profile = profile.dup
 
@@ -133,7 +133,7 @@ module SyncWrap
                 end
         props = aws_create_instance( hname, profile )
         host = space.host( props )
-        append_host_definitions( [ host ], nil, output_file )
+        append_host_definitions( [ host ], nil, sync_file )
         host[ :just_created ] = true
         # Need to use a host prop for this since context(s) do not
         # exist yet. Note it is set after append_host_definitions, to
@@ -204,8 +204,8 @@ module SyncWrap
       name
     end
 
-    def append_host_definitions( hosts, comment, output_file )
-      File.open( output_file, "a" ) do |out|
+    def append_host_definitions( hosts, comment, sync_file )
+      File.open( sync_file, "a" ) do |out|
         out.puts comment if comment
 
         hosts.each do |host|
