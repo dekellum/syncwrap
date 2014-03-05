@@ -382,6 +382,9 @@ module SyncWrap
     #
     # :verbose::   Output stdout/stderr from rsync (default: false)
     #
+    # :verbose_changes:: Promote to verbose output if there are any
+    #                    changes (default: false).
+    #
     # :erb_process:: If false, treat '.erb' suffixed files as normal
     #                files (default: true)
     #
