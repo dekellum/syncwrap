@@ -45,9 +45,9 @@ module SyncWrap
         install_run_dir    #as root
         install_iyyov_gem  #as root
         install_iyyov_init #as root
-        iyyov_restart      #as root
+        iyyov_restart unless state[ :imaging ] #as root
         true
-      elsif state[ :hashdot_updated ]
+      elsif state[ :hashdot_updated ] && !state[ :imaging ]
         iyyov_restart
         true
       end
@@ -58,6 +58,7 @@ module SyncWrap
       # changes may not be detected. Thus job upgrades may not occur.
       # This might be best fixed in Iyyov itself.
 
+      iyyov_stop if state[ :imaging ]
       false
     end
 

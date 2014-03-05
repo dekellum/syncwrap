@@ -103,7 +103,9 @@ module SyncWrap
       iopts = opts.dup
       iopts.delete( :ebs_volumes )
       iopts.delete( :ebs_volume_options )
-      iopts.delete( :roles )
+      iopts.delete( :roles ) #-> tags
+      iopts.delete( :description ) #-> tags
+      iopts.delete( :tag ) #-> tags
 
       if iopts[ :count ] && iopts[ :count ] != 1
         raise ":count #{iopts[ :count ]} != 1 is not supported"
@@ -123,6 +125,16 @@ module SyncWrap
 
       if opts[ :roles ]
         inst.add_tag( 'Roles', value: opts[ :roles ].join(' ') )
+      end
+
+      if opts[ :description ]
+        inst.add_tag( 'Description', value: opts[ :description ] )
+      end
+
+      tag = opts[ :tag ]
+      if tag
+        tag = tag.call if tag.is_a?( Proc )
+        inst.add_tag( 'Tag', value: tag )
       end
 
       wait_for_running( inst )
@@ -148,6 +160,50 @@ module SyncWrap
       #FIXME: end
 
       instance_to_props( region, inst )
+    end
+
+    # Return true if the authenticated AWS user in the sepecified
+    # region already owns an image of the specified name
+    def image_name_exist?( region, name )
+      ec2 = AWS::EC2.new.regions[ region ]
+      images = ec2.images.with_owner( :self )
+      images.any? { |img| img.name == name }
+    end
+
+    # Create an image for the specified host which will be stopped
+    # before imaging and not restarted
+    #
+    # === Options
+    #
+    # :name:: Required, image compatable (i.e. no spaces, identifier) name
+    #
+    # :description:: Image description
+    #
+    def create_image( host, opts = {} )
+      opts = opts.dup
+      name = opts.delete( :name ) or raise "Missing required name for image"
+      region = host[ :region ]
+      ec2 = AWS::EC2.new.regions[ region ]
+      inst = ec2.instances[ host[ :id ] ]
+      raise "Host ID #{host[:id]} does not exist?" unless inst.exists?
+
+      inst.stop
+      stat = wait_until( "instance #{inst.id} to stop", 2.0 ) do
+        s = inst.status
+        s if s == :stopped || s == :terminated
+      end
+      raise "Instance #{inst.id} has status #{stat}" unless stat == :stopped
+
+      image = inst.create_image( name, { no_reboot: true }.merge( opts ) )
+      stat = wait_until( "image #{image.id} to be available", 2.0 ) do
+        s = image.state
+        s if s != :pending
+      end
+      unless stat == :available
+        raise "Image #{image.id} failed: #{image.state_reason}"
+      end
+
+      image.image_id
     end
 
     # Create a Route53 DNS CNAME from iprops :name to :internet_name.
@@ -197,7 +253,7 @@ module SyncWrap
     # :region and :id.
     #
     # _WARNING_: data _will_ be lost!
-    def aws_terminate_instance( iprops, delete_attached_storage = false )
+    def aws_terminate_instance( iprops, delete_attached_storage = false, do_wait = true )
       ec2 = AWS::EC2.new.regions[ iprops[ :region ] ]
       inst = ec2.instances[ iprops[ :id ] ]
       unless inst.exists?
@@ -215,7 +271,9 @@ module SyncWrap
       end
 
       inst.terminate
-      wait_until( "termination of #{inst.id}", 2.0 ) { inst.status == :terminated }
+      if do_wait || !ebs_volumes.empty?
+        wait_until( "termination of #{inst.id}", 2.0 ) { inst.status == :terminated }
+      end
 
       ebs_volumes = ebs_volumes.map do |vid|
         volume = ec2.volumes[ vid ]

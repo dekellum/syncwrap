@@ -15,6 +15,7 @@
 #++
 
 require 'time'
+require 'securerandom'
 
 require 'syncwrap/amazon_ws'
 require 'syncwrap/host'
@@ -90,6 +91,10 @@ module SyncWrap
       @profiles[ key ] = profile
     end
 
+    def get_profile( key )
+      @profiles[ key ] or raise "Profile #{key} not registered"
+    end
+
     def import_hosts( regions, output_file )
       hlist = import_host_props( regions )
       unless hlist.empty?
@@ -105,9 +110,9 @@ module SyncWrap
       end
     end
 
-    def create_hosts( count, profile_key, name, output_file )
-      profile = @profiles[ profile_key ].dup or
-        raise "Profile #{profile_key} not registered"
+    def create_hosts( count, profile, name, output_file )
+      profile = get_profile( profile ) if profile.is_a?( Symbol )
+      profile = profile.dup
 
       # FIXME: Support profile overrides? Also add some targeted CLI
       # overrides (like for :availability_zone)?
@@ -136,13 +141,50 @@ module SyncWrap
       end
     end
 
-    def terminate_hosts( names, delete_attached_storage, sync_file )
+    # Create a temporary host using the specified profile, yield to
+    # block for provisioning, then create a machine image and
+    # terminate the host. If block returns false, then the image will
+    # not be created nor will the host be terminated.
+    # On success, returns image_id (ami-*) and name.
+    def create_image_from_profile( profile_key, sync_file )
+      profile = get_profile( profile_key ).dup
+      tag = profile[ :tag ]
+      profile[ :tag ] = tag = tag.call if tag.is_a?( Proc )
+
+      opts = {}
+      opts[ :name ] = profile_key.to_s
+      opts[ :name ] += ( '-' + tag ) if tag
+      opts[ :description ] = profile[ :description ]
+
+      if image_name_exist?( profile[ :region ], opts[ :name ] )
+        raise "Image name #{opts[:name]} (profile-tag) already exists."
+      end
+
+      hname = nil
+      loop do
+        hname = SecureRandom::hex(4)
+        break unless space.get_host( hname )
+      end
+      create_hosts( 1, profile, hname, sync_file )
+      host = space.host( hname, imaging: true )
+
+      success = yield( host )
+
+      if success
+        image_id = create_image( host, opts )
+        terminate_hosts( [ hname ], false, sync_file, false )
+        [ image_id, opts[ :name ] ]
+      end
+
+    end
+
+    def terminate_hosts( names, delete_attached_storage, sync_file, do_wait = true )
       names.each do |name|
         host = space.get_host( name )
         raise "Host #{name} not found in Space, sync file." unless host
         raise "Host #{name} missing :id" unless host[:id]
         raise "Host #{name} missing :region" unless host[:region]
-        aws_terminate_instance( host, delete_attached_storage )
+        aws_terminate_instance( host, delete_attached_storage, do_wait )
         delete_host_definition( host, sync_file )
       end
     end

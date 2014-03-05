@@ -80,9 +80,29 @@ module SyncWrap
                          "#{iyyov_run_dir}/jobs.d/#{name_instance}.rb",
                          user: run_user )
         changes += iyyov_install_jobs
-      elsif !changes.empty? || state[ :hashdot_updated ]
-        rudo( "kill #{pid} || true" ) # ..and let Iyyov restart it
       end
+
+      # If we found a daemon pid then kill if either:
+      #
+      # (1) the version is the same (i.e no other signal via updates
+      #     above for Iyyov) but there was a config change or hashdot
+      #     was updated (i.e. new jruby version). In this case Iyyov
+      #     should be up to restart the daemon.
+      #
+      # (2) We are :imaging, in which case we want a graceful
+      #     shutdown. In this case Iyyov should have already been kill
+      #     signalled itself and will not restart the daemon.
+      #
+      # In all cases there is the potential that the process has
+      # already stopped (i.e. crashed, etc) between above pid capture
+      # and the kill.  Ignore kill failures.
+      if pid &&
+          ( ( ver == version && ( !changes.empty? ||
+                                  state[ :hashdot_updated ] ) ) ||
+            state[ :imaging ] )
+        rudo( "kill #{pid} || true" )
+      end
+
       changes
     end
 
