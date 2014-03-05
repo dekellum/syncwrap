@@ -28,18 +28,18 @@ profile( :default,
 
 profile( :basic,
          default_name: "basic",
-         instance_type: 'm1.medium',
+         instance_type: 'm3.medium',
          roles: [ :jruby_stack ] )
 
 profile( :postgres,
          default_name: "pg",
-         instance_type: 'm1.medium',
+         instance_type: 'm3.medium',
          ebs_volumes: 4,
          ebs_volume_options: { size: 2 }, #gb
          roles: [ :postgres ] )
 
 profile( :cruby,
-         instance_type: 'm1.medium',
+         instance_type: 'm3.medium',
          roles: [ :cruby ] )
 
 role( :amazon_linux,
