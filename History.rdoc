@@ -1,23 +1,24 @@
 === 2.1.0 (TBD)
-* Add --ssh-session (interactive shell) support to CLI.
-* Add --verbose-changes (verbose only for changing rputs) CLI option
-  and Context support
-* Drop CLI -I short option for infrequently used --import-hosts
 * Simplify existing state handling (i.e. Ubuntu.first_apt?, Users
-  :just_created) by introducing SyncWrap::Component#state (via
-  Context)
+  :just_created) by introducing SyncWrap::Component#state
 * Add hashdot_updated state (i.e. jruby update) and use in Iyyov and
   IyyovDaemon components to signal required restarts.
 * Add :iyyov_root_jobs_installed state keeping to avoid redundant
   rput's to Iyyov root jobs.rb
-* Add CLI --create-image, AmazonEC2 support
-* Add GitHelp module for using a git hash as a host or image tag from
-  profile.
+* Add CLI --create-image and AmazonEC2 support
+* Add SyncWrap::GitHelp module for using a git hash as a host/image
+  tag from the profile
 * Add :imaging state awareness to Iyyov and IyyovDaemon: stop (or
-  don't launch) these when imaging.
+  don't launch) these when imaging
 * Add availability_zone to imported/saved Amazon host properties
-* Fix failure on (EC2) import from Host.initialize order.
-* EC2 create_instance maps profile description and tag to tags.
+* Fix failure on (EC2) import from Host.initialize order
+* EC2 create_instance maps profile description and tag to tags
+* Add --ssh-session (interactive shell) support to CLI
+* Add --verbose-changes (verbose only for changing rputs) CLI option
+* Drop CLI -I short option for infrequently used --import-hosts
+* Disable EC2 operations, don't fail, if AWS credentials not found
+* Improve Users pem-not-found warning
+* Improve CLI --help summary
 
 === 2.0.0 (2014-2-26)
 * Major rewrite with only very limited conceptual compatibility with
