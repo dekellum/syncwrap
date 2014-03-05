@@ -19,6 +19,7 @@
 * Disable EC2 operations, don't fail, if AWS credentials not found
 * Improve Users pem-not-found warning
 * Improve CLI --help summary
+* Upgrade default CRubyVM to 2.0.0-p451
 
 === 2.0.0 (2014-2-26)
 * Major rewrite with only very limited conceptual compatibility with

@@ -44,7 +44,7 @@ module SyncWrap
 
     # The ruby version to install, like it appears in source packages
     # from ruby-lang.org.
-    # (Default: 2.0.0-p353)
+    # (Default: 2.0.0-p451)
     attr_accessor :ruby_version
 
     # If true, attempt to uninstall any pre-existing distro packaged
@@ -53,7 +53,7 @@ module SyncWrap
     attr_accessor :do_uninstall_distro_ruby
 
     def initialize( opts = {} )
-      @ruby_version = "2.0.0-p353"
+      @ruby_version = "2.0.0-p451"
       @do_uninstall_distro_ruby = true
 
       super
