@@ -45,22 +45,35 @@ module SyncWrap
 
     def parse_cmd( args )
       opts = OptionParser.new do |opts|
-        opts.banner = "Usage: syncwrap {options} [Component[.method]] ..."
+        opts.banner = <<-TEXT
+Usage: syncwrap {options} [Component[.method]] ..."
+General options:
+TEXT
+        opts.summary_width = 30
+        opts.summary_indent = "  "
 
         opts.on( "-f", "--file FILE",
-                 "Load FILE for role/host/component definitions",
-                 "(default: './sync.rb')" ) do |f|
+                 "Load FILE for role/host/component/profile",
+                 "definitions. (default: './sync.rb')" ) do |f|
           @sw_file = f
         end
 
         opts.on( "-h", "--hosts PATTERN",
-                 "Constrain hosts by pattern (may use multiple)" ) do |p|
+                 "Constrain hosts by name PATTERN",
+                 "(may use multiple)" ) do |p|
           @host_patterns << Regexp.new( p )
         end
 
         opts.on( "-r", "--hosts-with-role ROLE",
-                 "Constrain hosts by role (may use multiple)" ) do |r|
+                 "Constrain hosts by ROLE (may use multiple)" ) do |r|
           @roles << r.sub(/^:/,'').to_sym
+        end
+
+        opts.on( "-t", "--threads N",
+                 "The number of hosts to process concurrently",
+                 "(default: all hosts)",
+                  Integer ) do |n|
+          @options[ :threads ] = n
         end
 
         opts.on( "-n", "--dryrun",
@@ -69,15 +82,8 @@ module SyncWrap
           @options[ :dryrun ] = true
         end
 
-        opts.on( "-t", "--threads N",
-                 "Specify the number of hosts to process concurrently",
-                 "(default: all hosts)",
-                  Integer ) do |n|
-          @options[ :threads ] = n
-        end
-
         opts.on( "-e", "--each-component",
-                 "Flush shell commands after each component/method" ) do
+                 "Flush shell commands after each component" ) do
           @options[ :flush_component ] = true
         end
 
@@ -92,17 +98,17 @@ module SyncWrap
         end
 
         opts.on( "-v", "--verbose",
-                 "Show details of local/remote command execution" ) do
+                 "Show details of rput and remote commands" ) do
           @options[ :verbose ] = true
         end
 
         opts.on( "-c", "--verbose-changes",
-                 "Show any rput changes that occur, as if verbose" ) do
+                 "Be verbose only about actual rput changes" ) do
           @options[ :verbose_changes ] = true
         end
 
         opts.on( "-x", "--expand-shell",
-                 "Use -x (expand) instead of -v shell verbose output",
+                 "Use -x (expand) instead of -v shell output",
                  "(sh_verbose: :x, typically combined with -v)" ) do
           @options[ :sh_verbose ] = :x
         end
@@ -135,17 +141,20 @@ module SyncWrap
         end
 
         opts.on( "-S", "--ssh-session HOST",
-                 "exec an interactive ssh session on HOST name",
+                 "Only exec an ssh login session on HOST name",
                  "(ssh args can be passed after an '--')" ) do |h|
           @ssh_session = h
         end
 
+        opts.separator( "Provider specific operations and options:" )
+
         opts.on( "-C", "--create-host P",
-                 "Create hosts where P has format: [N*]profile[:name]",
+                 "Create hosts. P has form: [N*]profile[:name]",
                  "  N: number to create (default: 1)",
-                 "  profile: the profile name as setup in the sync file",
-                 "  name: Host name, or prefix in the case on N>1",
-                 "Hosts are appended to the sync file and space" ) do |h|
+                 "  profile: profile name as in sync file",
+                 "  name: Host name, or prefix when N>1",
+                 "Appends hosts to the sync file and space for",
+                 "immediate provisioning." ) do |h|
           first,rest = h.split('*')
           if rest
             count = first.to_i
@@ -159,9 +168,9 @@ module SyncWrap
         end
 
         opts.on( "--create-image PROFILE",
-                 "Create a machine image using a temporary host of the",
-                 "specified PROFILE, provisioning only that host,",
-                 "stopping, imaging, and terminating it." ) do |profile|
+                 "Create a machine image using a temp. host",
+                 "of PROFILE, provisioning only that host,",
+                 "imaging, and terminating." ) do |profile|
           @image_plan << profile.to_sym
         end
 
@@ -172,17 +181,25 @@ module SyncWrap
         end
 
         opts.on( "--terminate-host NAME",
-                 "Terminate the specified instance and data via provider",
-                 "WARNING: potential for data loss!" ) do |name|
+                 "Terminate the specified instance and remove ",
+                 "from sync file. WARNING: potential data loss" ) do |name|
           @terminate_hosts << name
         end
 
         opts.on( "--delete-attached-storage",
-                 "When terminating hosts, also delete any attached storage",
-                 "volumes which wouldn't otherwise be deleted.",
-                 "WARNING: Data WILL be lost!" ) do
+                 "When terminating, also delete attached",
+                 "volumes which would not otherwise be",
+                 "deleted. WARNING: Data WILL be lost!" ) do
           @delete_attached_storage = true
         end
+
+        opts.separator <<-TEXT
+
+By default, runs #install on all Components of all hosts, including
+any just created.  This can be limited by specifying --host
+PATTERN(s), --hosts-with-role ROLE(s), specific Component[.method](s)
+or options above which exit early or have constraints noted.
+TEXT
 
       end
 
