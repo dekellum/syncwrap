@@ -18,6 +18,7 @@ require 'time'
 require 'securerandom'
 
 require 'syncwrap/amazon_ws'
+require 'syncwrap/path_util'
 require 'syncwrap/host'
 
 module SyncWrap
@@ -35,6 +36,7 @@ module SyncWrap
   #
   class AmazonEC2
     include AmazonWS
+    include PathUtil
 
     # FIXME: Interim strategy: use AmazonWS and defer deciding final
     # organization.
@@ -59,9 +61,15 @@ module SyncWrap
       # the sync file path.
       if @aws_config
         if sync_file_path
-          aws_configure( File.expand_path( @aws_config, sync_file_path ) )
-        else
+          @aws_config = File.expand_path( @aws_config, sync_file_path )
+        end
+
+        if File.exist?( @aws_config )
           aws_configure( @aws_config )
+        else
+          @aws_config = relativize( @aws_config )
+          warn "WARNING: #{aws_config} not found. EC2 provider operations not available."
+          @aws_config = nil
         end
       end
     end
@@ -96,6 +104,7 @@ module SyncWrap
     end
 
     def import_hosts( regions, sync_file )
+      require_configured!
       hlist = import_host_props( regions )
       unless hlist.empty?
 
@@ -111,6 +120,7 @@ module SyncWrap
     end
 
     def create_hosts( count, profile, name, sync_file )
+      require_configured!
       profile = get_profile( profile ) if profile.is_a?( Symbol )
       profile = profile.dup
 
@@ -147,6 +157,7 @@ module SyncWrap
     # not be created nor will the host be terminated.
     # On success, returns image_id (ami-*) and name.
     def create_image_from_profile( profile_key, sync_file )
+      require_configured!
       profile = get_profile( profile_key ).dup
       tag = profile[ :tag ]
       profile[ :tag ] = tag = tag.call if tag.is_a?( Proc )
@@ -179,6 +190,7 @@ module SyncWrap
     end
 
     def terminate_hosts( names, delete_attached_storage, sync_file, do_wait = true )
+      require_configured!
       names.each do |name|
         host = space.get_host( name )
         raise "Host #{name} not found in Space, sync file." unless host
@@ -192,6 +204,13 @@ module SyncWrap
     private
 
     attr_reader :space
+
+    def require_configured!
+      unless @aws_config
+        raise( ":aws_config file not found, " +
+               "operation not supported without AWS credentials" )
+      end
+    end
 
     def find_name( prefix )
       i = 1
