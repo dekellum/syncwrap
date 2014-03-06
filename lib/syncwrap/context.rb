@@ -273,7 +273,11 @@ module SyncWrap
     end
 
     def []( key )
-      @props[ key ] || @host[ key ]
+      if @props.has_key?( key )
+        @props[ key ]
+      else
+        @host[ key ]
+      end
     end
 
     def []=( key, val )
