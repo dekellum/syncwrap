@@ -70,24 +70,26 @@ module SyncWrap
     def standard_install
 
       create_service_dir( name, instance )
-      changes = rput_service_config
+      conf_changes = rput_service_config
 
-      # Shorten if the desired versioned process is already running.
       pid, ver = capture_running_version( name, instance )
-      if ver != version
-        gem_install( gem_name, version: version )
-        changes += rput( job_source,
-                         "#{iyyov_run_dir}/jobs.d/#{name_instance}.rb",
-                         user: run_user )
-        changes += iyyov_install_jobs
-      end
+
+      gem_install( gem_name, version: version ) if ver != version
+
+      # The job_source may contain more than just this daemon
+      # (i.e. additional tasks, etc.) Even if this is the
+      # default/daemon.rb.erb, it might have just been changed to
+      # that. So go ahead an rput in any case.
+      job_changes = rput( job_source,
+                          "#{iyyov_run_dir}/jobs.d/#{name_instance}.rb",
+                          user: run_user )
+      job_changes += iyyov_install_jobs
 
       # If we found a daemon pid then kill if either:
       #
-      # (1) the version is the same (i.e no other signal via updates
-      #     above for Iyyov) but there was a config change or hashdot
-      #     was updated (i.e. new jruby version). In this case Iyyov
-      #     should be up to restart the daemon.
+      # (1) the version is the same but there was a config change or
+      #     hashdot was updated (i.e. new jruby version). In this case
+      #     Iyyov should be up to restart the daemon.
       #
       # (2) We are :imaging, in which case we want a graceful
       #     shutdown. In this case Iyyov should have already been kill
@@ -97,13 +99,13 @@ module SyncWrap
       # already stopped (i.e. crashed, etc) between above pid capture
       # and the kill.  Ignore kill failures.
       if pid &&
-          ( ( ver == version && ( !changes.empty? ||
+          ( ( ver == version && ( !conf_changes.empty? ||
                                   state[ :hashdot_updated ] ) ) ||
             state[ :imaging ] )
         rudo( "kill #{pid} || true" )
       end
 
-      changes
+      conf_changes + job_changes
     end
 
     def rput_service_config
