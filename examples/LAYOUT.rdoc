@@ -16,6 +16,7 @@ by multiple examples.
 Here is what a complete end-user project setup might look like:
 
   deploy/
+  ├── Gemfile
   ├── lib/
   │   └── my_component.rb
   ├── .gitignore
@@ -24,23 +25,33 @@ Here is what a complete end-user project setup might look like:
   │   └── sec.pem
   ├── sync.rb
   └── sync/
-      ├── home
-      │   └── bob
-      │       └── .ssh
+      ├── home/
+      │   └── bob/
+      │       └── .ssh/
       │           └── authorized_keys
-      └── my/
-          └── config.rb.erb
+      └── var/
+          └── my_server/
+              └── config.rb.erb
 
 sync.rb:: The aforementioned default named sync-file, containing
           roles, components, hosts, and possibly profiles.
 
 sync/:: The default named sync root containing a tree of static files
-        and templates for pushing to hosts. See the rput.rb example
-        for usage.  The local sync root can contain overrides to the
-        syncwrap gem provided files/directories as well as new
-        files. Home directories and in particular
-        .ssh/authorized_keys is commonly used with the
-        SyncWrap::Users component.
+        and templates for pushing to hosts via
+        SyncWrap::Component#rput. The sub-directory structure
+        generally mimics the rput remote locations. See the rput.rb
+        example for usage.  The local sync root can contain overrides
+        to the syncwrap gem provided files/directories as well as new
+        files.
+
+sync/home/:: Default location for SyncWrap::Users provisioned
+             developer home directories (for ssh authorized_keys at
+             minimum).
+
+sync/var/:: Conventional location for daemon-component configuration
+            or other deployed files and templates (*.erb). Note that
+            with SyncWrap::RunUser at least, this maps by default to
+            the remote /var/local/runr directory.
 
 lib/:: Place project-specific components here. Once these are
        non-trivial its nicer to `require_relative` them into the
@@ -63,8 +74,9 @@ private/:: This directory is for sensitive files like credentials that
            ...which ignores and avoids check-in by mistake of any so
            named sub-directory and its contents.
 
+Gemfile:: Include a bundler Gemfile for precise version control of all
+          gems involved, including syncwrap.
+
 Without the private/ directories and sync.rb file, and adjusting lib/
 accordingly, you could also package this as a gem. This makes it easy
-to reuse components and files/templates across projects.  Include a
-bundler Gemfile in each deploy directory for precise version control
-of all gems involved, including syncwrap.
+to reuse components and files/templates across projects.
