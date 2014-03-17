@@ -58,10 +58,11 @@ module SyncWrap
     attr_accessor :raid_chunk
 
     # A table of [ slice, path (,name) ] rows where; slice is a
-    # floating point ratio in range (0.0,1.0], path is the mount
-    # point, and name is the lvm name, defaulting if omitted to the
-    # last path element. The sum of all slice values in the table
-    # should be 1.0. Default: [ [ 1.0, '/data' ] ]
+    # Numeric in range (0.0..1.0), path is the mount point, and name
+    # is the lvm name, defaulting if omitted to the last path
+    # element. The sum of all slice values in the table should be 1.0,
+    # unless unallocated space is desired.
+    # Default: [ [ 1.0, '/data' ] ]
     attr_accessor :lvm_volumes
 
     # File System Type. Default: 'ext4'
@@ -154,7 +155,6 @@ module SyncWrap
 
     def create_raid( md )
       rlevel = raid_level || default_raid_level
-
       sudo <<-SH
         mdadm --create #{md} --level=#{rlevel} --chunk=#{raid_chunk} \
           --raid-devices=#{raw_devices.count} #{raw_devices.join ' '}
