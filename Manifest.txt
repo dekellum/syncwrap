@@ -5,6 +5,7 @@ Rakefile
 bin/syncwrap
 examples/LAYOUT.rdoc
 examples/Rakefile
+examples/db_setup.rb
 examples/ec2.rb
 examples/hello.rb
 examples/hello_binding.rb
