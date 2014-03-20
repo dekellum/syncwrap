@@ -333,7 +333,7 @@ module SyncWrap
     end
 
     def decode_roles( roles )
-      ( roles || "" ).split( /\s+/ ).map { |r| r.to_sym }
+      ( roles || "" ).split( /\s+/ ).map( &:to_sym )
     end
 
     # Wait until block returns truthy, sleeping for freq seconds

@@ -282,10 +282,10 @@ TEXT
 
     def list_roles( hosts, multi )
       puts "Included Roles:" if multi
-      roles = hosts.map { |h| h.roles }.inject([],:|)
+      roles = hosts.map( &:roles ).inject([],:|)
       table = roles.map do |role|
         row = [ ':' + role.to_s ]
-        classes = space.role( role ).map { |c| c.class }
+        classes = space.role( role ).map( &:class )
         row << short_class_names( classes ).join(' ')
       end
       print_table( table )
@@ -309,7 +309,7 @@ TEXT
     end
 
     def print_table( table )
-      max_columns = table.map { |r| r.count }.max || 0
+      max_columns = table.map( &:count ).max || 0
       col_widths = max_columns.times.map do |i|
         table.map { |row| row[i] && row[i].length }.compact.max
       end

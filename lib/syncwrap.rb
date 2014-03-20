@@ -188,9 +188,9 @@ module SyncWrap
     # roles, currently contained by the specified hosts or all hosts.
     def component_classes( hs = hosts )
       hs.
-        map { |h| h.components }.
+        map( &:components ).
         flatten.
-        map { |comp| comp.class }.
+        map( &:class ).
         uniq
     end
 

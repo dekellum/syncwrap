@@ -286,7 +286,7 @@ module SyncWrap
         echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
         chmod 440 /etc/sudoers.d/#{user}
       SH
-      script.split( "\n" ).map { |l| l.strip }.join( "\n" )
+      script.split( "\n" ).map( &:strip ).join( "\n" )
     end
 
   end
