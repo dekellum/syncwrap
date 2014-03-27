@@ -197,7 +197,7 @@ module SyncWrap
         FileUtils.mkdir_p( newdir, mode: 0700 )
         ENV['TMPDIR'] = newdir
       end
-      Dir.mktmpdir( 'syncwrap' ) do |tmp_dir|
+      Dir.mktmpdir( prefix ) do |tmp_dir|
         yield tmp_dir
       end
     ensure
