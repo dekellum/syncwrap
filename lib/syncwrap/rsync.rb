@@ -159,7 +159,7 @@ module SyncWrap
     def process_templates( srcs, opts ) # :doc:
       bnd = opts[ :erb_binding ] or raise "required :erb_binding param missing"
       erb_mode = opts[ :erb_mode ] || '<>' #Trim new line on "<% ... %>\n"
-      mktmpdir( 'syncwrap' ) do |tmp_dir|
+      mktmpdir( 'syncwrap-' ) do |tmp_dir|
         processed_sources = []
         out_dir = File.join( tmp_dir, 'd' ) #for default perms
         srcs.each do |src|
