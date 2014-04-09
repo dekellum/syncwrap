@@ -135,7 +135,7 @@ module SyncWrap
     def create_user( user )
       sudo <<-SH
         if ! id #{user} >/dev/null 2>&1; then
-          useradd #{user}
+          useradd -s /bin/bash -m #{user}
         fi
       SH
     end
