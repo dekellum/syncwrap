@@ -52,11 +52,10 @@ role( :cruby,
 
 role( :postgres,
       MDRaid.new( raw_devices: 4,
-                  lvm_volumes: [ [1.0, '/pg'] ],
+                  lvm_volumes: [ [1.0, '/var/lib/pgsql9'] ],
                   mount_opts: %w[ defaults auto noatime nodiratime
                                   data=writeback barrier=0 ] ),
-      PostgreSQL.new( pg_data_dir: '/pg/data',
-                      checkpoint_segments: 16,
+      PostgreSQL.new( checkpoint_segments: 16,
                       commit_delay: 10_000,
                       synchronous_commit: :off,
                       shared_buffers: '256MB',
