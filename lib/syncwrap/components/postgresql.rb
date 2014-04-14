@@ -22,23 +22,24 @@ require 'syncwrap/components/ubuntu'
 
 module SyncWrap
 
-  # Provisions for install and configuration of PostgreSQL
+  # Provisions for install and configuration of a PostgreSQL server
   #
   # Host component dependencies: <Distro>
   class PostgreSQL < Component
 
-    public
-
-    # PostgreSQL _MAJOR.MINOR_ version to install, often by default
-    # system packages.
-    # (Default: '9.1')
+    # PostgreSQL _MAJOR.MINOR_ version to install. Since there are
+    # multiple versions in use even for _default_ system packages across
+    # distros, this should be set the same as the version that will
+    # be installed via #package_names.  (Default: '9.1')
     attr_accessor :version
 
+    # Return #version as an Array of Integer values
     def version_a
       @version.split('.').map( &:to_i )
     end
 
-    # Location of postgresql data dir
+    # Location of postgresql data (and possibly also config) directory.
+    # (Default: #pg_default_data_dir)
     attr_accessor :pg_data_dir
 
     def pg_data_dir
@@ -47,8 +48,8 @@ module SyncWrap
 
     protected
 
-    # The distro default data dir (set if known to be different than
-    # distro-specific default, nil -> computed in accessor)
+    # The _default_ data dir as used by the distro #package_names.
+    # (Default: as per RHEL or Ubuntu distro packages)
     attr_writer :pg_default_data_dir
 
     def pg_default_data_dir
@@ -63,7 +64,8 @@ module SyncWrap
         end
     end
 
-    # Configuration in '/etc/* root? (Default: true on Ubuntu only)
+    # Configuration in the '/etc' directory root?
+    # (Default: true on Ubuntu only, per distro package defaults)
     attr_writer :pg_specify_etc_config
 
     def pg_specify_etc_config
@@ -72,7 +74,7 @@ module SyncWrap
 
     # The package names, including PostgreSQL server of the
     # desired version to install.
-    # (Default: Ubuntu: postgresql-/version/; RHEL: postgresql-server)
+    # (Default: Ubuntu: postgresql-_version_; RHEL: postgresql-server)
     attr_writer :package_names
 
     def package_names
@@ -115,15 +117,15 @@ module SyncWrap
     attr_accessor :effective_io_concurrency
 
     # Method used in pg_hba.conf for network access
-    # :md5 is a common values for password auth.
+    # :md5 is a common value for password auth.
     # If truthy, will also set listen_address = '*' in postgresql.conf
     # (PG Default: false -> no access)
     attr_accessor :network_access
 
     # Kernel SHMMAX (Shared Memory Maximum) setting to apply.
-    # Note that PostgreSQL 9.3 used mmap and likely doesn't need this.
+    # Note that PostgreSQL 9.3 uses mmap and should not need this.
     # Currently this is only set on Ubuntu (RHEL packages take care of
-    # it?) (Default: 300MB if version < 9.3)
+    # it?) (Default: 300MB if #version < 9.3)
     attr_writer :shared_memory_max
 
     def shared_memory_max
@@ -174,6 +176,9 @@ module SyncWrap
       end
     end
 
+    # Install the #package_names. In the Ubuntu case, also install any
+    # shared_memory_max adjustment and stop the server for subsequent
+    # reconfigure or data relocation.
     def package_install
       dist_install( *package_names )
       if distro.is_a?( Ubuntu )
@@ -185,6 +190,7 @@ module SyncWrap
       end
     end
 
+    # Initialize or move the server data directory as per #pg_data_dir.
     def setup_data_dir
       changes = []
 
@@ -220,7 +226,7 @@ module SyncWrap
       changes
     end
 
-    # Update PostgreSQL config files
+    # Update the PostgreSQL configuration files
     def pg_configure
       files = %w[ pg_hba.conf pg_ident.conf postgresql.conf ]
       files += %w[ environment pg_ctl.conf ] if distro.is_a?( Ubuntu )
@@ -232,14 +238,17 @@ module SyncWrap
       changes
     end
 
+    # Start the server
     def pg_start
       dist_service( service_name, 'start' )
     end
 
+    # Restart the server
     def pg_restart
       dist_service( service_name, 'restart' )
     end
 
+    # Stop the server
     def pg_stop
       dist_service( service_name, 'stop' )
     end
