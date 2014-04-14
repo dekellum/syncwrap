@@ -27,16 +27,93 @@ module SyncWrap
   # Host component dependencies: <Distro>
   class PostgreSQL < Component
 
+    public
+
     # Location of postgresql data dir
     attr_accessor :pg_data_dir
+
+    # (default: '9.1')
+    attr_accessor :version
+
+    def version_a
+      @version.split('.').map( &:to_i )
+    end
+
+    protected
 
     # The distro default data dir (set if known to be different than
     # distro-specific default, nil -> computed in accessor)
     attr_writer :pg_default_data_dir
 
+    # Configuration in '/etc/* root? (Default: true on Ubuntu only)
+    attr_writer :pg_specify_etc_config
+
+    def pg_specify_etc_config
+      @pg_specify_etc_config || distro.is_a?( Ubuntu )
+    end
+
+    # Synchronization level for commit
+    # :off may be desirable on high-latency storage (i.e. EBS), at
+    # increased risk. (PG Default: :on)
+    attr_accessor :synchronous_commit
+
+    # Commit delay in microseconds
+    # 10000 or more may be desirable on high-latency storage, at
+    # increased risk. (PG Default: 0 -> none)
+    attr_accessor :commit_delay
+
+    # WAL log segments (16MB each) (PG Default: 3)
+    attr_accessor :checkpoint_segments
+
+    # Shared buffers (Default: '256MB' vs PG: '128MB')
+    attr_accessor :shared_buffers
+
+    # Work memory (Default: '128MB' vs PG: '1MB')
+    attr_accessor :work_mem
+
+    # Maintenance work memory (Default: '128MB' vs PG: '16MB')
+    attr_accessor :maintenance_work_mem
+
+    # Maximum stack depth (Default: '4MB' vs PG: '2MB')
+    attr_accessor :max_stack_depth
+
+    # Concurrent disk I/O operations
+    # May help to use RAID device count or similar (PG Default: 1)
+    attr_accessor :effective_io_concurrency
+
+    # Method used in pg_hba.conf for network access
+    # :md5 is a common values for password auth.
+    # If truthy, will also set listen_address = '*' in postgresql.conf
+    # (PG Default: false -> no access)
+    attr_accessor :network_access
+
+    # Kernel SHMMAX (Shared Memory Maximum) setting to apply.
+    # Note that PostgreSQL 9.3 used mmap and likely doesn't need this.
+    # Currently this is only set on Ubuntu (RHEL packages take care of
+    # it?) (Default: 300MB if version < 9.3)
+    attr_writer :shared_memory_max
+
+    def shared_memory_max
+      @shared_memory_max ||
+        ( ( (version_a <=> [9,3]) < 0 ) && 300_000_000 )
+    end
+
+    public
+
     def initialize( opts = {} )
       @pg_data_dir = '/pg/data'
       @pg_default_data_dir = nil
+      @version = '9.1'
+      @synchronous_commit = :on
+      @commit_delay = 0
+      @checkpoint_segments = 3
+      @shared_buffers = '256MB'
+      @work_mem = '128MB'
+      @maintenance_work_mem = '128MB'
+      @max_stack_depth = '4MB'
+      @effective_io_concurrency = 1
+      @network_access = false
+      @shared_memory_max = nil
       super
     end
 
@@ -46,21 +123,10 @@ module SyncWrap
         when RHEL
           '/var/lib/pgsql9/data'
         when Ubuntu
-          '/var/lib/postgresql/9.1/main'
+          "/var/lib/postgresql/#{version}/main"
         else
           raise ContextError, "Distro #{distro.class.name} not supported"
         end
-    end
-
-    def pg_deploy_config
-      case distro
-      when RHEL
-        'postgresql/rhel'
-      when Ubuntu
-        'postgresql/ubuntu'
-      else
-        raise ContextError, "Distro #{distro.class.name} not supported"
-      end
     end
 
     def pg_config_dir
@@ -68,7 +134,7 @@ module SyncWrap
       when RHEL
         pg_data_dir
       when Ubuntu
-        '/etc/postgresql/9.1/main'
+        "/etc/postgresql/#{version}/main"
       else
         raise ContextError, "Distro #{distro.class.name} not supported"
       end
@@ -89,8 +155,10 @@ module SyncWrap
       dist_install 'postgresql'
       if distro.is_a?( Ubuntu )
         pg_stop
-        rput( 'etc/sysctl.d/61-postgresql-shm.conf', :user => 'root' )
-        sudo "sysctl -p /etc/sysctl.d/61-postgresql-shm.conf"
+        if shared_memory_max
+          rput( 'etc/sysctl.d/61-postgresql-shm.conf', user: :root )
+          sudo "sysctl -p /etc/sysctl.d/61-postgresql-shm.conf"
+        end
       end
     end
 
@@ -101,7 +169,7 @@ module SyncWrap
 
       when RHEL
         unless pg_data_dir == pg_default_data_dir
-          changes = rput( 'etc/sysconfig/pgsql/postgresql', :user => 'root' )
+          changes = rput( 'etc/sysconfig/pgsql/postgresql', user: :root )
         end
 
         sudo( "if [ ! -d '#{pg_data_dir}/base' ]; then", close: "fi" ) do
@@ -135,7 +203,10 @@ module SyncWrap
 
     # Update PostgreSQL config files
     def pg_configure
-      changes = rput( "#{pg_deploy_config}/", pg_config_dir, :user => 'postgres' )
+      files = %w[ pg_hba.conf pg_ident.conf postgresql.conf ]
+      files += %w[ environment pg_ctl.conf ] if distro.is_a?( Ubuntu )
+      files = files.map { |f| File.join( 'postgresql', f ) }
+      changes = rput( *files, pg_config_dir, user: 'postgres' )
       if !changes.empty? && pg_config_dir == pg_data_dir
         sudo( "chmod 700 #{pg_data_dir}" )
       end
