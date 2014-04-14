@@ -55,7 +55,16 @@ role( :postgres,
                   lvm_volumes: [ [1.0, '/pg'] ],
                   mount_opts: %w[ defaults auto noatime nodiratime
                                   data=writeback barrier=0 ] ),
-      PostgreSQL.new )
+      PostgreSQL.new( pg_data_dir: '/pg/data',
+                      checkpoint_segments: 16,
+                      commit_delay: 10_000,
+                      synchronous_commit: :off,
+                      shared_buffers: '256MB',
+                      work_mem: '128MB',
+                      maintenance_work_mem: '128MB',
+                      max_stack_depth: '4MB',
+                      effective_io_concurrency: 4,
+                      network_access: :trust ) )
 
 role( :jruby_stack,
       RunUser.new,
