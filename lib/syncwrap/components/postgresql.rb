@@ -174,6 +174,7 @@ module SyncWrap
       else
         pg_restart
       end
+      changes
     end
 
     # Install the #package_names. In the Ubuntu case, also install any
