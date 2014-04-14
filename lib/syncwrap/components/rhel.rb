@@ -29,12 +29,14 @@ module SyncWrap
       super
     end
 
-    # Install packages.
-    # A trailing hash is interpreted as options, see below.
+    # Install the specified package names. A trailing hash is
+    # interpreted as options, see below.
     #
     # ==== Options
     # :succeed:: Always succeed (useful for local rpm files which
-    # might already be installed.)
+    #            might already be installed.)
+    #
+    # Other options will be ignored.
     def dist_install( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
 
@@ -45,18 +47,23 @@ module SyncWrap
       end
     end
 
+    # Uninstall the specified package names.
     def dist_uninstall( *pkgs )
       sudo "yum remove -q -y #{pkgs.join( ' ' )}"
     end
 
+    # Install a System V style init.d service script
     def dist_install_init_service( name )
       sudo "/sbin/chkconfig --add #{name}"
     end
 
+    # Enable the System V style init.d service
     def dist_enable_init_service( name )
       sudo "/sbin/chkconfig #{name} on"
     end
 
+    # Run via sudo, the service command typically supporting 'start',
+    # 'stop', 'restart', 'status', etc. arguments.
     def dist_service( *args )
       sudo( [ '/sbin/service', *args ].join( ' ' ) )
     end
