@@ -29,14 +29,20 @@ module SyncWrap
 
     public
 
-    # Location of postgresql data dir
-    attr_accessor :pg_data_dir
-
-    # (default: '9.1')
+    # PostgreSQL _MAJOR.MINOR_ version to install, often by default
+    # system packages.
+    # (Default: '9.1')
     attr_accessor :version
 
     def version_a
       @version.split('.').map( &:to_i )
+    end
+
+    # Location of postgresql data dir
+    attr_accessor :pg_data_dir
+
+    def pg_data_dir
+      @pg_data_dir || pg_default_data_dir
     end
 
     protected
@@ -44,6 +50,18 @@ module SyncWrap
     # The distro default data dir (set if known to be different than
     # distro-specific default, nil -> computed in accessor)
     attr_writer :pg_default_data_dir
+
+    def pg_default_data_dir
+      @pg_default_data_dir ||
+        case distro
+        when RHEL
+          '/var/lib/pgsql9/data'
+        when Ubuntu
+          "/var/lib/postgresql/#{version}/main"
+        else
+          raise ContextError, "Distro #{distro.class.name} not supported"
+        end
+    end
 
     # Configuration in '/etc/* root? (Default: true on Ubuntu only)
     attr_writer :pg_specify_etc_config
@@ -108,10 +126,21 @@ module SyncWrap
         ( ( (version_a <=> [9,3]) < 0 ) && 300_000_000 )
     end
 
+    def pg_config_dir
+      case distro
+      when RHEL
+        pg_data_dir
+      when Ubuntu
+        "/etc/postgresql/#{version}/main"
+      else
+        raise ContextError, "Distro #{distro.class.name} not supported"
+      end
+    end
+
     public
 
     def initialize( opts = {} )
-      @pg_data_dir = '/pg/data'
+      @pg_data_dir = nil
       @pg_default_data_dir = nil
       @version = '9.1'
       @package_name = nil
@@ -126,29 +155,6 @@ module SyncWrap
       @network_access = false
       @shared_memory_max = nil
       super
-    end
-
-    def pg_default_data_dir
-      @pg_default_data_dir ||
-        case distro
-        when RHEL
-          '/var/lib/pgsql9/data'
-        when Ubuntu
-          "/var/lib/postgresql/#{version}/main"
-        else
-          raise ContextError, "Distro #{distro.class.name} not supported"
-        end
-    end
-
-    def pg_config_dir
-      case distro
-      when RHEL
-        pg_data_dir
-      when Ubuntu
-        "/etc/postgresql/#{version}/main"
-      else
-        raise ContextError, "Distro #{distro.class.name} not supported"
-      end
     end
 
     def install
