@@ -20,7 +20,7 @@ space.prepend_sync_path
 space.use_provider( AmazonEC2 )
 
 profile( :default,
-         image_id: "ami-ccf297fc", #Amazon Linux 2013.09.2 EBS 64 us-west-2
+         image_id: "ami-b8f69f88", #Amazon Linux 2014.03 EBS 64 us-west-2
          region: 'us-west-2',
          user_data: :ec2_user_sudo,
          key_name: 'dek-key-pair-1',
