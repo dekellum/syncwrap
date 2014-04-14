@@ -228,14 +228,10 @@ module SyncWrap
 
     # Update the PostgreSQL configuration files
     def pg_configure
-      files = %w[ pg_hba.conf pg_ident.conf postgresql.conf ]
+      files  = %w[ pg_hba.conf pg_ident.conf postgresql.conf ]
       files += %w[ environment pg_ctl.conf ] if distro.is_a?( Ubuntu )
-      files = files.map { |f| File.join( 'postgresql', f ) }
-      changes = rput( *files, pg_config_dir, user: 'postgres' )
-      if !changes.empty? && pg_config_dir == pg_data_dir
-        sudo( "chmod 700 #{pg_data_dir}" )
-      end
-      changes
+      files  = files.map { |f| File.join( 'postgresql', f ) }
+      rput( *files, pg_config_dir, user: 'postgres' )
     end
 
     # Start the server
