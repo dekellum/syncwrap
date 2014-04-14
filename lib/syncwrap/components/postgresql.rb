@@ -70,14 +70,15 @@ module SyncWrap
       @pg_specify_etc_config || distro.is_a?( Ubuntu )
     end
 
-    # The package name containing PostgreSQL server of the desired version
+    # The package names, including PostgreSQL server of the
+    # desired version to install.
     # (Default: Ubuntu: postgresql-/version/; RHEL: postgresql-server)
-    attr_writer :package_name
+    attr_writer :package_names
 
-    def package_name
-      ( @package_name ||
-        ( distro.is_a?( Ubuntu ) && "postgresql-#{version}" ) ||
-        "postgresql-server" )
+    def package_names
+      ( @package_names ||
+        ( distro.is_a?( Ubuntu ) && [ "postgresql-#{version}" ] ) ||
+        [ "postgresql-server" ] )
     end
 
     # Synchronization level for commit
@@ -143,7 +144,7 @@ module SyncWrap
       @pg_data_dir = nil
       @pg_default_data_dir = nil
       @version = '9.1'
-      @package_name = nil
+      @package_names = nil
       @synchronous_commit = :on
       @commit_delay = 0
       @checkpoint_segments = 3
@@ -169,7 +170,7 @@ module SyncWrap
     end
 
     def package_install
-      dist_install package_name
+      dist_install( *package_names )
       if distro.is_a?( Ubuntu )
         pg_stop
         if shared_memory_max
