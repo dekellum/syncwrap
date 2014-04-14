@@ -25,13 +25,8 @@ module SyncWrap
     # (default: /usr/local)
     attr_accessor :local_root
 
-    # A Hash of internal/common package names to distro specific package
-    # names.
-    attr_reader :packages_map
-
     def initialize( *args )
       @local_root = '/usr/local'
-      @packages_map = {}
 
       super( *args )
     end
@@ -41,15 +36,8 @@ module SyncWrap
       self
     end
 
-    # Map internal/common names and return distro-specific names. If a
-    # mapping does not exist, return the original name.
-    def dist_map_packages( *pkgs )
-      pkgs.flatten.compact.map { |pkg| packages_map[ pkg ] || pkg }
-    end
-
-    # Install the specified packages using distro-specific mapped
-    # package names. A trailing hash is interpreted as options, see
-    # below.
+    # Install the specified package names. A trailing hash is
+    # interpreted as options, see below.
     #
     # ==== Options
     #
@@ -61,8 +49,7 @@ module SyncWrap
       raise "Include a distro-specific component, e.g. Ubuntu, RHEL"
     end
 
-    # Uninstall specified packages using distro-specific mapped
-    # package names and command.
+    # Uninstall the specified package names.
     def dist_uninstall( *pkgs )
       raise "Include a distro-specific component, e.g. Ubuntu, RHEL"
     end

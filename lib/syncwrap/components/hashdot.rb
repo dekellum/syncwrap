@@ -16,6 +16,9 @@
 
 require 'syncwrap/component'
 
+# For distro class comparison only (pre-load for safety)
+require 'syncwrap/components/ubuntu'
+
 module SyncWrap
 
   # Provision the {Hashdot}[http://hashdot.sourceforge.net/] JVM/script
@@ -59,7 +62,14 @@ module SyncWrap
     end
 
     def install_system_deps
-      dist_install( %w[ make gcc apr apr-devel ] )
+      deps = %w[ make gcc ]
+      deps += if distro.is_a?( Ubuntu )
+                %w[ libapr1 libapr1-dev ]
+              else
+                %w[ apr apr-devel ]
+              end
+
+      dist_install( *deps )
     end
 
     def test_hashdot_binary

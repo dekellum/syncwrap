@@ -26,9 +26,6 @@ module SyncWrap
 
     def initialize( opts = {} )
       super
-
-      packages_map.merge!( 'apr'       => 'libapr1',
-                           'apr-devel' => 'libapr1-dev' )
     end
 
     # Install packages. The first time this is applied to any given
@@ -39,7 +36,6 @@ module SyncWrap
     # :minimal:: Eqv to --no-install-recommends
     def dist_install( *args )
       opts = args.last.is_a?( Hash ) && args.pop || {}
-      args = dist_map_packages( args )
       args.unshift "--no-install-recommends" if opts[ :minimal ]
 
       sudo( "apt-get -yqq update" ) if first_apt?
@@ -47,7 +43,6 @@ module SyncWrap
     end
 
     def dist_uninstall( *pkgs )
-      pkgs = dist_map_packages( pkgs )
       sudo "aptitude -yq purge #{pkgs.join ' '}"
     end
 

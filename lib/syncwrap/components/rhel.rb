@@ -27,8 +27,6 @@ module SyncWrap
 
     def initialize( opts = {} )
       super
-
-      packages_map.merge!( 'emacs' => 'emacs-nox' )
     end
 
     # Install packages.
@@ -39,7 +37,6 @@ module SyncWrap
     # might already be installed.)
     def dist_install( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      pkgs = dist_map_packages( pkgs )
 
       if opts[ :succeed ]
         sudo "yum install -q -y #{pkgs.join( ' ' )} || true"
@@ -49,7 +46,6 @@ module SyncWrap
     end
 
     def dist_uninstall( *pkgs )
-      pkgs = dist_map_packages( pkgs )
       sudo "yum remove -q -y #{pkgs.join( ' ' )}"
     end
 
