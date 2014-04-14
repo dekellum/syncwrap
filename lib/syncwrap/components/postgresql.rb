@@ -81,6 +81,10 @@ module SyncWrap
         [ "postgresql-server" ] )
     end
 
+    # The service name of the PostgreSQL server to start
+    # (Default: 'postgresql' )
+    attr_accessor :service_name
+
     # Synchronization level for commit
     # :off may be desirable on high-latency storage (i.e. EBS), at
     # increased risk. (PG Default: :on)
@@ -145,6 +149,7 @@ module SyncWrap
       @pg_default_data_dir = nil
       @version = '9.1'
       @package_names = nil
+      @service_name = 'postgresql'
       @synchronous_commit = :on
       @commit_delay = 0
       @checkpoint_segments = 3
@@ -200,7 +205,7 @@ module SyncWrap
               chmod 700 #{pg_data_dir}
             SH
           end
-          dist_service( 'postgresql', 'initdb' )
+          dist_service( service_name, 'initdb' )
         end
 
       when Ubuntu
@@ -232,15 +237,15 @@ module SyncWrap
     end
 
     def pg_start
-      dist_service( 'postgresql', 'start' )
+      dist_service( service_name, 'start' )
     end
 
     def pg_restart
-      dist_service( 'postgresql', 'restart' )
+      dist_service( service_name, 'restart' )
     end
 
     def pg_stop
-      dist_service( 'postgresql', 'stop' )
+      dist_service( service_name, 'stop' )
     end
 
   end
