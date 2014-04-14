@@ -196,15 +196,11 @@ module SyncWrap
         end
 
         sudo( "if [ ! -d '#{pg_data_dir}/base' ]; then", close: "fi" ) do
-          unless pg_data_dir == pg_default_data_dir
-            # (Per Amazon Linux)
-            # Install PGDATA var override for init.d/postgresql
-            sudo <<-SH
-              mkdir -p #{pg_data_dir}
-              chown postgres:postgres #{pg_data_dir}
-              chmod 700 #{pg_data_dir}
-            SH
-          end
+          sudo <<-SH
+            mkdir -p #{pg_data_dir}
+            chown postgres:postgres #{pg_data_dir}
+            chmod 700 #{pg_data_dir}
+          SH
           dist_service( service_name, 'initdb' )
         end
 
