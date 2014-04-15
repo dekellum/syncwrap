@@ -37,11 +37,11 @@ module SyncWrap
     end
 
     # Home directory for the #run_user
-    # (default: nil -> unspecified)
+    # (default: nil -> same as #run_dir)
     attr_writer :run_user_home
 
     def run_user_home
-      @run_user_home
+      @run_user_home || run_dir
     end
 
     def initialize( opts = {} )
@@ -60,10 +60,10 @@ module SyncWrap
     # Create run_user if not already present
     def create_run_user
       sudo( "if ! id #{run_user} >/dev/null 2>&1; then", close: "fi" ) do
-        user_opts  = "-c 'Run User' -s /bin/bash"
+        user_opts  = "-r -c 'Run User' -s /bin/bash"
         user_opts += " -d #{run_user_home}" if run_user_home
         if run_group && run_group != run_user
-          sudo "groupadd -f #{run_group}"
+          sudo "groupadd -r -f #{run_group}"
           user_opts += " -g #{run_group}"
         end
         sudo "useradd #{user_opts} #{run_user}"
