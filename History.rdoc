@@ -1,6 +1,8 @@
 === 2.1.1 (TBD)
 * Use 'syncwrap-' as tmpdir prefix.
-* Fix Users use of useradd on Ubuntu (where bash shell doesn't default)
+* Fix Users, RunUser use of useradd, adding -s and -m options, for
+  Ubuntu (where bash shell is not default)
+* Add RunUser.run_user_home option; no change in default
 * IyyovDaemon: handle case of non-version related job changes
 
 === 2.1.0 (2014-3-5)
