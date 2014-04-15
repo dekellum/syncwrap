@@ -25,7 +25,7 @@ module SyncWrap
     # A user for running deployed daemons, jobs (default: 'runr')
     attr_accessor :run_user
 
-    # A group for running (default: nil -> same as run_user)
+    # A group for running (default: nil -> same as #run_user)
     attr_accessor :run_group
 
     # Root directory for persistent data and logs
@@ -36,11 +36,19 @@ module SyncWrap
       @run_dir || "/var/local/#{run_user}"
     end
 
+    # Home directory for the #run_user
+    # (default: nil -> unspecified)
+    attr_writer :run_user_home
+
+    def run_user_home
+      @run_user_home
+    end
+
     def initialize( opts = {} )
       @run_user    = 'runr'
       @run_group   = nil
       @run_dir     = nil
-
+      @run_user_home = nil
       super
     end
 
@@ -52,14 +60,13 @@ module SyncWrap
     # Create run_user if not already present
     def create_run_user
       sudo( "if ! id #{run_user} >/dev/null 2>&1; then", close: "fi" ) do
+        user_opts  = "-c 'Run User' -s /bin/bash"
+        user_opts += " -d #{run_user_home}" if run_user_home
         if run_group && run_group != run_user
-          sudo <<-SH
-            groupadd -f #{run_group}
-            useradd -g #{run_group} #{run_user}
-          SH
-        else
-          sudo "useradd #{run_user}"
+          sudo "groupadd -f #{run_group}"
+          user_opts += " -g #{run_group}"
         end
+        sudo "useradd #{user_opts} #{run_user}"
       end
     end
 
