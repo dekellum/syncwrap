@@ -1,5 +1,12 @@
 === 2.2.0 (TBD)
 
+=== 2.1.1 (2014-4-15)
+* Use 'syncwrap-' as tmpdir prefix.
+* Fix Users, RunUser use of useradd, adding -s and -m options, for
+  Ubuntu (where bash shell is not default)
+* Add RunUser.run_user_home option; no change in default
+* IyyovDaemon: handle case of non-version related job changes
+
 === 2.1.0 (2014-3-5)
 * Simplify existing state handling (i.e. Ubuntu.first_apt?, Users
   :just_created) by introducing SyncWrap::Component#state
