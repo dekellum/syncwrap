@@ -68,7 +68,7 @@ role( :iyyov,
       Uninstaller.new,
       RunUser.new,
       OpenJDK.new,
-      JRubyVM.new( jruby_version: '1.7.10' ),
+      JRubyVM.new( jruby_version: '1.7.12' ),
       Hashdot.new,
       Iyyov.new )
 
