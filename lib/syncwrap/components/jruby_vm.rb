@@ -27,11 +27,11 @@ module SyncWrap
   class JRubyVM < Component
     include RubySupport
 
-    # JRuby version to install (default: 1.7.10)
+    # JRuby version to install (default: 1.7.12)
     attr_accessor :jruby_version
 
     def initialize( opts = {} )
-      @jruby_version = '1.7.10'
+      @jruby_version = '1.7.12'
 
       super( { gem_command: 'jgem' }.merge( opts ) )
     end
