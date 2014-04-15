@@ -1,4 +1,24 @@
 === 2.2.0 (TBD)
+* Major SyncWrap::PostgreSQL component updates. You need to
+  review and adjust any configuration overrides and constructor
+  properties:
+  * Use templates to consolidate RHEL and Ubuntu configuration. Files
+    moved to sync/postgresql. (#2)
+  * Use distro default PG data directory, by default. Tested
+    Amazon Linux EBS MDRaid mount direct to /var/lib/pgsql9. (#3)
+  * No elevated permissions (trust, etc.) by default (#4)
+  * Configuration is 9.3 ready (9.1-9.3 compatible)
+  * Configuration no longer assumes AWS EBS optimizations, relaxed
+    guarantees. See test/aws/sync.rb sample for new PostgreSQL
+    properties to maintain compatibility.
+* Removed vestigial Distro package_map, and use in RHEL, Ubuntu,
+  PostgreSQL and Hashdot. Better to include Distro specific package
+  variations in the specific components, rather than two places.
+* SyncWrap::RunUser now creates a _system_ user/group with default
+  home the same as run_dir.
+* SyncWrap::JRubyVM default version updated to 1.7.12 (incl all
+  example usage.)
+* Broadened aws-sdk to >= 1.34.0, < 1.39
 
 === 2.1.1 (2014-4-15)
 * Use 'syncwrap-' as tmpdir prefix.
