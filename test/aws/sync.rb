@@ -20,7 +20,7 @@ space.prepend_sync_path
 space.use_provider( AmazonEC2 )
 
 profile( :default,
-         image_id: "ami-ccf297fc", #Amazon Linux 2013.09.2 EBS 64 us-west-2
+         image_id: "ami-b8f69f88", #Amazon Linux 2014.03 EBS 64 us-west-2
          region: 'us-west-2',
          user_data: :ec2_user_sudo,
          key_name: 'dek-key-pair-1',
@@ -52,10 +52,18 @@ role( :cruby,
 
 role( :postgres,
       MDRaid.new( raw_devices: 4,
-                  lvm_volumes: [ [1.0, '/pg'] ],
+                  lvm_volumes: [ [1.0, '/var/lib/pgsql9'] ],
                   mount_opts: %w[ defaults auto noatime nodiratime
                                   data=writeback barrier=0 ] ),
-      PostgreSQL.new )
+      PostgreSQL.new( checkpoint_segments: 16,
+                      commit_delay: 10_000,
+                      synchronous_commit: :off,
+                      shared_buffers: '256MB',
+                      work_mem: '128MB',
+                      maintenance_work_mem: '128MB',
+                      max_stack_depth: '4MB',
+                      effective_io_concurrency: 4,
+                      network_access: :trust ) )
 
 role( :jruby_stack,
       RunUser.new,

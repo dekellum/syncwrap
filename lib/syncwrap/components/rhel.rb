@@ -28,8 +28,7 @@ module SyncWrap
     def initialize( opts = {} )
       super
 
-      packages_map.merge!( 'emacs' => 'emacs-nox',
-                           'postgresql' => 'postgresql-server' )
+      packages_map.merge!( 'emacs' => 'emacs-nox' )
     end
 
     # Install packages.
