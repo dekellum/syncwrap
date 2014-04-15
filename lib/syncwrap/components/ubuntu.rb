@@ -19,46 +19,48 @@ require 'syncwrap/distro'
 
 module SyncWrap
 
-  # Customizations for Ubuntu and possibly other Debian/apt packaged
+  # Customizations for \Ubuntu and possibly other Debian/apt packaged
   # derivatives. Specific distros/versions may further specialize.
   class Ubuntu < Component
     include SyncWrap::Distro
 
     def initialize( opts = {} )
       super
-
-      packages_map.merge!( 'apr'       => 'libapr1',
-                           'apr-devel' => 'libapr1-dev' )
     end
 
-    # Install packages. The first time this is applied to any given
-    # host, an "apt-get update" is issued as well.  A trailing hash is
-    # interpreted as options, see below.
+    # Install the specified package names. The first time this is
+    # applied to any given host, an "apt-get update" is issued as
+    # well.  A trailing hash is interpreted as options, see below.
     #
     # ==== Options
     # :minimal:: Eqv to --no-install-recommends
+    #
+    # Other options will be ignored.
     def dist_install( *args )
       opts = args.last.is_a?( Hash ) && args.pop || {}
-      args = dist_map_packages( args )
       args.unshift "--no-install-recommends" if opts[ :minimal ]
 
       sudo( "apt-get -yqq update" ) if first_apt?
       sudo( "apt-get -yq install #{args.join ' '}" )
     end
 
+    # Uninstall the specified package names.
     def dist_uninstall( *pkgs )
-      pkgs = dist_map_packages( pkgs )
       sudo "aptitude -yq purge #{pkgs.join ' '}"
     end
 
+    # Install a System V style init.d service script
     def dist_install_init_service( name )
       sudo "/usr/sbin/update-rc.d #{name} defaults"
     end
 
+    # Enable the System V style init.d service
     def dist_enable_init_service( name )
       sudo "/usr/sbin/update-rc.d #{name} enable"
     end
 
+    # Run via sudo, the service command typically supporting 'start',
+    # 'stop', 'restart', 'status', etc. arguments.
     def dist_service( *args )
       sudo( [ '/usr/sbin/service', *args ].join( ' ' ) )
     end
