@@ -35,13 +35,13 @@ module SyncWrap
 
     # Return the abbreviated SHA-1 hash for the last git commit at
     # path
-    def self.hash( path = nil )
+    def self.git_hash( path = nil )
       path ||= caller_path( caller )
       `cd #{path} && git log -n 1 --format='format:%h'`
     end
 
     # Return a lambda that will #require_clean! for callers path
-    # before providing #hash. Use this for cases where you only want
+    # before providing #git_hash. Use this for cases where you only want
     # to use a git hash when it is an accurate reflection of the local
     # file state. Since the test is deferred, it will only be required
     # for actions (i.e. image creation, etc.) that actually use it.
@@ -49,7 +49,7 @@ module SyncWrap
       cpath = caller_path( caller )
       lambda do
         require_clean!( cpath )
-        hash( cpath )
+        git_hash( cpath )
       end
     end
 
