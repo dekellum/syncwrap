@@ -27,12 +27,16 @@ module SyncWrap
   # Host component dependencies: <Distro>
   class Network < Component
 
-    # A default DNS domain name to use for name search, for addition
-    # to /etc/resolver.conf, etc. (default: nil)
-    attr_accessor :dns_domain
+    # A dns search list (a single domain or space delimited list of
+    # domains) for addition to the resolv.conf search option,
+    # etc. (default: nil)
+    attr_accessor :dns_search
+
+    alias :dns_domain  :dns_search
+    alias :dns_domain= :dns_search=
 
     def initialize( opts = {} )
-      @dns_domain = nil
+      @dns_search = nil
       super
     end
 
@@ -67,31 +71,50 @@ module SyncWrap
     end
 
     def update_resolver
-      if dns_domain
-        # (Temporary) inclusion direct to resolver.conf
-        sudo <<-SH
-          if ! grep -q 'search.* #{dns_domain}' /etc/resolver.conf; then
-            cp -f /etc/resolver.conf /etc/resolver.conf~
-            sed -i '/^search/d' /etc/resolver.conf
-            echo 'search #{dns_domain}' >> /etc/resolver.conf
-          fi
-        SH
-
+      if dns_search
         case distro
         when RHEL
-          # FIXME:
-          warn "Network: not sure if resolver.conf change is permanent?"
-        when Ubuntu
-          f='/etc/network/interfaces'
+          update_resolv_conf
+
+          f='/etc/sysconfig/network-scripts/ifcfg-eth0'
           sudo <<-SH
-            if ! grep -E -q '^\\s*dns-domain #{dns_domain}' #{f}; then
+            if ! grep -q '^SEARCH=.*#{dns_search}' #{f}; then
               cp -f #{f} #{f}~
-              sed -r -i '/^\\s*dns-domain/d' #{f}
-              echo '     dns-domain #{dns_domain}' >> #{f}
+              sed -i '/^SEARCH=/d' #{f}
+              echo 'SEARCH="#{dns_search}"' >> #{f}
             fi
           SH
+
+        when Ubuntu
+          # As of 12.04 - Precise; /etc/resolv.conf is a symlink that
+          # should not be lost.
+          update_resolv_conf( '/run/resolvconf/resolv.conf' )
+
+          f='/etc/network/interfaces'
+          sudo <<-SH
+            if ! grep -E -q '^\\s*dns-search #{dns_search}' #{f}; then
+              cp -f #{f} #{f}~
+              sed -r -i '/^\\s*dns-search/d' #{f}
+              echo '     dns-search #{dns_search}' >> #{f}
+            fi
+          SH
+
         end
       end
+    end
+
+    protected
+
+    # Make a temporary adjustment to search domains directly to the
+    # resolv.conf file.
+    def update_resolv_conf( f = '/etc/resolv.conf' )
+      sudo <<-SH
+        if ! grep -q '^search.* #{dns_search}' #{f}; then
+          cp -f #{f} #{f}~
+          sed -i '/^search/d' #{f}
+          echo 'search #{dns_search}' >> #{f}
+        fi
+      SH
     end
 
   end
