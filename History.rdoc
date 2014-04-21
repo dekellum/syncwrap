@@ -1,4 +1,5 @@
-=== 2.1.2 (TBD)
+=== 2.1.2 (2014-4-21)
+* Fix Network.dns_search (alias dns_domain) to resolve.conf support
 
 === 2.1.1 (2014-4-15)
 * Use 'syncwrap-' as tmpdir prefix.
