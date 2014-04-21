@@ -116,11 +116,23 @@ module SyncWrap
     # May help to use RAID device count or similar (PG Default: 1)
     attr_accessor :effective_io_concurrency
 
+    # Method used in pg_hba.conf for local access
+    # (PG Default: :peer)
+    attr_accessor :local_access
+
     # Method used in pg_hba.conf for network access
     # :md5 is a common value for password auth.
     # If truthy, will also set listen_address = '*' in postgresql.conf
     # (PG Default: false -> no access)
     attr_accessor :network_access
+
+    # IPv4 address mask for #network_access
+    # (PG Default: nil -> no IPv4 access)
+    attr_accessor :network_v4_mask
+
+    # IPv6 address mask for #network_access
+    # (PG Default: nil -> no IPv4 access)
+    attr_accessor :network_v6_mask
 
     # Kernel SHMMAX (Shared Memory Maximum) setting to apply.
     # Note that PostgreSQL 9.3 uses mmap and should not need this.
@@ -160,7 +172,10 @@ module SyncWrap
       @maintenance_work_mem = '128MB'
       @max_stack_depth = '4MB'
       @effective_io_concurrency = 1
+      @local_access = :peer
       @network_access = false
+      @network_v4_mask = nil
+      @network_v6_mask = nil
       @shared_memory_max = nil
       super
     end

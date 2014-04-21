@@ -84,12 +84,21 @@ local   all             postgres                                peer
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
 
 # "local" is for Unix domain socket connections only
-local   all             all                                     peer
-<% if network_access %>
+local   all             all                                     <%= local_access %>
 # IPv4 local connections:
-host    all             all             127.0.0.1/32            <%= network_access %>
+host    all             all             127.0.0.1/32            <%= local_access %>
 # IPv6 local connections:
-host    all             all             ::1/128                 <%= network_access %>
+host    all             all             ::1/128                 <%= local_access %>
+
+<% if network_access %>
+<%  if network_v4_mask %>
+# IPv4 network connections:
+host    all             all             <%=network_v4_mask%>        <%= network_access %>
+<%  end %>
+<%  if network_v6_mask %>
+# IPv6 network connections:
+host    all             all             <%=network_v6_mask%>        <%= network_access %>
+<%  end %>
 <% end %>
 # Allow replication connections from localhost, by a user with the
 # replication privilege.
