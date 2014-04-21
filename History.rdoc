@@ -20,6 +20,9 @@
   example usage.)
 * Broadened aws-sdk to >= 1.34.0, < 1.39
 
+=== 2.1.2 (2014-4-21)
+* Fix Network.dns_search (alias dns_domain) to resolve.conf support
+
 === 2.1.1 (2014-4-15)
 * Use 'syncwrap-' as tmpdir prefix.
 * Fix Users, RunUser use of useradd, adding -s and -m options, for
