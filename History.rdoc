@@ -1,3 +1,5 @@
+=== 2.1.2 (TBD)
+
 === 2.1.1 (2014-4-15)
 * Use 'syncwrap-' as tmpdir prefix.
 * Fix Users, RunUser use of useradd, adding -s and -m options, for
