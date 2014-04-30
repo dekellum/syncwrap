@@ -174,6 +174,7 @@ module SyncWrap
     #
     # :pipefail::   Pass bash the "-o pipefail" option to return the first
     #               non-zero command return from a pipeline.
+    #               Default: true when :error is true
     #
     # :close::      An additional bash fragment to append after the
     #               provided shell command/fragment and block has been
