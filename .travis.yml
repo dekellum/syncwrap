@@ -6,12 +6,13 @@ bundler_args: ""
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.0
+  - ruby-head
   - rbx
   - jruby
   - jruby-head
 script: "bundle exec rake test"
 matrix:
   allow_failures:
+    - rvm: ruby-head
     - rvm: rbx
     - rvm: jruby-head
