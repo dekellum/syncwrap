@@ -88,7 +88,7 @@ module SyncWrap
     # passed to #commmand_lines_cleanup.
     def sh_args( command, opts = {} ) # :doc:
       args = [ 'bash' ]
-      args << '-e' if opts[ :error ].nil? || opts[ :error ] == :exit
+      args << '-e' if opts[ :error ].nil? || opts[ :error ]
       args << '-n' if opts[ :dryrun ]
 
       if opts[ :coalesce ]

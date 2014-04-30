@@ -146,7 +146,7 @@ class TestShell < MiniTest::Unit::TestCase
   end
 
   def test_shell_error_early_exit
-    exit_code, outputs = capture3( sh_args( <<-'SH', error: :exit ) )
+    exit_code, outputs = capture3( sh_args( <<-'SH', error: true ) )
       echo before
       (exit 33)
       echo after
