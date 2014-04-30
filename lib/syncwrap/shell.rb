@@ -24,19 +24,20 @@ module SyncWrap
 
   # Low level command construction and process output capture.
   #
-  # == Supported Commands
+  # == Supported Command Forms
   #
-  # Local:
-  #   bash [-v|-x -e -n] -c COMMANDS
-  #   sudo :sudo_flags [-u user] bash [-v|-x -e -n] -c COMMANDS
+  #   LOCAL:
+  #   bash BASH_FLAGS -c COMMANDS
+  #   sudo SUDO_FLAGS bash BASH_FLAGS -c COMMANDS
   #
-  # Remote:
-  #   ssh :ssh_flags :host bash [-v|-x -e -n] -c "COMMANDS"
-  #   ssh :ssh_flags :host sudo :sudo_flags [-u user] bash [-v|-x -e -n] -c "COMMANDS"
+  #   REMOTE:
+  #   ssh SSH_FLAGS HOST bash BASH_FLAGS -c "COMMANDS" [1>&2]
+  #   ssh SSH_FLAGS HOST sudo SUDO_FLAGS bash BASH_FLAGS -c "COMMANDS" [1>&2]
   #
-  # Example ssh_flags: -i ./key.pem -l ec2-user
+  #   BASH_FLAGS: [-v|-x] [-e] [-n]
+  #   SUDO_FLAGS: [-u :user] :sudo_flags ...
+  #   SSH_FLAGS:  [-l :ssh_user] [-i :ssh_user_pem] :ssh_flags ...
   #
-  # Example sudo_flags: -H
   module Shell
 
     private
