@@ -116,9 +116,14 @@ module SyncWrap
     # May help to use RAID device count or similar (PG Default: 1)
     attr_accessor :effective_io_concurrency
 
-    # Method used in pg_hba.conf for local access
+    # Method used in pg_hba.conf for local (unix socket) access
     # (PG Default: :peer)
     attr_accessor :local_access
+
+    # Method used in pg_hba.conf for local network access. Note
+    # that :peer does not work here.
+    # (PG Default: :md5)
+    attr_accessor :local_network_access
 
     # Method used in pg_hba.conf for network access
     # :md5 is a common value for password auth.
@@ -173,6 +178,7 @@ module SyncWrap
       @max_stack_depth = '4MB'
       @effective_io_concurrency = 1
       @local_access = :peer
+      @local_network_access = :md5
       @network_access = false
       @network_v4_mask = nil
       @network_v6_mask = nil

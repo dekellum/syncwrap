@@ -85,11 +85,12 @@ local   all             postgres                                peer
 
 # "local" is for Unix domain socket connections only
 local   all             all                                     <%= local_access %>
+<% if local_network_access %>
 # IPv4 local connections:
-host    all             all             127.0.0.1/32            <%= local_access %>
+host    all             all             127.0.0.1/32            <%= local_network_access %>
 # IPv6 local connections:
-host    all             all             ::1/128                 <%= local_access %>
-
+host    all             all             ::1/128                 <%= local_network_access %>
+<% end %>
 <% if network_access %>
 <%  if network_v4_mask %>
 # IPv4 network connections:
