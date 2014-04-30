@@ -22,12 +22,12 @@ require 'syncwrap/components/ubuntu'
 
 module SyncWrap
 
-  # Provisions for install and configuration of a PostgreSQL server
+  # Provisions for install and configuration of a \PostgreSQL server
   #
   # Host component dependencies: <Distro>
   class PostgreSQL < Component
 
-    # PostgreSQL _MAJOR.MINOR_ version to install. Since there are
+    # \PostgreSQL _MAJOR.MINOR_ version to install. Since there are
     # multiple versions in use even for _default_ system packages across
     # distros, this should be set the same as the version that will
     # be installed via #package_names.  (Default: '9.1')
@@ -72,7 +72,7 @@ module SyncWrap
       @pg_specify_etc_config || distro.is_a?( Ubuntu )
     end
 
-    # The package names, including PostgreSQL server of the
+    # The package names, including \PostgreSQL server of the
     # desired version to install.
     # (Default: Ubuntu: postgresql-_version_; RHEL: postgresql-server)
     attr_writer :package_names
@@ -83,7 +83,7 @@ module SyncWrap
         [ "postgresql-server" ] )
     end
 
-    # The service name of the PostgreSQL server to start
+    # The service name of the \PostgreSQL server to start
     # (Default: 'postgresql' )
     attr_accessor :service_name
 
@@ -180,6 +180,9 @@ module SyncWrap
       super
     end
 
+    # Calls in order: #package_install, #setup_data_dir, and
+    # #pg_configure then ensures the server is running (via #pg_start) or
+    # is restarted (via #pg_restart) if there were configuration changes.
     def install
       package_install
       changes = setup_data_dir
@@ -193,7 +196,7 @@ module SyncWrap
     end
 
     # Install the #package_names. In the Ubuntu case, also install any
-    # shared_memory_max adjustment and stop the server for subsequent
+    # #shared_memory_max adjustment and stops the server for subsequent
     # reconfigure or data relocation.
     def package_install
       dist_install( *package_names )
@@ -242,7 +245,7 @@ module SyncWrap
       changes
     end
 
-    # Update the PostgreSQL configuration files
+    # Update the \PostgreSQL configuration files
     def pg_configure
       files  = %w[ pg_hba.conf pg_ident.conf postgresql.conf ]
       files += %w[ environment pg_ctl.conf ] if distro.is_a?( Ubuntu )
