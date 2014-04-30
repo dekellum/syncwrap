@@ -34,7 +34,7 @@ module SyncWrap
   #   ssh SSH_FLAGS HOST bash BASH_FLAGS -c "COMMANDS" [1>&2]
   #   ssh SSH_FLAGS HOST sudo SUDO_FLAGS bash BASH_FLAGS -c "COMMANDS" [1>&2]
   #
-  #   BASH_FLAGS: [-v|-x] [-e] [-n]
+  #   BASH_FLAGS: [-v|-x] [-e] [-o pipefail] [-n]
   #   SUDO_FLAGS: [-u :user] :sudo_flags ...
   #   SSH_FLAGS:  [-l :ssh_user] [-i :ssh_user_pem] :ssh_flags ...
   #
@@ -89,6 +89,7 @@ module SyncWrap
     def sh_args( command, opts = {} ) # :doc:
       args = [ 'bash' ]
       args << '-e' if opts[ :error ].nil? || opts[ :error ]
+      args += %w[ -o pipefail ] if opts[ :pipefail ]
       args << '-n' if opts[ :dryrun ]
 
       if opts[ :coalesce ]
