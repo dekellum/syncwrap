@@ -132,6 +132,32 @@ class TestShell < MiniTest::Unit::TestCase
                   outputs, outputs )
   end
 
+
+  def test_shell_error_late_exit
+    exit_code, outputs = capture3( sh_args( <<-'SH', error: false ) )
+      echo before
+      (exit 33)
+      echo after
+      exit 34
+    SH
+    assert_equal( 34, exit_code )
+    assert_equal( [[:out, ( "before\nafter\n" )]],
+                  outputs, outputs )
+  end
+
+  def test_shell_error_early_exit
+    exit_code, outputs = capture3( sh_args( <<-'SH', error: :exit ) )
+      echo before
+      (exit 33)
+      echo after
+      exit 34
+    SH
+    assert_equal( 33, exit_code )
+    assert_equal( [[:out, ( "before\n" )]],
+                  outputs, outputs )
+  end
+
+
   def test_sudo
     skip unless SAFE_SUDO
     cmd = sudo_args( 'echo foo', user: :root )
