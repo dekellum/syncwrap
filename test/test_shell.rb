@@ -132,12 +132,70 @@ class TestShell < MiniTest::Unit::TestCase
                   outputs, outputs )
   end
 
+  def test_shell_error_late_exit
+    exit_code, outputs = capture3( sh_args( <<-'SH', error: false ) )
+      echo before
+      (exit 33)
+      echo after
+      exit 34
+    SH
+    assert_equal( 34, exit_code )
+    assert_equal( [[:out, ( "before\nafter\n" )]],
+                  outputs, outputs )
+  end
+
+  def test_shell_error_early_exit
+    exit_code, outputs = capture3( sh_args( <<-'SH', error: true ) )
+      echo before
+      (exit 33)
+      echo after
+      exit 34
+    SH
+    assert_equal( 33, exit_code )
+    assert_equal( [[:out, ( "before\n" )]],
+                  outputs, outputs )
+  end
+
+  def test_shell_pipe_no_fail
+    exit_code, outputs =
+      capture3( sh_args( <<-'SH', error: true, pipefail: false ) )
+      (echo first && exit 33) | (cat - && echo second)
+      exit 34
+    SH
+    assert_equal( 34, exit_code )
+    assert_equal( [[:out, ( "first\nsecond\n" )]],
+                  outputs, outputs )
+  end
+
+  def test_shell_pipefail
+    exit_code, outputs =
+      capture3( sh_args( <<-'SH', error: true, pipefail: true ) )
+      (echo first && exit 33) | (cat - && echo second)
+      exit 34
+    SH
+    assert_equal( 33, exit_code )
+    assert_equal( [[:out, ( "first\nsecond\n" )]],
+                  outputs, outputs )
+  end
+
   def test_sudo
     skip unless SAFE_SUDO
     cmd = sudo_args( 'echo foo', user: :root )
     exit_code, outputs = capture3( cmd )
     assert_equal( 0, exit_code )
     assert_equal( [[:out, "foo\n"]], outputs, outputs )
+  end
+
+  def test_sudo_pipefail
+    skip unless SAFE_SUDO
+    exit_code, outputs =
+      capture3( sudo_args( <<-'SH', user: :root, error: true, pipefail: true ) )
+      (echo first && exit 33) | (cat - && echo second)
+      exit 34
+    SH
+    assert_equal( 33, exit_code )
+    assert_equal( [[:out, ( "first\nsecond\n" )]],
+                  outputs, outputs )
   end
 
   def test_ssh

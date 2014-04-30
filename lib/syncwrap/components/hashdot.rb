@@ -76,7 +76,7 @@ module SyncWrap
       binary = "#{local_root}/bin/hashdot"
       code,_ = capture( <<-SH, accept: [0,91,92] )
         if [ -x #{binary} ]; then
-          cver=`#{binary} 2>&1 | grep -o -E '([0-9]\.?){2,}'`
+          cver=`(#{binary} 2>&1 || true) | grep -o -E '([0-9]\.?){2,}'`
           if [ "$cver" = "#{hashdot_version}" ]; then
             exit 0
           fi

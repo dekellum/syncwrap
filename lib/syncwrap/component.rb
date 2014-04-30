@@ -172,6 +172,10 @@ module SyncWrap
     # :error::      Pass bash the -e option to terminate early on errors.
     #               Default: true
     #
+    # :pipefail::   Pass bash the "-o pipefail" option to return the first
+    #               non-zero command return from a pipeline.
+    #               Default: true when :error is true
+    #
     # :close::      An additional bash fragment to append after the
     #               provided shell command/fragment and block has been
     #               enqueued. See usage example above. Default: nil
