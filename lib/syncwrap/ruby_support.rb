@@ -80,7 +80,7 @@ module SyncWrap
       shopts = opts[ :user_install ] ? {} : {user: :root}
 
       if opts[ :check ]
-        _,out = capture( cmd, shopts.merge!( accept: 0 ) )
+        _,out = capture( cmd, shopts )
 
         count = 0
         out.split( "\n" ).each do |oline|
