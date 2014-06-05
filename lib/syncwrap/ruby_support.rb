@@ -84,7 +84,7 @@ module SyncWrap
 
         count = 0
         out.split( "\n" ).each do |oline|
-          if oline =~ /^\s+(\d+)\s+gem(s)?\s+installed/
+          if oline =~ /^\s*(\d+)\s+gem(s)?\s+installed/
             count = $1.to_i
           end
         end
