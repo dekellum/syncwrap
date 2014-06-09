@@ -95,6 +95,32 @@ class TestContextRput < MiniTest::Unit::TestCase
     end
   end
 
+  def test_rput_file_sudo_root
+    skip unless TestOptions::SAFE_SUDO
+    begin
+      FileUtils.mkdir_p( "#{TEST_DIR}/root" )
+      host = sp.host( 'localhost' )
+      2.times do |i|
+        ctx = TestContext.new( host, sp.default_options )
+        ctx.with do
+          changes = ctx.rput( 'd1/bar', "#{TEST_DIR}/root/d2/", user: :root )
+          if i == 0
+            assert_equal( %w[ bar ], changes.map { |c| c[1] } )
+          else
+            assert_empty( changes )
+          end
+          assert_equal( 0, File.stat( "#{TEST_DIR}/root/d2" ).uid )
+          assert_equal( 0, File.stat( "#{TEST_DIR}/root/d2/bar" ).uid )
+          assert_equal( IO.read( "#{SYNC_DIR}/d1/bar" ),
+                        IO.read( "#{TEST_DIR}/root/d2/bar" ) )
+        end
+        assert_equal( 1, ctx.rsync_count )
+      end
+    ensure
+      system "sudo rm -rf #{TEST_DIR}/root"
+    end
+  end
+
   def test_rput_erb_no_suffix
     host = sp.host( 'localhost' )
     2.times do |i|

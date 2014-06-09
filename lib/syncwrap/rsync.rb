@@ -31,6 +31,8 @@ module SyncWrap
 
     def rsync_args( host, srcs, target, opts = {} ) # :doc:
 
+      cmd = [ 'rsync' ]
+
       # -i --itemize-changes, used for counting changed files
       flags = %w[ -i ]
 
@@ -74,11 +76,16 @@ module SyncWrap
       if opts[ :user ]
         # Use sudo to place files at remote.
         user = opts[ :user ].to_s
-        flags << ( if user != 'root'
-                     "--rsync-path=sudo -u #{user} rsync"
-                   else
-                     "--rsync-path=sudo rsync"
-                   end )
+        scmd = if user == 'root'
+                 %w[ sudo rsync ]
+               else
+                 [ 'sudo', '-u', user, 'rsync' ]
+               end
+        if host == 'localhost'
+          cmd = scmd
+        else
+          flags << "--rsync-path=#{scmd.join ' '}"
+        end
       end
 
       excludes = Array( opts[ :excludes ] )
@@ -94,7 +101,7 @@ module SyncWrap
 
       target = [ host, target ].join(':') unless host == 'localhost'
 
-      [ 'rsync', flags, srcs, target ].flatten.compact
+      [ *cmd, *flags, *srcs, target ]
     end
 
     def expand_implied_target( srcs ) # :doc:
