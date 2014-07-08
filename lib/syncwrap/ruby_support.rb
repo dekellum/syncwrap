@@ -79,18 +79,20 @@ module SyncWrap
 
       shopts = opts[ :user_install ] ? {} : {user: :root}
 
-      if opts[ :check ]
-        _,out = capture( cmd, shopts.merge!( accept: 0 ) )
+      clean_env( opts[ :user_install ] ) do
+        if opts[ :check ]
+          _,out = capture( cmd, shopts )
 
-        count = 0
-        out.split( "\n" ).each do |oline|
-          if oline =~ /^\s+(\d+)\s+gem(s)?\s+installed/
-            count = $1.to_i
+          count = 0
+          out.split( "\n" ).each do |oline|
+            if oline =~ /^\s*(\d+)\s+gem(s)?\s+installed/
+              count = $1.to_i
+            end
           end
+          count
+        else
+          sh( cmd, shopts )
         end
-        count
-      else
-        sh( cmd, shopts )
       end
 
     end
@@ -103,6 +105,29 @@ module SyncWrap
 
     def gem_version_flags( reqs )
       Array( reqs ).flatten.compact.map { |req| "-v'#{req}'" }
+    end
+
+    # Execute within Bundler clean environment if Bundler is defined,
+    # doit is passed true (i.e. :user_install, sudo restricted
+    # environment should also avoid the issue), and running on
+    # localhost. Otherwise gem_install may fail attempting to reload
+    # the wrong bundle/r in the shell sub-process.
+    def clean_env( doit )
+      ret = nil
+      if defined?( ::Bundler ) && doit && host.name.to_s == 'localhost'
+        ::Bundler.with_clean_env do
+          # Oddly, GEM_HOME remains in clean_env even when bundler
+          # adds it. Unfortunately now it is hard to tell whom added
+          # it.  Best guess given not using RVM, etc. is to delete and
+          # let return from block restore it.
+          ENV.delete( 'GEM_HOME' )
+          ret = yield
+          flush # otherwise may be deferred till outside of clean block
+        end
+      else
+        ret = yield
+      end
+      ret
     end
 
   end
