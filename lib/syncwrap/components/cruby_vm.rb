@@ -42,9 +42,12 @@ module SyncWrap
   class CRubyVM < Component
     include RubySupport
 
-    # The ruby version to install, like it appears in source packages
-    # from ruby-lang.org.
-    # (Default: 2.0.0-p451)
+    # The ruby version to install, as it appears in source packages
+    # from ruby-lang.org. Note that starting with 2.1.0, the patch
+    # release (p#) no longer appears in package names.
+    # (Default: 2.0.0-p481)
+    #
+    # Example values: '2.0.0-p481', '2.1.2'
     attr_accessor :ruby_version
 
     # If true, attempt to uninstall any pre-existing distro packaged
@@ -53,7 +56,7 @@ module SyncWrap
     attr_accessor :do_uninstall_distro_ruby
 
     def initialize( opts = {} )
-      @ruby_version = "2.0.0-p451"
+      @ruby_version = "2.0.0-p481"
       @do_uninstall_distro_ruby = true
 
       super
@@ -68,8 +71,9 @@ module SyncWrap
       "#{local_root}/bin/ruby"
     end
 
-    def compact_version
-      ruby_version.sub( '-', '' )
+    # Return ruby_version as an array of Integer values
+    def ruby_version_a
+      ruby_version.split( /[.\-p]+/ ).map( &:to_i )
     end
 
     # If the current ruby_command is not at the desired ruby_version,
@@ -77,7 +81,7 @@ module SyncWrap
     def install_ruby
       cond = <<-SH
         rvr=`[ -x #{ruby_command} ] &&
-             #{ruby_command} -v | grep -o -E '[0-9]+(\\.[0-9]+)+(p[0-9]+)?' \
+             #{ruby_command} -v | grep -o -E '#{version_pattern}' \
              || true`
         if [ "$rvr" != "#{compact_version}" ]; then
       SH
@@ -92,15 +96,30 @@ module SyncWrap
 
     def uninstall_distro_ruby
       if distro.is_a?( RHEL )
-        dist_uninstall( %w[ ruby ruby18 ruby19 ruby20 ] )
+        dist_uninstall( %w[ ruby ruby18 ruby19 ruby20 ruby21 ] )
       else
-        dist_uninstall( %w[ ruby ruby1.8 ruby1.9 ruby1.9.1 ruby1.9.3 ruby2.0 ] )
+        dist_uninstall( %w[ ruby ruby1.8 ruby1.9 ruby1.9.1 ruby1.9.3 ruby2.0 ruby2.1 ] )
       end
     end
 
     alias :cruby_gem_install :gem_install
 
     protected
+
+    def compact_version
+      ruby_version.sub( '-', '' )
+    end
+
+    def version_pattern
+      if ( ruby_version_a <=> [2,1] ) > 0
+        # Starting with 2.1.x, the p# (patch number) is no longer used
+        # for download, won't be in ruby_version, and shouldn't be
+        # used for version comparison.
+        '[0-9]+(\.[0-9]+)+'
+      else
+        '[0-9]+(\.[0-9]+)+(p[0-9]+)?'
+      end
+    end
 
     def install_build_deps
       if distro.is_a?( RHEL )
