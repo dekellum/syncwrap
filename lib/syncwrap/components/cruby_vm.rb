@@ -45,9 +45,9 @@ module SyncWrap
     # The ruby version to install, as it appears in source packages
     # from ruby-lang.org. Note that starting with 2.1.0, the patch
     # release (p#) no longer appears in package names.
-    # (Default: 2.0.0-p451)
+    # (Default: 2.0.0-p481)
     #
-    # Example values: '2.0.0-p451', '2.1.2'
+    # Example values: '2.0.0-p481', '2.1.2'
     attr_accessor :ruby_version
 
     # If true, attempt to uninstall any pre-existing distro packaged
@@ -56,7 +56,7 @@ module SyncWrap
     attr_accessor :do_uninstall_distro_ruby
 
     def initialize( opts = {} )
-      @ruby_version = "2.0.0-p451"
+      @ruby_version = "2.0.0-p481"
       @do_uninstall_distro_ruby = true
 
       super
