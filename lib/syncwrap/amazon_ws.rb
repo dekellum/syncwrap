@@ -86,11 +86,15 @@ module SyncWrap
     # :security_groups:: As per aws-sdk, but the special :default value
     #                    is replaced with a single security group with
     #                    same name as the :region.
-    # :ebs_volumes:: The number of EBS volumes to create an attach to this instance.
+    # :ebs_volumes:: The number of EBS volumes to create and attach to this instance.
     # :ebs_volume_options:: A nested Hash of options, as per
     #                       {AWS::EC2::VolumeCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/VolumeCollection.html#create-instance_method]
     #                       with custom default :size 16 GB, and the same
     #                       :availibility_zone as the instance.
+    # :ebs_mounts:: Device mounting scheme. The value :sdf_p indicates
+    #               "/dev/sd[f-p]", and should be used for HVM instances.
+    #               The default scheme is currently :sdh1_6 "/dev/sdh[1-6]".
+    #               See {EC2: Block Device Mapping}[http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html]
     # :lvm_volumes:: Ignored here.
     # :roles:: Array of role Strings or Symbols (applied as Roles tag)
     def aws_create_instance( name, opts = {} )
@@ -103,6 +107,7 @@ module SyncWrap
       iopts = opts.dup
       iopts.delete( :ebs_volumes )
       iopts.delete( :ebs_volume_options )
+      iopts.delete( :ebs_mounts )
       iopts.delete( :roles ) #-> tags
       iopts.delete( :description ) #-> tags
       iopts.delete( :tag ) #-> tags
@@ -150,7 +155,12 @@ module SyncWrap
         attachments = opts[ :ebs_volumes ].times.map do |i|
           vol = ec2.volumes.create( vopts )
           wait_until( vol.id, 0.5 ) { vol.status == :available }
-          vol.attach_to( inst, "/dev/sdh#{i+1}" ) #=> Attachment
+          ap = if opts[ :ebs_mounts ] == :sdf_p
+                 "/dev/sd" + "fghijklmnop"[i]
+               else
+                 "/dev/sdh#{i+1}"
+               end
+          vol.attach_to( inst, ap ) #=> Attachment
         end
 
         wait_until( "volumes to attach" ) do
