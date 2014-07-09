@@ -24,7 +24,7 @@
   home the same as run_dir.
 * SyncWrap::JRubyVM default version updated to 1.7.12 (incl all
   example usage.)
-* Broadened aws-sdk to >= 1.34.0, < 1.39
+* Upgrade to aws-sdk ~> 1.46 (no longer depends on uuidtools)
 * Upgrade default CRubyVM to 2.1.2
 
 === 2.1.3 (2014-7-8)
