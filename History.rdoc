@@ -22,7 +22,7 @@
   variations in the specific components, rather than two places.
 * SyncWrap::RunUser now creates a _system_ user/group with default
   home the same as run_dir.
-* SyncWrap::JRubyVM default version updated to 1.7.12 (incl all
+* SyncWrap::JRubyVM default version updated to 1.7.13 (incl all
   example usage.)
 * Upgrade to aws-sdk ~> 1.46 (no longer depends on uuidtools)
 * Upgrade default CRubyVM to 2.1.2
