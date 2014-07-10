@@ -26,6 +26,8 @@
   example usage.)
 * Upgrade to aws-sdk ~> 1.46 (no longer depends on uuidtools)
 * Upgrade default CRubyVM to 2.1.2
+* Add :ebs_mounts AWS profile option to support HVM-style dev mounts,
+  made apparent by EC2 t2 instance types.
 
 === 2.1.3 (2014-7-8)
 * Use sudo instead of --rsync-path=sudo... for :user on localhost
