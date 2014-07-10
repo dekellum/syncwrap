@@ -16,7 +16,7 @@
 
 include SyncWrap
 
-role( :ruby, CRubyVM.new( ruby_version: "2.0.0-p451" ) )
+role( :ruby, CRubyVM.new( ruby_version: "2.1.2" ) )
 
 host( 'centos-1', RHEL.new,   Network.new, :ruby, internal_ip: '192.168.122.4' )
 host( 'ubuntu-1', Ubuntu.new, Network.new, :ruby, internal_ip: '192.168.122.145' )
