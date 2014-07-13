@@ -1,4 +1,4 @@
-=== 2.2.0 (TBD)
+=== 2.2.0 (2014-7-13)
 * New SyncWrap::Component#sh :pipefail option to pass bash flag "-o
   pipefail" to return the first non-zero command return from a
   pipeline.  This option defaults to true when the :error (bash -e)
