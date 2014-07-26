@@ -358,6 +358,7 @@ module SyncWrap
   # any threads are in play.
 
   autoload :AmazonLinux,   'syncwrap/components/amazon_linux'
+  autoload :Arch,          'syncwrap/components/arch'
   autoload :CentOS,        'syncwrap/components/centos'
   autoload :CommercialJDK, 'syncwrap/components/commercial_jdk'
   autoload :CRubyVM,       'syncwrap/components/cruby_vm'

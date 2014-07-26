@@ -32,6 +32,7 @@ lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/version_support.rb
 lib/syncwrap/components/amazon_linux.rb
+lib/syncwrap/components/arch.rb
 lib/syncwrap/components/centos.rb
 lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/cruby_vm.rb
