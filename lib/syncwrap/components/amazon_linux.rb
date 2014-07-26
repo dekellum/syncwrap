@@ -14,13 +14,12 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/components/debian'
+require 'syncwrap/components/rhel'
 
 module SyncWrap
 
-  # Customizations for \Ubuntu and derivatives. Specific
-  # distros/versions may further specialize.
-  class Ubuntu < Debian
+  # Customizations for Amazon Linux.
+  class AmazonLinux < RHEL
   end
 
 end

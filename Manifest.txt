@@ -31,8 +31,11 @@ lib/syncwrap/rsync.rb
 lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/version_support.rb
+lib/syncwrap/components/amazon_linux.rb
+lib/syncwrap/components/centos.rb
 lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/cruby_vm.rb
+lib/syncwrap/components/debian.rb
 lib/syncwrap/components/etc_hosts.rb
 lib/syncwrap/components/geminabox.rb
 lib/syncwrap/components/hashdot.rb

@@ -357,8 +357,11 @@ module SyncWrap
   # risky in SyncWrap given that all of these should be loaded before
   # any threads are in play.
 
+  autoload :AmazonLinux,   'syncwrap/components/amazon_linux'
+  autoload :CentOS,        'syncwrap/components/centos'
   autoload :CommercialJDK, 'syncwrap/components/commercial_jdk'
   autoload :CRubyVM,       'syncwrap/components/cruby_vm'
+  autoload :Debian,        'syncwrap/components/debian'
   autoload :EtcHosts,      'syncwrap/components/etc_hosts'
   autoload :Geminabox,     'syncwrap/components/geminabox'
   autoload :Hashdot,       'syncwrap/components/hashdot'
