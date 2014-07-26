@@ -16,6 +16,7 @@
 
 require 'syncwrap/component'
 require 'syncwrap/ruby_support'
+require 'syncwrap/version_support'
 
 module SyncWrap
 
@@ -25,6 +26,7 @@ module SyncWrap
   #
   # Host component dependencies: <Distro>
   class JRubyVM < Component
+    include VersionSupport
     include RubySupport
 
     # JRuby version to install (default: 1.7.13)
@@ -46,6 +48,10 @@ module SyncWrap
 
     def jruby_gem_home
       "#{local_root}/lib/jruby/gems"
+    end
+
+    def jruby_version_a
+      version_string_to_a( jruby_version )
     end
 
     # Install jruby if the jruby_version is not already present.
@@ -109,8 +115,7 @@ module SyncWrap
     alias :jruby_gem_install :gem_install
 
     def min_deps_supported?
-      varray = jruby_version.split('.').map( &:to_i )
-      ( varray <=> [1, 7, 5] ) >= 0
+      version_gte?( jruby_version_a, [1,7,5] )
     end
 
     def jruby_gem_version_flags( reqs )

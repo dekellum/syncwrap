@@ -30,6 +30,7 @@ lib/syncwrap/path_util.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
+lib/syncwrap/version_support.rb
 lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/cruby_vm.rb
 lib/syncwrap/components/etc_hosts.rb
@@ -81,6 +82,7 @@ test/test_rsync.rb
 test/test_shell.rb
 test/test_space.rb
 test/test_space_main.rb
+test/test_version_support.rb
 test/zfile
 test/sync/d1/bar
 test/sync/d1/foo.erb

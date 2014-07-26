@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/version_support'
 
 # For distro class comparison only (pre-load for safety)
 require 'syncwrap/components/rhel'
@@ -26,6 +27,7 @@ module SyncWrap
   #
   # Host component dependencies: <Distro>
   class PostgreSQL < Component
+    include VersionSupport
 
     # \PostgreSQL _MAJOR.MINOR_ version to install. Since there are
     # multiple versions in use even for _default_ system packages across
@@ -35,7 +37,7 @@ module SyncWrap
 
     # Return #version as an Array of Integer values
     def version_a
-      @version.split('.').map( &:to_i )
+      version_string_to_a( @version )
     end
 
     # Location of postgresql data (and possibly also config) directory.
@@ -146,8 +148,7 @@ module SyncWrap
     attr_writer :shared_memory_max
 
     def shared_memory_max
-      @shared_memory_max ||
-        ( ( (version_a <=> [9,3]) < 0 ) && 300_000_000 )
+      @shared_memory_max || ( version_lt?(version_a, [9,3]) && 300_000_000 )
     end
 
     def pg_config_dir
