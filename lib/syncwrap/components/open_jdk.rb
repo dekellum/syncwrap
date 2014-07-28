@@ -19,6 +19,7 @@ require 'syncwrap/component'
 # For distro class comparison only (pre-load for safety)
 require 'syncwrap/components/rhel'
 require 'syncwrap/components/debian'
+require 'syncwrap/components/arch'
 
 module SyncWrap
 
@@ -47,6 +48,8 @@ module SyncWrap
         "/usr/lib/jvm/java-1.#{jdk_major_minor}.0"
       when Debian
         "/usr/lib/jvm/java-#{jdk_major_minor}-openjdk-amd64"
+      when Arch
+        "/usr/lib/jvm/java-#{jdk_major_minor}-openjdk"
       else
         raise ContextError, "Unknown distro jdk_dir"
       end
@@ -60,6 +63,8 @@ module SyncWrap
                       "java-1.#{jdk_major_minor}.0-openjdk-devel" )
       when Debian
         dist_install( "openjdk-#{jdk_major_minor}-jdk" )
+      when Arch
+        dist_install( 'jdk7-openjdk' )
       else
         raise ContextError, "Unknown distro type"
       end
