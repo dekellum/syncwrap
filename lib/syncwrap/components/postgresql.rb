@@ -35,11 +35,6 @@ module SyncWrap
     # be installed via #package_names.  (Default: '9.1')
     attr_accessor :version
 
-    # Return #version as an Array of Integer values
-    def version_a
-      version_string_to_a( @version )
-    end
-
     # Location of postgresql data (and possibly also config) directory.
     # (Default: #pg_default_data_dir)
     attr_accessor :pg_data_dir
@@ -148,7 +143,7 @@ module SyncWrap
     attr_writer :shared_memory_max
 
     def shared_memory_max
-      @shared_memory_max || ( version_lt?(version_a, [9,3]) && 300_000_000 )
+      @shared_memory_max || ( version_lt?(version, [9,3]) && 300_000_000 )
     end
 
     def pg_config_dir

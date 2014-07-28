@@ -35,15 +35,17 @@ module SyncWrap
       end
     end
 
-    # Return true if version arrays v1 >= v2
+    # Return true if v1 and v2 are not nil, to_a arrays are type
+    # compatible and compare v1 >= v2.
     def version_gte?( v1, v2 )
-      c = ( v1 <=> v2 ) #-> nil for String/Integer mix
+      c = v1 && v2 && ( v1 <=> v2 ) #-> nil for String/Integer mix
       c && c >= 0
     end
 
-    # Return true if version arrays v1 < v2
+    # Return true if v1 and v2 are not nil, to_a arrays are type
+    # compatible and compare v1 < v2.
     def version_lt?( v1, v2 )
-      c = ( v1 <=> v2 ) #-> nil for String/Integer mix
+      c = v1 && v2 && ( v1 <=> v2 ) #-> nil for String/Integer mix
       c && c < 0
     end
   end

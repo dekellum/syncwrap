@@ -55,4 +55,10 @@ class TestVersionSupport < MiniTest::Unit::TestCase
     refute( version_gte?( [1,1], [1,'a'] ) )
   end
 
+  def test_lte
+    assert( version_lt?( [0], [1] ) )
+    refute( version_lt?( [1], [1] ) )
+    refute( version_lt?( [2], [1] ) )
+  end
+
 end

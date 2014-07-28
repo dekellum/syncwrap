@@ -73,11 +73,6 @@ module SyncWrap
       "#{local_root}/bin/ruby"
     end
 
-    # Return ruby_version as an array of Integer values
-    def ruby_version_a
-      version_string_to_a( ruby_version )
-    end
-
     # If the current ruby_command is not at the desired ruby_version,
     # download source, configure, make and install.
     def install_ruby
@@ -113,7 +108,7 @@ module SyncWrap
     end
 
     def version_pattern
-      if version_gte?( ruby_version_a, [2,1] )
+      if version_gte?( ruby_version, [2,1] )
         # Starting with 2.1.x, the p# (patch number) is no longer used
         # for download, won't be in ruby_version, and shouldn't be
         # used for version comparison.

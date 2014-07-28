@@ -16,6 +16,7 @@
 
 require 'syncwrap/component'
 require 'syncwrap/distro'
+require 'syncwrap/version_support'
 
 module SyncWrap
 

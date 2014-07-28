@@ -50,10 +50,6 @@ module SyncWrap
       "#{local_root}/lib/jruby/gems"
     end
 
-    def jruby_version_a
-      version_string_to_a( jruby_version )
-    end
-
     # Install jruby if the jruby_version is not already present.
     def install
       jruby_install
@@ -115,7 +111,7 @@ module SyncWrap
     alias :jruby_gem_install :gem_install
 
     def min_deps_supported?
-      version_gte?( jruby_version_a, [1,7,5] )
+      version_gte?( jruby_version, [1,7,5] )
     end
 
     def jruby_gem_version_flags( reqs )
