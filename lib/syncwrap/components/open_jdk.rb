@@ -25,14 +25,14 @@ module SyncWrap
 
   # Provision an OpenJDK via Linux distro managed packages.
   #
-  # For simplicity, this component only the supports the full "JDK"
-  # and not a "JRE" only.  Note however that on Debian distros,
-  # installing 'openjdk-7-jdk' ends up pulling in X11 and leads to
-  # signficant system bloat. See:
+  # For simplicity, this component only supports the full JDK (runtime
+  # and compiler) and not the JRE (runtime only).  Note however that
+  # on Debian distros, installing 'openjdk-7-jdk' ends up pulling in
+  # X11 and leads to signficant system bloat. See:
   #
   # https://bugs.launchpad.net/ubuntu/+source/openjdk-6/+bug/257857
   #
-  # Apparently only the JRE is available "headless".
+  # On Debian, only the JRE is available "headless".
   #
   # Host component dependencies: <Distro>
   #
@@ -51,6 +51,7 @@ module SyncWrap
       super
     end
 
+    # Distro and version dependent JDK installation directory.
     def jdk_dir
       case distro
       when RHEL
@@ -64,7 +65,8 @@ module SyncWrap
       end
     end
 
-    # Install including development headers for things like Hashdot.
+    # Install distro packages, including development headers for JNI
+    # dependet like Hashdot.
     def install
       case distro
       when RHEL
