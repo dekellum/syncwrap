@@ -33,7 +33,11 @@ module SyncWrap
     # multiple versions in use even for _default_ system packages across
     # distros, this should be set the same as the version that will
     # be installed via #package_names.  (Default: '9.1')
-    attr_accessor :version
+    attr_accessor :pg_version
+
+    # Deprecated, alias for #pg_version
+    alias :version :pg_version
+    alias :version= :pg_version=
 
     # Location of postgresql data (and possibly also config) directory.
     # (Default: #pg_default_data_dir)
@@ -55,7 +59,7 @@ module SyncWrap
         when RHEL
           '/var/lib/pgsql9/data'
         when Ubuntu
-          "/var/lib/postgresql/#{version}/main"
+          "/var/lib/postgresql/#{pg_version}/main"
         else
           raise ContextError, "Distro #{distro.class.name} not supported"
         end
@@ -71,12 +75,12 @@ module SyncWrap
 
     # The package names, including \PostgreSQL server of the
     # desired version to install.
-    # (Default: Ubuntu: postgresql-_version_; RHEL: postgresql-server)
+    # (Default: Ubuntu: postgresql-_pg_version_; RHEL: postgresql-server)
     attr_writer :package_names
 
     def package_names
       ( @package_names ||
-        ( distro.is_a?( Ubuntu ) && [ "postgresql-#{version}" ] ) ||
+        ( distro.is_a?( Ubuntu ) && [ "postgresql-#{pg_version}" ] ) ||
         [ "postgresql-server" ] )
     end
 
@@ -139,11 +143,11 @@ module SyncWrap
     # Kernel SHMMAX (Shared Memory Maximum) setting to apply.
     # Note that PostgreSQL 9.3 uses mmap and should not need this.
     # Currently this is only set on Ubuntu (RHEL packages take care of
-    # it?) (Default: 300MB if #version < 9.3)
+    # it?) (Default: 300MB if #pg_version < 9.3)
     attr_writer :shared_memory_max
 
     def shared_memory_max
-      @shared_memory_max || ( version_lt?(version, [9,3]) && 300_000_000 )
+      @shared_memory_max || ( version_lt?(pg_version, [9,3]) && 300_000_000 )
     end
 
     def pg_config_dir
@@ -151,7 +155,7 @@ module SyncWrap
       when RHEL
         pg_data_dir
       when Ubuntu
-        "/etc/postgresql/#{version}/main"
+        "/etc/postgresql/#{pg_version}/main"
       else
         raise ContextError, "Distro #{distro.class.name} not supported"
       end
@@ -162,7 +166,7 @@ module SyncWrap
     def initialize( opts = {} )
       @pg_data_dir = nil
       @pg_default_data_dir = nil
-      @version = '9.1'
+      @pg_version = '9.1'
       @package_names = nil
       @service_name = 'postgresql'
       @synchronous_commit = :on
