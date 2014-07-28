@@ -24,27 +24,36 @@ module SyncWrap
     # Convert version decimal String to Array of Integer or String
     # values. The characters '.' and '-' are treated as
     # delimiters. Any remaining non-digit in a segment results in a
-    # String being returned for that segment.
+    # String being returned for that segment. Return v if not a
+    # String (incl nil).
     def version_string_to_a( v )
-      v.split(/[.\-]/).map do |p|
-        if p =~ /^\d+$/
-          p.to_i
-        else
-          p
+      if v.is_a?( String )
+        v.split(/[.\-]/).map do |p|
+          if p =~ /^\d+$/
+            p.to_i
+          else
+            p
+          end
         end
+      else
+        v
       end
     end
 
-    # Return true if v1 and v2 are not nil, to_a arrays are type
-    # compatible and compare v1 >= v2.
+    # Return true if v1 and v2 are not nil, (auto converted) array
+    # positions are type compatible and compare as v1 >= v2.
     def version_gte?( v1, v2 )
+      v1 = version_string_to_a( v1 )
+      v2 = version_string_to_a( v2 )
       c = v1 && v2 && ( v1 <=> v2 ) #-> nil for String/Integer mix
       c && c >= 0
     end
 
-    # Return true if v1 and v2 are not nil, to_a arrays are type
-    # compatible and compare v1 < v2.
+    # Return true if v1 and v2 are not nil, (auto converted) array
+    # positions are type compatible and compare v1 < v2.
     def version_lt?( v1, v2 )
+      v1 = version_string_to_a( v1 )
+      v2 = version_string_to_a( v2 )
       c = v1 && v2 && ( v1 <=> v2 ) #-> nil for String/Integer mix
       c && c < 0
     end

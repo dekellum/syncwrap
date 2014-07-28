@@ -25,6 +25,7 @@ class TestVersionSupport < MiniTest::Unit::TestCase
   include SyncWrap::VersionSupport
 
   def test_to_a
+    assert_equal( [ 1 ], version_string_to_a( [ 1 ] ) )
     assert_equal( [ 1 ], version_string_to_a( '1' ) )
     assert_equal( [ 'a' ], version_string_to_a( 'a' ) )
     assert_equal( [ 1, 2 ], version_string_to_a( '1.2' ) )
