@@ -25,11 +25,20 @@ module SyncWrap
 
   # Provision an OpenJDK via Linux distro managed packages.
   #
-  # Oracle, Java, and OpenJDK are registered trademarks of Oracle
-  # and/or its affiliates.
-  # See http://openjdk.java.net/legal/openjdk-trademark-notice.html.
+  # For simplicity, this component only the supports the full "JDK"
+  # and not a "JRE" only.  Note however that on Debian distros,
+  # installing 'openjdk-7-jdk' ends up pulling in X11 and leads to
+  # signficant system bloat. See:
+  #
+  # https://bugs.launchpad.net/ubuntu/+source/openjdk-6/+bug/257857
+  #
+  # Apparently only the JRE is available "headless".
   #
   # Host component dependencies: <Distro>
+  #
+  # Oracle, Java, and OpenJDK are registered trademarks of Oracle
+  # and/or its affiliates.
+  # See http://openjdk.java.net/legal/openjdk-trademark-notice.html
   class OpenJDK < Component
 
     # The JDK major and/or minor version number, i.e "1.7" or "7" is 7.
