@@ -18,7 +18,7 @@ require 'syncwrap/component'
 
 # For distro class comparison only (pre-load for safety)
 require 'syncwrap/components/rhel'
-require 'syncwrap/components/ubuntu'
+require 'syncwrap/components/debian'
 
 module SyncWrap
 
@@ -45,7 +45,7 @@ module SyncWrap
       case distro
       when RHEL
         "/usr/lib/jvm/java-1.#{jdk_major_minor}.0"
-      when Ubuntu
+      when Debian
         "/usr/lib/jvm/java-#{jdk_major_minor}-openjdk-amd64"
       else
         raise ContextError, "Unknown distro jdk_dir"
@@ -58,7 +58,7 @@ module SyncWrap
       when RHEL
         dist_install( "java-1.#{jdk_major_minor}.0-openjdk",
                       "java-1.#{jdk_major_minor}.0-openjdk-devel" )
-      when Ubuntu
+      when Debian
         dist_install( "openjdk-#{jdk_major_minor}-jdk" )
       else
         raise ContextError, "Unknown distro type"

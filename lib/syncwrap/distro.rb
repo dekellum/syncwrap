@@ -18,7 +18,7 @@ require 'syncwrap/base'
 
 module SyncWrap
 
-  # Support module and inteface for (Linux) distribution components.
+  # Support module and interface for distribution components.
   module Distro
 
     # The root directory for local, non-distro managed installs
@@ -46,25 +46,25 @@ module SyncWrap
     #
     # :minimal:: Avoid additional "optional" packages when possible.
     def dist_install( *pkgs )
-      raise "Include a distro-specific component, e.g. Ubuntu, RHEL"
+      raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
     # Uninstall the specified package names.
     def dist_uninstall( *pkgs )
-      raise "Include a distro-specific component, e.g. Ubuntu, RHEL"
+      raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
     # Install a System V style init.d script (already placed at remote
     # /etc/init.d/<name>) via distro-specific command
     def dist_install_init_service( name )
-      raise "Include a distro-specific component, e.g. Ubuntu, RHEL"
+      raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
     # Run via sudo, the System V style, distro specific `service`
     # command, typically supporting 'start', 'stop', 'restart',
     # 'status', etc. arguments.
     def dist_service( *args )
-      raise "Include a distro-specific component, e.g. Ubuntu, RHEL"
+      raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
   end
