@@ -21,6 +21,21 @@ module SyncWrap
   # Customizations for \Ubuntu and derivatives. Specific
   # distros/versions may further specialize.
   class Ubuntu < Debian
+
+    # Ubuntu version, i.e. '14.04' or '12.04.4'. No default value.
+    attr_accessor :ubuntu_version
+
+    alias :distro_version :ubuntu_version
+
+    # Return Debian#debian_version if specified, or provide comparable
+    # default Debian version if #ubuntu_vesion is specified. This is
+    # an approximation of the LTS lineage.
+    def debian_version
+      super ||
+        ( version_gte?( ubuntu_version, [14,4] ) && '7' ) ||
+        ( version_gte?( ubuntu_version, [12,4] ) && '6' )
+    end
+
   end
 
 end

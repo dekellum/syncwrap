@@ -20,6 +20,31 @@ module SyncWrap
 
   # Customizations for Amazon Linux.
   class AmazonLinux < RHEL
+
+    # Amazon Linux version, i.e. '2014.03.2'. No default value.
+    attr_accessor :amazon_version
+
+    alias :distro_version :amazon_version
+
+    # Return RHEL#rhel_version if specified, or provide comparable
+    # default RHEL version if #amazon_vesion is specified.
+    #
+    # History of Amazon Linux releases:
+    #
+    # * 2011.09 upgraded to glibc 2.12, parity with RHEL 6
+    #
+    # * 2014.03 upgraded to 2.17, parity with RHEL 7
+    #
+    # Note however that Amazon is still behind RHEL 7 in other
+    # respects (ex: systemd), and is ahead on other packages.
+    def rhel_version
+      super ||
+        ( amazon_version &&
+          ( ( version_gte?( amazon_version, [2014,3] ) && '7' ) ||
+            ( version_gte?( amazon_version, [2011,9] ) && '6' ) ||
+            '5' ) )
+    end
+
   end
 
 end

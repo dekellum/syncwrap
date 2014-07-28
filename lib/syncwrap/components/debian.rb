@@ -24,6 +24,12 @@ module SyncWrap
   # derivatives. Specific distros/versions may further specialize.
   class Debian < Component
     include SyncWrap::Distro
+    include SyncWrap::VersionSupport
+
+    # Debian version, i.e. '7.6' No default value.
+    attr_accessor :debian_version
+
+    alias :distro_version :debian_version
 
     def initialize( opts = {} )
       super

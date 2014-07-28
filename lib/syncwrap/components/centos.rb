@@ -20,6 +20,9 @@ module SyncWrap
 
   # Customizations for \CentOS and derivatives.
   class CentOS < RHEL
+
+    alias :centos_version :rhel_version
+    alias :centos_version= :rhel_version=
   end
 
 end

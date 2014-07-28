@@ -25,6 +25,11 @@ module SyncWrap
   class RHEL < Component
     include SyncWrap::Distro
 
+    # RHEL version, i.e. '6'. No default value.
+    attr_accessor :rhel_version
+
+    alias :distro_version :rhel_version
+
     def initialize( opts = {} )
       super
     end
