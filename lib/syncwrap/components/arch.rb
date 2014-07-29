@@ -19,7 +19,7 @@ require 'syncwrap/distro'
 
 module DevEnv
 
-  # Customizations for \Arch Linux.
+  # \Arch Linux distro, partial implementation for pacman.
   class Arch < SyncWrap::Component
     include SyncWrap::Distro
 
