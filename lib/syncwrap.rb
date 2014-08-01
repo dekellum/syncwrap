@@ -357,6 +357,7 @@ module SyncWrap
   # risky in SyncWrap given that all of these should be loaded before
   # any threads are in play.
 
+  autoload :Bundler,       'syncwrap/components/bundler'
   autoload :CommercialJDK, 'syncwrap/components/commercial_jdk'
   autoload :CRubyVM,       'syncwrap/components/cruby_vm'
   autoload :EtcHosts,      'syncwrap/components/etc_hosts'

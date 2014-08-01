@@ -36,6 +36,8 @@ module SyncWrap
       [ RHEL,   CRubyVM ],
       [ EtcHosts ],
       [ RHEL,   JRubyVM, RunUser, Iyyov, Geminabox ],
+      [ RHEL,   JRubyVM, Bundler ],
+      [ RHEL,   CRubyVM, Bundler ],
       [ Ubuntu, OpenJDK, JRubyVM, Hashdot ],
       [ RHEL,   JRubyVM, RunUser, Iyyov ],
       [ Ubuntu, JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
