@@ -370,6 +370,7 @@ module SyncWrap
   autoload :Network,       'syncwrap/components/network'
   autoload :OpenJDK,       'syncwrap/components/open_jdk'
   autoload :PostgreSQL,    'syncwrap/components/postgresql'
+  autoload :Puma,          'syncwrap/components/puma'
   autoload :Qpid,          'syncwrap/components/qpid'
   autoload :QpidRepo,      'syncwrap/components/qpid'
   autoload :RHEL,          'syncwrap/components/rhel'

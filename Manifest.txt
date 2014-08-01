@@ -43,6 +43,7 @@ lib/syncwrap/components/mdraid.rb
 lib/syncwrap/components/network.rb
 lib/syncwrap/components/open_jdk.rb
 lib/syncwrap/components/postgresql.rb
+lib/syncwrap/components/puma.rb
 lib/syncwrap/components/qpid.rb
 lib/syncwrap/components/rhel.rb
 lib/syncwrap/components/run_user.rb

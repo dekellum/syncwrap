@@ -42,6 +42,8 @@ module SyncWrap
         source_dir: 'lib', require_clean: false ],
       [ RHEL,   RunUser, CRubyVM, Bundler, SourceBundle,
         source_dir: 'lib', require_clean: false ],
+      [ RHEL,   RunUser, CRubyVM, Bundler, Puma,
+        source_dir: 'lib', require_clean: false ],
       [ Ubuntu, OpenJDK, JRubyVM, Hashdot ],
       [ RHEL,   JRubyVM, RunUser, Iyyov ],
       [ Ubuntu, JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
