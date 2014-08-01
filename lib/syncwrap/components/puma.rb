@@ -35,7 +35,7 @@ module SyncWrap
 
     def initialize( opts = {} )
       @always_restart = false
-      super
+      super( { caller: caller }.merge( opts ) )
     end
 
     def install

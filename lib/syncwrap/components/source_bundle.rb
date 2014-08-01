@@ -61,7 +61,9 @@ module SyncWrap
     attr_accessor :rput_options
 
     def initialize( opts = {} )
-      @local_source_root = path_relative_to_caller( '..', caller )
+      opts = opts.dup
+      clr = opts.delete(:caller) || caller
+      @local_source_root = path_relative_to_caller( '..', clr )
       @source_dir = nil
       @remote_source_root = nil
       @require_clean = true
