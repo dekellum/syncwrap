@@ -46,6 +46,7 @@ lib/syncwrap/components/postgresql.rb
 lib/syncwrap/components/qpid.rb
 lib/syncwrap/components/rhel.rb
 lib/syncwrap/components/run_user.rb
+lib/syncwrap/components/source_bundle.rb
 lib/syncwrap/components/ubuntu.rb
 lib/syncwrap/components/users.rb
 sync/etc/gemrc

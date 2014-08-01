@@ -374,6 +374,7 @@ module SyncWrap
   autoload :QpidRepo,      'syncwrap/components/qpid'
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
+  autoload :SourceBundle,  'syncwrap/components/source_bundle'
   autoload :Ubuntu,        'syncwrap/components/ubuntu'
   autoload :Users,         'syncwrap/components/users'
 
