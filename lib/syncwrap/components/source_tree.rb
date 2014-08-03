@@ -75,6 +75,10 @@ module SyncWrap
       raise "SourceTree#source_dir not set" unless source_dir
     end
 
+    def remote_source_path
+      File.join( remote_source_root, source_dir )
+    end
+
     def install
       changes = sync_source
       on_change( changes ) unless changes.empty?
@@ -83,8 +87,12 @@ module SyncWrap
 
     protected
 
+    def local_source_path
+      File.join( local_source_root, source_dir )
+    end
+
     def on_change( changes )
-      state[ change_key ] = changes unless changes.empty?
+      state[ change_key ] = changes unless change_key.nil? || changes.empty?
     end
 
     def sync_source
@@ -95,14 +103,6 @@ module SyncWrap
                sync_paths: [ local_source_root ] }.
         merge( rput_options )
       rput( source_dir, remote_source_root, opts )
-    end
-
-    def local_source_path
-      File.join( local_source_root, source_dir )
-    end
-
-    def remote_source_path
-      File.join( remote_source_root, source_dir )
     end
 
   end
