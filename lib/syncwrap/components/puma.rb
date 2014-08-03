@@ -18,10 +18,16 @@ require 'syncwrap/component'
 
 module SyncWrap
 
-  # Provision to start or restart the Puma HTTP
+  # Provision to install, start/restart a Puma HTTP
   # server, optionally triggered by a state change key.
-  # Host component dependencies: RunUser
+  #
+  # Host component dependencies: RunUser, <ruby>
   class Puma < Component
+
+    # Puma version to install/run, if set. Otherwise assume puma is
+    # bundled with the application (i.e. Bundle) and use bin stubs to
+    # run.  (Default: nil; Example: 2.9.0)
+    attr_accessor :puma_version
 
     # An optional state key to check, indicating changes requiring
     # a Puma restart (Default: nil; Example: :source_tree)
@@ -44,6 +50,7 @@ module SyncWrap
     end
 
     def initialize( opts = {} )
+      @puma_version = nil
       @always_restart = false
       @change_key = nil
       @rack_path = nil
@@ -51,26 +58,27 @@ module SyncWrap
     end
 
     def install
-      #FIXME: puma gem install, optional?
+      if puma_version
+        gem_install( 'puma', version: puma_version )
+      end
+
       changes = change_key && state[ change_key ]
       rudo( "( cd #{rack_path}", close: ')' ) do
         rudo( "if [ -f puma.state -a -e control ]; then", close: else_start ) do
-          if changes && !always_restart?
+          if ( change_key && !changes ) && !always_restart?
             rudo 'true' #no-op
           else
             restart
           end
         end
       end
-      changes
+      nil
     end
 
     protected
 
     def restart
-      rudo <<-SH
-        bin/pumactl --state puma.state restart
-      SH
+      rudo( ( pumactl_command + %w[ --state puma.state restart ] ).join( ' ' ) )
     end
 
     def else_start
@@ -91,8 +99,23 @@ module SyncWrap
           [ key_to_arg( key ), value && value.to_s ]
         end
       end
+      ( puma_command + args.compact ).join( ' ' )
+    end
 
-      "bin/puma " + args.compact.join( ' ' )
+    def puma_command
+      if puma_version
+        [ ruby_command, '-S', 'puma', "_#{puma_version}_" ]
+      else
+        [ "bin/puma" ]
+      end
+    end
+
+    def pumactl_command
+      if puma_version
+        [ ruby_command, '-S', 'puma', "_#{puma_version}_" ]
+      else
+        [ "bin/pumactl" ]
+      end
     end
 
     def puma_args
