@@ -84,7 +84,7 @@ module SyncWrap
     #
     # The jruby jgem command tends to be slow on virtual hardware.
     # This implementation adds a faster short-circuit when an exact,
-    # single :version is given that avoids calling gem if the rubygems
+    # single :version is given that avoids calling jgem if the rubygems
     # same version gemspec file is found.
     def gem_install( gem, opts = {} )
       version = Array( opts[ :version ] )
@@ -92,7 +92,7 @@ module SyncWrap
 
       unless ( opts[:check] || opts[:user_install] ||
                opts[:minimize] == false || opts[:spec_check] == false ||
-               !version )
+               ver.nil? )
 
         specs = [ "#{jruby_gem_home}/specifications/#{gem}-#{ver}-java.gemspec",
                   "#{jruby_gem_home}/specifications/#{gem}-#{ver}.gemspec" ]
