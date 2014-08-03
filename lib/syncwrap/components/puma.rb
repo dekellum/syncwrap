@@ -14,16 +14,26 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/components/source_bundle'
+require 'syncwrap/component'
 
 module SyncWrap
 
-  # A specialized SourceBundle that starts or restarts the Puma HTTP
-  # server as needed, based on the source config.ru.  Puma itself
-  # should be declared as a dependency in the source bundle Gemfile.
-  #
+  # Provision to start or restart the Puma HTTP
+  # server, optionally triggered by a state change key.
   # Host component dependencies: RunUser
-  class Puma < SourceBundle
+  class Puma < Component
+
+    # An optional state key to check, indicating changes requiring
+    # a Puma restart (Default: nil; Example: :source_tree)
+    attr_accessor :change_key
+
+    # Path to the application config.ru
+    # (Default: SourceTree#remote_source_path)
+    attr_writer :rack_path
+
+    def rack_path
+      @rack_path || remote_source_path
+    end
 
     # Should Puma be restarted even when there were no source bundle
     # changes? (Default: false)
@@ -35,14 +45,17 @@ module SyncWrap
 
     def initialize( opts = {} )
       @always_restart = false
-      super( { caller: caller }.merge( opts ) )
+      @change_key = nil
+      @rack_path = nil
+      super
     end
 
     def install
-      changes = super
-      rudo( "( cd #{remote_source_path}", close: ')' ) do
+      #FIXME: puma gem install, optional?
+      changes = change_key && state[ change_key ]
+      rudo( "( cd #{rack_path}", close: ')' ) do
         rudo( "if [ -f puma.state -a -e control ]; then", close: else_start ) do
-          if changes.empty? && !always_restart?
+          if changes && !always_restart?
             rudo 'true' #no-op
           else
             restart
@@ -83,10 +96,10 @@ module SyncWrap
     end
 
     def puma_args
-      { dir: remote_source_path,
-        pidfile: "#{remote_source_path}/puma.pid",
-        state: "#{remote_source_path}/puma.state",
-        control: "unix://#{remote_source_path}/control",
+      { dir: rack_path,
+        pidfile: "#{rack_path}/puma.pid",
+        state: "#{rack_path}/puma.state",
+        control: "unix://#{rack_path}/control",
         environment: "production",
         port: 5874,
         daemon: true }

@@ -357,6 +357,7 @@ module SyncWrap
   # risky in SyncWrap given that all of these should be loaded before
   # any threads are in play.
 
+  autoload :Bundle,        'syncwrap/components/bundle'
   autoload :Bundler,       'syncwrap/components/bundler'
   autoload :CommercialJDK, 'syncwrap/components/commercial_jdk'
   autoload :CRubyVM,       'syncwrap/components/cruby_vm'
@@ -375,7 +376,7 @@ module SyncWrap
   autoload :QpidRepo,      'syncwrap/components/qpid'
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
-  autoload :SourceBundle,  'syncwrap/components/source_bundle'
+  autoload :SourceTree,    'syncwrap/components/source_tree'
   autoload :Ubuntu,        'syncwrap/components/ubuntu'
   autoload :Users,         'syncwrap/components/users'
 

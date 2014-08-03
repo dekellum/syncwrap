@@ -25,12 +25,10 @@ module SyncWrap
   # assumes the local source tree is in a Git DVCS repository and
   # checks that it is clean before executing.
   #
-  # If any changes to the source tree occur, performs a bundle_install
-  # if the bundle_command is defined (typically via Bundler), and a
-  # Gemfile is found at top of source tree.
+  # The remote source directory will be owned by the RunUser#run_user
   #
-  # Host component dependencies: RunUser, Bundler (optional)
-  class SourceBundle < Component
+  # Host component dependencies: RunUser
+  class SourceTree < Component
     include PathUtil
 
     # Local path to root directory in which #source_dir is found
@@ -41,8 +39,7 @@ module SyncWrap
     attr_accessor :source_dir
 
     # Remote path to the root directory in which #source_dir should be
-    # installed.
-    # (Default: run_dir, as per RunUser#run_dir)
+    # installed. (Default: RunUser#run_dir)
     attr_writer :remote_source_root
 
     def remote_source_root
@@ -57,6 +54,10 @@ module SyncWrap
       @require_clean
     end
 
+    # The state key to set to if there are any changes to the tree
+    # (Default: :source_tree)
+    attr_accessor :change_key
+
     # Any additional options for the rput (Default: {} -> none)
     attr_accessor :rput_options
 
@@ -68,33 +69,22 @@ module SyncWrap
       @remote_source_root = nil
       @require_clean = true
       @rput_options = {}
+      @change_key = :source_tree
       super
 
-      raise "SourceBundle#source_dir not set" unless source_dir
+      raise "SourceTree#source_dir not set" unless source_dir
     end
 
     def install
       changes = sync_source
-      install_on_change( changes ) unless changes.empty?
+      on_change( changes ) unless changes.empty?
       changes
     end
 
     protected
 
-    def install_on_change( changes )
-      bundle_install if defined?( bundle_command )
-    end
-
-    def bundle_install
-      rudo( "( cd #{remote_source_path}", close: ')' ) do
-        rudo( 'if [ -f Gemfile ]; then', close: 'fi' ) do
-          bundle_install!
-        end
-      end
-    end
-
-    def bundle_install!
-      rudo "#{bundle_command} install --path ~/.gem --binstubs ./bin"
+    def on_change( changes )
+      state[ change_key ] = changes unless changes.empty?
     end
 
     def sync_source
