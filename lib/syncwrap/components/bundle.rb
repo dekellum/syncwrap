@@ -21,12 +21,10 @@ require 'syncwrap/path_util'
 
 module SyncWrap
 
-  # Performs a bundle install, optionally triggered a state change key.
-  # If any changes to the source tree occur, performs a bundle_install
-  # if the bundle_command is defined (typically via Bundler), and a
-  # Gemfile is found at top of source tree.
+  # Provision to `bundle install`, optionally triggered by a state change key.
   #
-  # Host component dependencies: RunUser, Bundler
+  # Host component dependencies: RunUser, BundlerGem
+  #
   class Bundle < Component
     include PathUtil
 
@@ -52,18 +50,11 @@ module SyncWrap
       bundle_install if change_key.nil? || state[ change_key ]
     end
 
-    protected
-
     def bundle_install
       rudo( "( cd #{bundle_path}", close: ')' ) do
-        rudo( 'if [ -f Gemfile ]; then', close: 'fi' ) do
-          bundle_install!
-        end
+        rudo( "#{bundle_command} #{bundler_version} " +
+              "install --path ~/.gem --binstubs ./bin" )
       end
-    end
-
-    def bundle_install!
-      rudo "#{bundle_command} install --path ~/.gem --binstubs ./bin"
     end
 
   end

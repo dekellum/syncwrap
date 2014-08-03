@@ -26,7 +26,11 @@ module SyncWrap
     # Default gem install arguments (default: --no-rdoc, --no-ri)
     attr_accessor :gem_install_args
 
+    # Ruby VM command name (default: ruby; alt example: jruby)
+    attr_accessor :ruby_command
+
     def initialize( *args )
+      @ruby_command = 'ruby'
       @gem_command = 'gem'
       @gem_install_args = %w[ --no-rdoc --no-ri ]
 
@@ -67,10 +71,14 @@ module SyncWrap
     #             installs to the minimum required to satisfy the
     #             version requirements.  (Default: true)
     #
+    # :format_executable:: Use --format-executable to prefix commands
+    #                      for specific ruby VMs if needed.
+    #
     def gem_install( gem, opts = {} )
       cmd = [ gem_command, 'install',
               gem_install_args,
               ( '--user-install' if opts[ :user_install ] ),
+              ( '--format-executable' if opts[ :format_executable ] ),
               ( '--conservative' if opts[ :minimize] != false ),
               ( '--minimal-deps' if opts[ :minimize] != false &&
                 min_deps_supported? ),

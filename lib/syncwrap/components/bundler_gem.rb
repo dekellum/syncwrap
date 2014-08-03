@@ -20,9 +20,9 @@ module SyncWrap
 
   # Provision for the bundler rubygem and its (j)bundle command
   #
-  # Host component dependencies: <Ruby>
+  # Host component dependencies: <ruby>
   #
-  class Bundler < Component
+  class BundlerGem < Component
 
     # Bundler version to install (Default: 1.6.5)
     attr_accessor :bundler_version
@@ -32,21 +32,16 @@ module SyncWrap
       super
     end
 
-    def install
-      sudo( "if ! hash #{bundle_command} 2>/dev/null; then", close: 'fi' ) do
-        gem_install_bundler
-      end
-    end
-
-    def gem_install_bundler
-      args = [ 'bundler' ]
-      args.unshift( '--format-executable' ) if bundle_command == 'jbundle'
-      gem_install( args, version: bundler_version )
-    end
-
     def bundle_command
-      ( gem_command == 'jgem' ) ? 'jbundle' : 'bundle'
+      ( ruby_command == 'jruby' ) ? 'jbundle' : 'bundle'
+    end
+
+    def install
+      opts = { version: bundler_version }
+      opts[ :format_executable ] = true unless bundle_command == 'bundle'
+      gem_install( 'bundler', opts )
     end
 
   end
+
 end

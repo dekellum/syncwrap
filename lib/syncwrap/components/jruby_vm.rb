@@ -33,7 +33,8 @@ module SyncWrap
     def initialize( opts = {} )
       @jruby_version = '1.7.13'
 
-      super( { gem_command: 'jgem' }.merge( opts ) )
+      super( { ruby_command: 'jruby',
+                gem_command: 'jgem' }.merge( opts ) )
     end
 
     def jruby_dist_path
@@ -107,6 +108,8 @@ module SyncWrap
     end
 
     alias :jruby_gem_install :gem_install
+
+    protected
 
     def min_deps_supported?
       varray = jruby_version.split('.').map( &:to_i )

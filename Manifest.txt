@@ -31,7 +31,7 @@ lib/syncwrap/rsync.rb
 lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/components/bundle.rb
-lib/syncwrap/components/bundler.rb
+lib/syncwrap/components/bundler_gem.rb
 lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/cruby_vm.rb
 lib/syncwrap/components/etc_hosts.rb
