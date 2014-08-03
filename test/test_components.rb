@@ -38,6 +38,8 @@ module SyncWrap
       [ RHEL,   JRubyVM, RunUser, Iyyov, Geminabox ],
       [ RHEL,   JRubyVM, BundlerGem ],
       [ RHEL,   CRubyVM, BundlerGem ],
+      [ RHEL,   JRubyVM, RakeGem ],
+      [ RHEL,   CRubyVM, RakeGem ],
       [ RHEL,   RunUser, SourceTree,
         source_dir: 'lib', require_clean: false ],
       [ RHEL,   CRubyVM, BundlerGem, RunUser, Bundle,

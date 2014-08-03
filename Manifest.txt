@@ -46,6 +46,7 @@ lib/syncwrap/components/open_jdk.rb
 lib/syncwrap/components/postgresql.rb
 lib/syncwrap/components/puma.rb
 lib/syncwrap/components/qpid.rb
+lib/syncwrap/components/rake_gem.rb
 lib/syncwrap/components/rhel.rb
 lib/syncwrap/components/run_user.rb
 lib/syncwrap/components/source_tree.rb
