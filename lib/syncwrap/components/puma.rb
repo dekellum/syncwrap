@@ -24,16 +24,17 @@ module SyncWrap
   # Host component dependencies: RunUser, <ruby>
   class Puma < Component
 
-    # Puma version to install/run, if set. Otherwise assume puma is
-    # bundled with the application (i.e. Bundle) and use bin stubs to
-    # run.  (Default: nil; Example: 2.9.0)
+    # Puma version to install and run, if set. Otherwise assume puma
+    # is bundled with the application (i.e. Bundle) and use bin stubs
+    # to run.  (Default: nil; Example: 2.9.0)
     attr_accessor :puma_version
 
     # An optional state key to check, indicating changes requiring
     # a Puma restart (Default: nil; Example: :source_tree)
     attr_accessor :change_key
 
-    # Path to the application config.ru
+    # Path to the application/configuration directory which
+    # contains the config.ru.
     # (Default: SourceTree#remote_source_path)
     attr_writer :rack_path
 
