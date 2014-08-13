@@ -38,6 +38,20 @@ module SyncWrap
     # (Default: SourceTree#remote_source_path)
     attr_writer :rack_path
 
+    # Hash of puma command line flag overrides.
+    # (Default: See #puma_flags)
+    attr_writer :puma_flags
+
+    def puma_flags
+      { dir: rack_path,
+        pidfile: "#{rack_path}/puma.pid",
+        state: "#{rack_path}/puma.state",
+        control: "unix://#{rack_path}/control",
+        environment: "production",
+        port: 5874,
+        daemon: true }.merge( @puma_flags )
+    end
+
     def rack_path
       @rack_path || remote_source_path
     end
@@ -55,6 +69,7 @@ module SyncWrap
       @always_restart = false
       @change_key = nil
       @rack_path = nil
+      @puma_flags = {}
       super
     end
 
@@ -91,7 +106,7 @@ module SyncWrap
     end
 
     def puma_start_command
-      args = puma_args.map do |key,value|
+      args = puma_flags.map do |key,value|
         if value.is_a?( TrueClass )
           key_to_arg( key )
         elsif value.is_a?( FalseClass )
@@ -117,16 +132,6 @@ module SyncWrap
       else
         [ "bin/pumactl" ]
       end
-    end
-
-    def puma_args
-      { dir: rack_path,
-        pidfile: "#{rack_path}/puma.pid",
-        state: "#{rack_path}/puma.state",
-        control: "unix://#{rack_path}/control",
-        environment: "production",
-        port: 5874,
-        daemon: true }
     end
 
     def key_to_arg( key )
