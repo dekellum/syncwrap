@@ -31,6 +31,7 @@ module SyncWrap
     # An optional state key to check, indicating changes requiring
     # bundle install (Default: nil; Example: :source_tree)
     attr_accessor :change_key
+    protected :change_key, :change_key=
 
     # Path to the Gemfile(.lock)
     # (Default: SourceTree#remote_source_path)

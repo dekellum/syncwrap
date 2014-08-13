@@ -57,6 +57,7 @@ module SyncWrap
     # The state key to set to if there are any changes to the tree
     # (Default: :source_tree)
     attr_accessor :change_key
+    protected :change_key, :change_key=
 
     # Any additional options for the rput (Default: {} -> none)
     attr_accessor :rput_options
