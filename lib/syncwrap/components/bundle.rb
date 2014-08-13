@@ -41,9 +41,14 @@ module SyncWrap
       @bundle_path || remote_source_path
     end
 
+    # Hash of environment key/values to set on call to bundle install
+    # (Default: {} -> none)
+    attr_accessor :bundle_install_env
+
     def initialize( opts = {} )
       @change_key = nil
       @bundle_path = nil
+      @bundle_install_env = {}
       super
     end
 
@@ -53,9 +58,18 @@ module SyncWrap
 
     def bundle_install
       rudo( "( cd #{bundle_path}", close: ')' ) do
-        rudo( "#{bundle_command} #{bundler_version} " +
+        rudo( "#{bundle_preamble} #{bundle_command} _#{bundler_version}_ " +
               "install --path ~/.gem --binstubs ./bin" )
       end
+    end
+
+    protected
+
+    def bundle_preamble
+      setters = bundle_install_env.map do |k,v|
+        k.to_s + '="' + v.gsub( /["\\]/ ) { |c| '\\' + c } + '"'
+      end
+      setters.join( ' ' )
     end
 
   end
