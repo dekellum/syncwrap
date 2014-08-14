@@ -108,6 +108,12 @@ Components implementing \#install:
 
 * SyncWrap::JRubyVM and/or SyncWrap::CRubyVM (MRI, from source)
 
+* SyncWrap::BundlerGem and SyncWrap::RakeGem - base Rubygems
+
+* SyncWrap::SourceTree, SyncWrap::Bundle
+
+* SyncWrap::Puma
+
 * SyncWrap::Iyyov - job scheduler and process monitor with
   utilities for SyncWrap::IyyovDaemon deployment.
 
@@ -120,7 +126,6 @@ Components implementing \#install:
 The above only represents my more recent project needs. Pull requests
 to add, for example, the following would be well received:
 
-* Bundler install, for example for Sinatra apps
 * Bluepill
 * Rails (extra credit: without git fetch or per-host asset compile)
 * Nginx
