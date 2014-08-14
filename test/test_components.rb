@@ -59,6 +59,7 @@ module SyncWrap
       [ Debian, Network ],
       [ Ubuntu, Network ],
       [ RHEL,   Network ],
+      [ RHEL, { rhel_version: '7' }, Network ],
       [ AmazonLinux, Network ],
       [ Debian, OpenJDK ],
       [ Debian, PostgreSQL ],
