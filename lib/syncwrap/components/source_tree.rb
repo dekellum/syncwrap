@@ -46,6 +46,8 @@ module SyncWrap
       @remote_source_root || run_dir
     end
 
+    protected
+
     # Require local source_dir to be clean per Git before #rput of the
     # tree. (Default: true)
     attr_writer :require_clean
@@ -57,10 +59,11 @@ module SyncWrap
     # The state key to set to if there are any changes to the tree
     # (Default: :source_tree)
     attr_accessor :change_key
-    protected :change_key, :change_key=
 
     # Any additional options for the rput (Default: {} -> none)
     attr_accessor :rput_options
+
+    public
 
     def initialize( opts = {} )
       opts = opts.dup

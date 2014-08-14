@@ -28,11 +28,6 @@ module SyncWrap
   class Bundle < Component
     include PathUtil
 
-    # An optional state key to check, indicating changes requiring
-    # bundle install (Default: nil; Example: :source_tree)
-    attr_accessor :change_key
-    protected :change_key, :change_key=
-
     # Path to the Gemfile(.lock)
     # (Default: SourceTree#remote_source_path)
     attr_writer :bundle_path
@@ -41,9 +36,17 @@ module SyncWrap
       @bundle_path || remote_source_path
     end
 
+    protected
+
+    # An optional state key to check, indicating changes requiring
+    # bundle install (Default: nil; Example: :source_tree)
+    attr_accessor :change_key
+
     # Hash of environment key/values to set on call to bundle install
     # (Default: {} -> none)
     attr_accessor :bundle_install_env
+
+    public
 
     def initialize( opts = {} )
       @change_key = nil

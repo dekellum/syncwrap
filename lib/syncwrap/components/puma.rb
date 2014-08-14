@@ -29,15 +29,14 @@ module SyncWrap
     # to run.  (Default: nil; Example: 2.9.0)
     attr_accessor :puma_version
 
-    # An optional state key to check, indicating changes requiring
-    # a Puma restart (Default: nil; Example: :source_tree)
-    attr_accessor :change_key
-    protected :change_key, :change_key=
-
     # Path to the application/configuration directory which
     # contains the config.ru.
     # (Default: SourceTree#remote_source_path)
     attr_writer :rack_path
+
+    def rack_path
+      @rack_path || remote_source_path
+    end
 
     # Hash of puma command line flag overrides.
     # (Default: See #puma_flags)
@@ -53,9 +52,11 @@ module SyncWrap
         daemon: true }.merge( @puma_flags )
     end
 
-    def rack_path
-      @rack_path || remote_source_path
-    end
+    protected
+
+    # An optional state key to check, indicating changes requiring
+    # a Puma restart (Default: nil; Example: :source_tree)
+    attr_accessor :change_key
 
     # Should Puma be restarted even when there were no source bundle
     # changes? (Default: false)
@@ -64,6 +65,8 @@ module SyncWrap
     def always_restart?
       @always_restart
     end
+
+    public
 
     def initialize( opts = {} )
       @puma_version = nil
