@@ -54,7 +54,9 @@ module SyncWrap
       [ Ubuntu ],
       [ Users, home_users: [ 'bob' ] ] ]
 
+  # Test overrides to standard Context.
   class TestContext < Context
+    include Shell
     attr_accessor :commands
 
     def initialize( *args )
@@ -62,10 +64,34 @@ module SyncWrap
       super
     end
 
-    def capture_stream( *args )
+    # Run bash on localhost in dryrun mode (-n), for basic syntax
+    # checking.
+    def run_shell( command, opts = {} )
+      opts = opts.merge( dryrun: true, coalesce: false, accept: [0] )
+      args = sh_args( command, opts )
+      capture_stream( args, host, :sh, opts )
       @commands << args
-      [ 0, [] ]
+      nil
     end
+
+    # Run bash on localhost in dryrun mode (-n), for basic syntax
+    # checking. Return random selection of :accept return value and
+    # empty output text.
+    def capture_shell( command, opts = {} )
+      accept = opts[ :accept ] || [ 0 ]
+      opts = opts.merge( dryrun: true, coalesce: false, accept: [0] )
+      args = sh_args( command, opts )
+      capture_stream( args, host, :sh, opts )
+      @commands << args
+      [ accept[ rand( accept.length ) ], "" ]
+    end
+
+    # Don't run rsync. Return some or no changes at random.
+    def rsync( srcs, target, opts )
+      @commands << rsync_args( host, srcs, target, opts )
+      ( rand(2) == 1 ) ? [ :something ] : []
+    end
+
   end
 
   class TestComponents < MiniTest::Unit::TestCase
@@ -93,10 +119,15 @@ module SyncWrap
         host.add( comp )
         pass
         if comp.respond_to?( :install )
-          with_test_context( sp, host ) do |ctx|
-            comp.install
-            ctx.flush
-            assert_operator( ctx.commands.length, :>, 0 )
+          # Repeatedly test for randomized permutations
+          3.times do
+            with_test_context( sp, host ) do |ctx|
+              comp.install
+              ctx.flush
+              assert_operator( ctx.commands.length, :>, 0 )
+              # each command run is an effective assert
+              ctx.commands.length.times { pass }
+            end
           end
         end
       end
