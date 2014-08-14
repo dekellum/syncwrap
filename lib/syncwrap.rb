@@ -358,6 +358,8 @@ module SyncWrap
   # any threads are in play.
 
   autoload :AmazonLinux,   'syncwrap/components/amazon_linux'
+  autoload :Bundle,        'syncwrap/components/bundle'
+  autoload :BundlerGem,    'syncwrap/components/bundler_gem'
   autoload :Arch,          'syncwrap/components/arch'
   autoload :CentOS,        'syncwrap/components/centos'
   autoload :CommercialJDK, 'syncwrap/components/commercial_jdk'
@@ -373,10 +375,13 @@ module SyncWrap
   autoload :Network,       'syncwrap/components/network'
   autoload :OpenJDK,       'syncwrap/components/open_jdk'
   autoload :PostgreSQL,    'syncwrap/components/postgresql'
+  autoload :Puma,          'syncwrap/components/puma'
   autoload :Qpid,          'syncwrap/components/qpid'
   autoload :QpidRepo,      'syncwrap/components/qpid'
+  autoload :RakeGem,       'syncwrap/components/rake_gem'
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
+  autoload :SourceTree,    'syncwrap/components/source_tree'
   autoload :Ubuntu,        'syncwrap/components/ubuntu'
   autoload :Users,         'syncwrap/components/users'
 

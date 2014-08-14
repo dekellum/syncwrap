@@ -36,6 +36,19 @@ module SyncWrap
       [ RHEL,   CRubyVM ],
       [ EtcHosts ],
       [ RHEL,   JRubyVM, RunUser, Iyyov, Geminabox ],
+      [ RHEL,   JRubyVM, BundlerGem ],
+      [ RHEL,   CRubyVM, BundlerGem ],
+      [ RHEL,   JRubyVM, RakeGem ],
+      [ RHEL,   CRubyVM, RakeGem ],
+      [ RHEL,   RunUser, SourceTree,
+        source_dir: 'lib', require_clean: false ],
+      [ RHEL,   CRubyVM, BundlerGem, RunUser, Bundle,
+        bundle_path: File.expand_path( '../../lib', __FILE__ ) ],
+      [ RHEL,   RunUser, CRubyVM, BundlerGem,
+        SourceTree, { source_dir: 'lib', require_clean: false },
+        Bundle ],
+      [ RHEL,   RunUser, CRubyVM, BundlerGem, Puma,
+        rack_path: File.expand_path( '../../lib', __FILE__ ) ],
       [ Ubuntu, OpenJDK, JRubyVM, Hashdot ],
       [ RHEL,   JRubyVM, RunUser, Iyyov ],
       [ Ubuntu, JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
@@ -112,8 +125,10 @@ module SyncWrap
       define_method( "test_#{cname}_#{i}" ) do
         sp = Space.new
         host = sp.host( 'testhost' )
-        comps.each do |dep|
-          host.add( dep.new )
+        until comps.empty? do
+          dep_class = comps.shift
+          dep_class_opts = comps.first.is_a?( Hash ) ? comps.shift : {}
+          host.add( dep_class.new( dep_class_opts ) )
         end
         comp = comp_class.new( comp_class_opts )
         host.add( comp )

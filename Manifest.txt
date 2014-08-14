@@ -33,6 +33,8 @@ lib/syncwrap/shell.rb
 lib/syncwrap/version_support.rb
 lib/syncwrap/components/amazon_linux.rb
 lib/syncwrap/components/arch.rb
+lib/syncwrap/components/bundle.rb
+lib/syncwrap/components/bundler_gem.rb
 lib/syncwrap/components/centos.rb
 lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/cruby_vm.rb
@@ -47,9 +49,12 @@ lib/syncwrap/components/mdraid.rb
 lib/syncwrap/components/network.rb
 lib/syncwrap/components/open_jdk.rb
 lib/syncwrap/components/postgresql.rb
+lib/syncwrap/components/puma.rb
 lib/syncwrap/components/qpid.rb
+lib/syncwrap/components/rake_gem.rb
 lib/syncwrap/components/rhel.rb
 lib/syncwrap/components/run_user.rb
+lib/syncwrap/components/source_tree.rb
 lib/syncwrap/components/ubuntu.rb
 lib/syncwrap/components/users.rb
 sync/etc/gemrc
