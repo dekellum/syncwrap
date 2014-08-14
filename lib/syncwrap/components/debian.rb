@@ -16,61 +16,72 @@
 
 require 'syncwrap/component'
 require 'syncwrap/distro'
+require 'syncwrap/version_support'
 
 module SyncWrap
 
-  # Customizations for RedHat Enterprise Linux and derivatives like
-  # CentOS and Amazon Linux.  Specific distros/versions may further
-  # override these.
-  class RHEL < Component
+  # Customizations for \Debian and possibly other deb packaged
+  # derivatives. Specific distros/versions may further specialize.
+  class Debian < Component
     include SyncWrap::Distro
+    include SyncWrap::VersionSupport
 
-    # RHEL version, i.e. '6'. No default value.
-    attr_accessor :rhel_version
+    # Debian version, i.e. '7.6' No default value.
+    attr_accessor :debian_version
 
-    alias :distro_version :rhel_version
+    alias :distro_version :debian_version
 
     def initialize( opts = {} )
       super
     end
 
-    # Install the specified package names. A trailing hash is
-    # interpreted as options, see below.
+    # Install the specified package names. The first time this is
+    # applied to any given host, an "apt-get update" is issued as
+    # well.  A trailing hash is interpreted as options, see below.
     #
     # ==== Options
-    # :succeed:: Always succeed (useful for local rpm files which
-    #            might already be installed.)
+    # :minimal:: Eqv to --no-install-recommends
     #
     # Other options will be ignored.
-    def dist_install( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
+    def dist_install( *args )
+      opts = args.last.is_a?( Hash ) && args.pop || {}
+      args.unshift "--no-install-recommends" if opts[ :minimal ]
 
-      if opts[ :succeed ]
-        sudo "yum install -q -y #{pkgs.join( ' ' )} || true"
-      else
-        sudo "yum install -q -y #{pkgs.join( ' ' )}"
-      end
+      sudo( "apt-get -yqq update" ) if first_apt?
+      sudo( "apt-get -yq install #{args.join ' '}" )
     end
 
     # Uninstall the specified package names.
     def dist_uninstall( *pkgs )
-      sudo "yum remove -q -y #{pkgs.join( ' ' )}"
+      sudo "aptitude -yq purge #{pkgs.join ' '}"
     end
 
     # Install a System V style init.d service script
     def dist_install_init_service( name )
-      sudo "/sbin/chkconfig --add #{name}"
+      sudo "/usr/sbin/update-rc.d #{name} defaults"
     end
 
     # Enable the System V style init.d service
     def dist_enable_init_service( name )
-      sudo "/sbin/chkconfig #{name} on"
+      sudo "/usr/sbin/update-rc.d #{name} enable"
     end
 
     # Run via sudo, the service command typically supporting 'start',
     # 'stop', 'restart', 'status', etc. arguments.
     def dist_service( *args )
-      sudo( [ '/sbin/service', *args ].join( ' ' ) )
+      sudo( [ '/usr/sbin/service', *args ].join( ' ' ) )
+    end
+
+    protected
+
+    def first_apt?
+      s = state
+      if s[ :debian_apt_updated ]
+        false
+      else
+        s[ :debian_apt_updated ] = true
+        true
+      end
     end
 
   end

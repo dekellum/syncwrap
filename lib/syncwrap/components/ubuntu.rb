@@ -14,67 +14,26 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/component'
-require 'syncwrap/distro'
+require 'syncwrap/components/debian'
 
 module SyncWrap
 
-  # Customizations for \Ubuntu and possibly other Debian/apt packaged
-  # derivatives. Specific distros/versions may further specialize.
-  class Ubuntu < Component
-    include SyncWrap::Distro
+  # Customizations for \Ubuntu and derivatives. Specific
+  # distros/versions may further specialize.
+  class Ubuntu < Debian
 
-    def initialize( opts = {} )
-      super
-    end
+    # Ubuntu version, i.e. '14.04' or '12.04.4'. No default value.
+    attr_accessor :ubuntu_version
 
-    # Install the specified package names. The first time this is
-    # applied to any given host, an "apt-get update" is issued as
-    # well.  A trailing hash is interpreted as options, see below.
-    #
-    # ==== Options
-    # :minimal:: Eqv to --no-install-recommends
-    #
-    # Other options will be ignored.
-    def dist_install( *args )
-      opts = args.last.is_a?( Hash ) && args.pop || {}
-      args.unshift "--no-install-recommends" if opts[ :minimal ]
+    alias :distro_version :ubuntu_version
 
-      sudo( "apt-get -yqq update" ) if first_apt?
-      sudo( "apt-get -yq install #{args.join ' '}" )
-    end
-
-    # Uninstall the specified package names.
-    def dist_uninstall( *pkgs )
-      sudo "aptitude -yq purge #{pkgs.join ' '}"
-    end
-
-    # Install a System V style init.d service script
-    def dist_install_init_service( name )
-      sudo "/usr/sbin/update-rc.d #{name} defaults"
-    end
-
-    # Enable the System V style init.d service
-    def dist_enable_init_service( name )
-      sudo "/usr/sbin/update-rc.d #{name} enable"
-    end
-
-    # Run via sudo, the service command typically supporting 'start',
-    # 'stop', 'restart', 'status', etc. arguments.
-    def dist_service( *args )
-      sudo( [ '/usr/sbin/service', *args ].join( ' ' ) )
-    end
-
-    protected
-
-    def first_apt?
-      s = state
-      if s[ :ubuntu_apt_updated ]
-        false
-      else
-        s[ :ubuntu_apt_updated ] = true
-        true
-      end
+    # Return Debian#debian_version if specified, or provide comparable
+    # default Debian version if #ubuntu_vesion is specified. This is
+    # an approximation of the LTS lineage.
+    def debian_version
+      super ||
+        ( version_gte?( ubuntu_version, [14,4] ) && '7' ) ||
+        ( version_gte?( ubuntu_version, [12,4] ) && '6' )
     end
 
   end

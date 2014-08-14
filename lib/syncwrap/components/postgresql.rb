@@ -15,9 +15,12 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/version_support'
 
 # For distro class comparison only (pre-load for safety)
 require 'syncwrap/components/rhel'
+require 'syncwrap/components/amazon_linux'
+require 'syncwrap/components/debian'
 require 'syncwrap/components/ubuntu'
 
 module SyncWrap
@@ -25,17 +28,49 @@ module SyncWrap
   # Provisions for install and configuration of a \PostgreSQL server
   #
   # Host component dependencies: <Distro>
+  #
+  # Currently provided (sync/postgresql) configuration is \PostgreSQL
+  # 9.x compatible.  You will need to provide your own complete
+  # configuration for any other versions.
+  #
+  # Most distros provide reasonably updated \PostgreSQL 9.x in more
+  # recent releases:
+  #
+  # * RHEL, CentOS 6: 8.4
+  # * RHEL, CentOS 7: 9.2
+  # * AmazonLinux 2013.03: 8.4 and 9.2
+  # * Debian 7: 9.1
+  # * Ubuntu 14: 9.3
+  #
+  # The latest stable and beta packages can also be obtained via the
+  # \PostgreSQL {Yum Repo}[http://yum.postgresql.org] or
+  # {Apt Repo}[http://wiki.postgresql.org/wiki/Apt]. Create your own
+  # repo component to install these repo's, then configure the
+  # \PostgreSQL component accordingly for #pg_version,
+  # #pg_default_data_dir, #package_names.
+  #
   class PostgreSQL < Component
+    include VersionSupport
 
     # \PostgreSQL _MAJOR.MINOR_ version to install. Since there are
     # multiple versions in use even for _default_ system packages across
     # distros, this should be set the same as the version that will
-    # be installed via #package_names.  (Default: '9.1')
-    attr_accessor :version
+    # be installed via #package_names.
+    # (Default: guess based on distro/version or '9.1')
+    attr_writer :pg_version
 
-    # Return #version as an Array of Integer values
-    def version_a
-      @version.split('.').map( &:to_i )
+    def pg_version
+      ( @pg_version ||
+        ( case distro
+          when AmazonLinux
+            '9.2' if version_gte?( amazon_version, [2013,3] )
+          when RHEL
+            '9.2' if version_gte?( rhel_version, [7] )
+          when Ubuntu
+            '9.3' if version_gte?( ubuntu_version, [14,4] )
+          end
+          ) ||
+          '9.1' )
     end
 
     # Location of postgresql data (and possibly also config) directory.
@@ -48,38 +83,50 @@ module SyncWrap
 
     protected
 
+    # Deprecated
+    alias :version :pg_version
+
+    # Deprecated
+    alias :version= :pg_version=
+
+    protected :version, :version=
+
     # The _default_ data dir as used by the distro #package_names.
-    # (Default: as per RHEL or Ubuntu distro packages)
+    # (Default: as per RHEL/Debian package conventions)
     attr_writer :pg_default_data_dir
 
     def pg_default_data_dir
-      @pg_default_data_dir ||
-        case distro
-        when RHEL
-          '/var/lib/pgsql9/data'
-        when Ubuntu
-          "/var/lib/postgresql/#{version}/main"
-        else
-          raise ContextError, "Distro #{distro.class.name} not supported"
-        end
+      ( @pg_default_data_dir ||
+        ( case distro
+          when AmazonLinux
+            '/var/lib/pgsql9/data'
+          when RHEL
+            if version_lt?( rhel_version, [7] )
+              '/var/lib/pgsql9/data'
+            end
+          when Debian
+            "/var/lib/postgresql/#{pg_version}/main"
+          end ) ||
+        '/var/lib/pgsql/data' )
     end
 
     # Configuration in the '/etc' directory root?
-    # (Default: true on Ubuntu only, per distro package defaults)
+    # (Default: true on Debian only, per distro package conventions)
     attr_writer :pg_specify_etc_config
 
     def pg_specify_etc_config
-      @pg_specify_etc_config || distro.is_a?( Ubuntu )
+      @pg_specify_etc_config || distro.is_a?( Debian )
     end
 
     # The package names, including \PostgreSQL server of the
     # desired version to install.
-    # (Default: Ubuntu: postgresql-_version_; RHEL: postgresql-server)
+    # (Default: guess based on distro)
     attr_writer :package_names
 
     def package_names
       ( @package_names ||
-        ( distro.is_a?( Ubuntu ) && [ "postgresql-#{version}" ] ) ||
+        ( distro.is_a?( Debian ) && [ "postgresql-#{pg_version}" ] ) ||
+        ( distro.is_a?( AmazonLinux ) && [ "postgresql9-server" ] ) ||
         [ "postgresql-server" ] )
     end
 
@@ -141,13 +188,12 @@ module SyncWrap
 
     # Kernel SHMMAX (Shared Memory Maximum) setting to apply.
     # Note that PostgreSQL 9.3 uses mmap and should not need this.
-    # Currently this is only set on Ubuntu (RHEL packages take care of
-    # it?) (Default: 300MB if #version < 9.3)
+    # Currently this only set on Debian distros.
+    # (Default: 300MB if #pg_version < 9.3)
     attr_writer :shared_memory_max
 
     def shared_memory_max
-      @shared_memory_max ||
-        ( ( (version_a <=> [9,3]) < 0 ) && 300_000_000 )
+      @shared_memory_max || ( version_lt?(pg_version, [9,3]) && 300_000_000 )
     end
 
     def pg_config_dir
@@ -155,7 +201,7 @@ module SyncWrap
       when RHEL
         pg_data_dir
       when Ubuntu
-        "/etc/postgresql/#{version}/main"
+        "/etc/postgresql/#{pg_version}/main"
       else
         raise ContextError, "Distro #{distro.class.name} not supported"
       end
@@ -166,7 +212,7 @@ module SyncWrap
     def initialize( opts = {} )
       @pg_data_dir = nil
       @pg_default_data_dir = nil
-      @version = '9.1'
+      @pg_version = nil
       @package_names = nil
       @service_name = 'postgresql'
       @synchronous_commit = :on
@@ -201,12 +247,12 @@ module SyncWrap
       changes
     end
 
-    # Install the #package_names. In the Ubuntu case, also install any
+    # Install the #package_names. In the Debian case, also install any
     # #shared_memory_max adjustment and stops the server for subsequent
     # reconfigure or data relocation.
     def package_install
       dist_install( *package_names )
-      if distro.is_a?( Ubuntu )
+      if distro.is_a?( Debian )
         pg_stop
         if shared_memory_max
           rput( 'etc/sysctl.d/61-postgresql-shm.conf', user: :root )
@@ -235,7 +281,7 @@ module SyncWrap
           dist_service( service_name, 'initdb' )
         end
 
-      when Ubuntu
+      when Debian
         unless pg_data_dir == pg_default_data_dir
           sudo <<-SH
             mkdir -p #{pg_data_dir}
@@ -254,7 +300,7 @@ module SyncWrap
     # Update the \PostgreSQL configuration files
     def pg_configure
       files  = %w[ pg_hba.conf pg_ident.conf postgresql.conf ]
-      files += %w[ environment pg_ctl.conf ] if distro.is_a?( Ubuntu )
+      files += %w[ environment pg_ctl.conf ] if distro.is_a?( Debian )
       files  = files.map { |f| File.join( 'postgresql', f ) }
       rput( *files, pg_config_dir, user: 'postgres' )
     end

@@ -38,18 +38,18 @@
 # option or PGDATA environment variable, represented here as ConfigDir.
 
 <% if pg_specify_etc_config %>
-data_directory = '/var/lib/postgresql/<%= version %>/main'
+data_directory = '/var/lib/postgresql/<%= pg_version %>/main'
                                         # use data in another directory
                                         # (change requires restart)
-hba_file = '/etc/postgresql/<%= version %>/main/pg_hba.conf'
+hba_file = '/etc/postgresql/<%= pg_version %>/main/pg_hba.conf'
                                         # host-based authentication file
                                         # (change requires restart)
-ident_file = '/etc/postgresql/<%= version %>/main/pg_ident.conf'
+ident_file = '/etc/postgresql/<%= pg_version %>/main/pg_ident.conf'
                                         # ident configuration file
                                         # (change requires restart)
 
 # If external_pid_file is not explicitly set, no extra PID file is written.
-external_pid_file = '/var/run/postgresql/<%= version %>-main.pid'
+external_pid_file = '/var/run/postgresql/<%= pg_version %>-main.pid'
                                         # write an extra PID file
                                         # (change requires restart)
 <% else %>

@@ -17,7 +17,7 @@
 require 'syncwrap/component'
 
 # For distro class comparison only (pre-load for safety)
-require 'syncwrap/components/ubuntu'
+require 'syncwrap/components/debian'
 
 module SyncWrap
 
@@ -63,12 +63,14 @@ module SyncWrap
 
     def install_system_deps
       deps = %w[ make gcc ]
-      deps += if distro.is_a?( Ubuntu )
+      deps += case distro
+              when Debian
                 %w[ libapr1 libapr1-dev ]
-              else
+              when RHEL
                 %w[ apr apr-devel ]
+              else
+                %w[ apr ]
               end
-
       dist_install( *deps )
     end
 

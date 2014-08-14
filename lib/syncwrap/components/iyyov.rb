@@ -17,7 +17,7 @@
 require 'syncwrap/component'
 
 # For distro class comparison only (pre-load for safety)
-require 'syncwrap/components/ubuntu'
+require 'syncwrap/components/debian'
 
 module SyncWrap
 
@@ -138,7 +138,7 @@ module SyncWrap
     # Install iyyov daemon init.d script and add to init daemons
     def install_iyyov_init
       rput( 'etc/init.d/iyyov', user: :root,
-            erb_vars: { lsb: distro.kind_of?( Ubuntu ) } )
+            erb_vars: { lsb: distro.kind_of?( Debian ) } )
 
       # Add to init.d
       dist_install_init_service( 'iyyov' )

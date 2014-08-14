@@ -156,9 +156,8 @@ module SyncWrap
     end
 
     def set_sudoers( user )
-      #FIXME: make this a template?
       #FIXME: Use local_root for secure_path? (Order issue)
-      #Relax, less overrides needed for Ubuntu?
+
       sudo <<-SH
         echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
         echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}

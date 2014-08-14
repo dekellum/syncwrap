@@ -17,6 +17,7 @@
 require 'syncwrap/component'
 require 'syncwrap/components/rhel'
 require 'syncwrap/ruby_support'
+require 'syncwrap/version_support'
 
 module SyncWrap
 
@@ -40,6 +41,7 @@ module SyncWrap
   # development however. Again you are currently on your own (beyond
   # RubySupport) if you wish to go this route.
   class CRubyVM < Component
+    include VersionSupport
     include RubySupport
 
     # The ruby version to install, as it appears in source packages
@@ -69,11 +71,6 @@ module SyncWrap
 
     def ruby_command
       "#{local_root}/bin/ruby"
-    end
-
-    # Return ruby_version as an array of Integer values
-    def ruby_version_a
-      ruby_version.split( /[.\-p]+/ ).map( &:to_i )
     end
 
     # If the current ruby_command is not at the desired ruby_version,
@@ -111,7 +108,7 @@ module SyncWrap
     end
 
     def version_pattern
-      if ( ruby_version_a <=> [2,1] ) > 0
+      if version_gte?( ruby_version, [2,1] )
         # Starting with 2.1.x, the p# (patch number) is no longer used
         # for download, won't be in ruby_version, and shouldn't be
         # used for version comparison.

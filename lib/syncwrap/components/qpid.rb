@@ -20,7 +20,7 @@ require 'syncwrap/components/rhel'
 module SyncWrap
 
   # Qpid AMQP broker provisioning. Currently this is RHEL (CentoOS,
-  # Amazon Linux) centric; it has not been ported to Debian/Ubuntu.
+  # Amazon Linux) centric; it has not been ported to Debian.
   #
   # Host component dependencies: RHEL
   class Qpid < Component

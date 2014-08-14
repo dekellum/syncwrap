@@ -15,9 +15,13 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/version_support'
 
+# For distro class comparison only (pre-load for safety)
+require 'syncwrap/components/debian'
 require 'syncwrap/components/ubuntu'
 require 'syncwrap/components/rhel'
+require 'syncwrap/components/amazon_linux'
 
 module SyncWrap
 
@@ -26,6 +30,7 @@ module SyncWrap
   #
   # Host component dependencies: <Distro>
   class Network < Component
+    include VersionSupport
 
     # A dns search list (a single domain or space delimited list of
     # domains) for addition to the resolv.conf search option,
@@ -47,27 +52,38 @@ module SyncWrap
 
     def update_hostname
       name = host.name
-
-      case distro
-      when RHEL
-        # If HOSTNAME not already set correctly in network file,
-        # backup, delete old line, append new line.
-        sudo <<-SH
-          if ! grep -q '^HOSTNAME=#{name}$' /etc/sysconfig/network; then
-            cp -f /etc/sysconfig/network /etc/sysconfig/network~
-            sed -i '/^HOSTNAME=.*/d' /etc/sysconfig/network
-            echo 'HOSTNAME=#{name}' >> /etc/sysconfig/network
-            hostname #{name}
-          fi
-        SH
-      when Ubuntu
-        sudo <<-SH
-          if [ ! -e /etc/hostname -o "$(< /etc/hostname)" != "#{name}" ]; then
-            echo #{name} > /etc/hostname
-            hostname #{name}
-          fi
-        SH
+      if ( distro.is_a?( AmazonLinux ) ||
+           ( distro.is_a?( RHEL ) && version_lt?( rhel_version, [7] ) ) )
+        set_sysconfig_network( name )
+      else
+        set_etc_hostname( name )
       end
+    end
+
+    # Test if change to etc/hostname is needed. If so also immediately
+    # set (in kernel) hostname.
+    def set_etc_hostname( name )
+      sudo <<-SH
+        if [ ! -e /etc/hostname -o "$(< /etc/hostname)" != "#{name}" ]; then
+          echo #{name} > /etc/hostname
+          hostname #{name}
+        fi
+      SH
+    end
+
+    # Test if change to etc/sysconfig/network is needed. If so also
+    # immediately set (in kernel) hostname.
+    def set_sysconfig_network( name )
+      # If not already set correctly, backup, delete old line, append
+      # new line.
+      sudo <<-SH
+        if ! grep -q '^HOSTNAME=#{name}$' /etc/sysconfig/network; then
+          cp -f /etc/sysconfig/network /etc/sysconfig/network~
+          sed -i '/^HOSTNAME=.*/d' /etc/sysconfig/network
+          echo 'HOSTNAME=#{name}' >> /etc/sysconfig/network
+          hostname #{name}
+        fi
+      SH
     end
 
     def update_resolver
@@ -85,10 +101,14 @@ module SyncWrap
             fi
           SH
 
-        when Ubuntu
-          # As of 12.04 - Precise; /etc/resolv.conf is a symlink that
-          # should not be lost.
-          update_resolv_conf( '/run/resolvconf/resolv.conf' )
+        when Debian
+          if distro.is_a?( Ubuntu )
+            # As of 12.04 - Precise; /etc/resolv.conf is a symlink that
+            # should not be lost.
+            update_resolv_conf( '/run/resolvconf/resolv.conf' )
+          else
+            update_resolv_conf
+          end
 
           f='/etc/network/interfaces'
           sudo <<-SH
