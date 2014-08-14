@@ -17,10 +17,10 @@
 require 'syncwrap/component'
 require 'syncwrap/distro'
 
-module DevEnv
+module SyncWrap
 
   # \Arch Linux distro, partial implementation for pacman.
-  class Arch < SyncWrap::Component
+  class Arch < Component
     include SyncWrap::Distro
 
     def dist_install( *pkgs )

@@ -79,11 +79,15 @@ examples directory and LAYOUT.
 
 == Components
 
-Components implementing SyncWrap::Distro, to expose common utility
-methods like dist_install:
+Component hierarchy implementing SyncWrap::Distro, for common methods
+like dist_install and other distribution-specific behaviors:
 
-* SyncWrap::RHEL (also supports CentOS, Amazon Linux)
-* SyncWrap::Ubuntu
+* SyncWrap::Arch (limited support)
+* SyncWrap::Debian
+  * SyncWrap::Ubuntu
+* SyncWrap::RHEL
+  * SyncWrap::CentOS
+  * SyncWrap::AmazonLinux
 
 Components implementing \#install:
 
