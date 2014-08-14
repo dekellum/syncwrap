@@ -200,7 +200,7 @@ module SyncWrap
       case distro
       when RHEL
         pg_data_dir
-      when Ubuntu
+      when Debian
         "/etc/postgresql/#{pg_version}/main"
       else
         raise ContextError, "Distro #{distro.class.name} not supported"
