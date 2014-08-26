@@ -359,6 +359,7 @@ module SyncWrap
 
   autoload :AmazonLinux,   'syncwrap/components/amazon_linux'
   autoload :Bundle,        'syncwrap/components/bundle'
+  autoload :BundledIyyovDaemon, 'syncwrap/components/bundled_iyyov_daemon'
   autoload :BundlerGem,    'syncwrap/components/bundler_gem'
   autoload :Arch,          'syncwrap/components/arch'
   autoload :CentOS,        'syncwrap/components/centos'
