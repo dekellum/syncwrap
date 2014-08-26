@@ -57,9 +57,10 @@ module SyncWrap
     #              '~> 1.1'
     #              ['>=1.0', '<1.2']
     #
-    # :user_install:: If true, perform a --user-install as the current
-    #                 user.  Otherwise system install with sudo (the
-    #                 default, false).
+    # :user_install:: Perform a --user-install if true, as the
+    #                 indicated user if a String or as the login user.
+    #                 Otherwise system install with sudo (the default,
+    #                 false).
     #
     # :check:: If true, capture output and return the number of gems
     #          actually installed.  Combine with :minimize to only
@@ -85,7 +86,14 @@ module SyncWrap
               gem_version_flags( opts[ :version ] ),
               gem ].flatten.compact.join( ' ' )
 
-      shopts = opts[ :user_install ] ? {} : {user: :root}
+      shopts = {}
+
+      case opts[ :user_install ]
+      when String
+        shopts[ :user ] = opts[ :user_install ]
+      when nil, false
+        shopts[ :user ] = :root
+      end
 
       clean_env( opts[ :user_install ] ) do
         if opts[ :check ]
