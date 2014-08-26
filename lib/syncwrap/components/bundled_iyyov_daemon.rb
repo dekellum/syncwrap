@@ -33,11 +33,11 @@ module SyncWrap
 
     protected
 
-    # The daemon process name. (Default: SourceTree#source_dir)
+    # The daemon process name. (Default: SourceTree#remote_dir)
     attr_writer :name
 
     def name
-      @name || source_dir
+      @name || remote_dir
     end
 
     # An optional secondary instance name, useful if running more than

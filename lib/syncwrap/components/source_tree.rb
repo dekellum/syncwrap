@@ -38,12 +38,19 @@ module SyncWrap
     # Source directory name (required)
     attr_accessor :source_dir
 
-    # Remote path to the root directory in which #source_dir should be
+    # Remote path to the root directory in which #remote_dir should be
     # installed. (Default: RunUser#run_dir)
     attr_writer :remote_source_root
 
     def remote_source_root
       @remote_source_root || run_dir
+    end
+
+    # Remote directory name (Default: #source_dir)
+    attr_writer :remote_dir
+
+    def remote_dir
+      @remote_dir || source_dir
     end
 
     protected
@@ -70,6 +77,7 @@ module SyncWrap
       clr = opts.delete(:caller) || caller
       @local_source_root = path_relative_to_caller( '..', clr )
       @source_dir = nil
+      @remote_dir = nil
       @remote_source_root = nil
       @require_clean = true
       @rput_options = {}
@@ -80,7 +88,7 @@ module SyncWrap
     end
 
     def remote_source_path
-      File.join( remote_source_root, source_dir )
+      File.join( remote_source_root, remote_dir )
     end
 
     def install
@@ -107,7 +115,7 @@ module SyncWrap
                user: run_user,
                sync_paths: [ local_source_root ] }.
         merge( rput_options )
-      rput( source_dir, remote_source_root, opts )
+      rput( source_dir + '/', remote_source_path, opts )
     end
 
   end
