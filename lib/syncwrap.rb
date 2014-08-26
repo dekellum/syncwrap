@@ -383,6 +383,7 @@ module SyncWrap
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
   autoload :SourceTree,    'syncwrap/components/source_tree'
+  autoload :TarpitGem,     'syncwrap/components/tarpit_gem'
   autoload :Ubuntu,        'syncwrap/components/ubuntu'
   autoload :Users,         'syncwrap/components/users'
 

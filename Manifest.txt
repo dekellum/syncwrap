@@ -56,6 +56,7 @@ lib/syncwrap/components/rake_gem.rb
 lib/syncwrap/components/rhel.rb
 lib/syncwrap/components/run_user.rb
 lib/syncwrap/components/source_tree.rb
+lib/syncwrap/components/tarpit_gem.rb
 lib/syncwrap/components/ubuntu.rb
 lib/syncwrap/components/users.rb
 sync/etc/gemrc

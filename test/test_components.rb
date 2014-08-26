@@ -75,6 +75,8 @@ module SyncWrap
       [ CentOS, QpidRepo, qpid_prebuild_repo: 'http://localhost' ],
       [ RHEL ],
       [ RunUser ],
+      [ RHEL,  CRubyVM, TarpitGem ],
+      [ RHEL,  JRubyVM, TarpitGem ],
       [ Users, home_users: [ 'bob' ] ] ]
 
   # Test overrides to standard Context.
