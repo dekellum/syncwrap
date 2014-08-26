@@ -20,7 +20,7 @@ module SyncWrap
 
   # Provision for the rjack-tarpit rubygem
   #
-  # Host component dependencies: <ruby>
+  # Host component dependencies: RunUser?, <ruby>
   #
   class TarpitGem < Component
 
@@ -29,7 +29,7 @@ module SyncWrap
 
     protected
 
-    # Perform a user_install? (Default: false)
+    # Perform a user_install as the run_user? (Default: false)
     attr_writer :user_install
 
     def user_install?
@@ -45,7 +45,7 @@ module SyncWrap
     end
 
     def install
-      opts = { version: tarpit_version, user_install: user_install? }
+      opts = { version: tarpit_version, user_install: user_install? && run_user }
 
       # tarpit depends on rake, etc., so use format_executable even
       # though tarpit doesn't have any bin scripts

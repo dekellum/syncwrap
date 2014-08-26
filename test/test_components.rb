@@ -77,6 +77,7 @@ module SyncWrap
       [ RunUser ],
       [ RHEL,  CRubyVM, TarpitGem ],
       [ RHEL,  JRubyVM, TarpitGem ],
+      [ RHEL, RunUser, JRubyVM, TarpitGem, user_install: true ],
       [ Users, home_users: [ 'bob' ] ] ]
 
   # Test overrides to standard Context.
