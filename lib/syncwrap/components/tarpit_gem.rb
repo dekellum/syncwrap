@@ -27,13 +27,25 @@ module SyncWrap
     # Tarpit version to install (Default: 1.1.0)
     attr_accessor :tarpit_version
 
+    protected
+
+    # Perform a user_install? (Default: false)
+    attr_writer :user_install
+
+    def user_install?
+      @user_install
+    end
+
+    public
+
     def initialize( opts = {} )
       @tarpit_version = '2.1.0'
+      @user_install = false
       super
     end
 
     def install
-      opts = { version: tarpit_version }
+      opts = { version: tarpit_version, user_install: user_install? }
 
       # tarpit depends on rake, etc., so use format_executable even
       # though tarpit doesn't have any bin scripts
