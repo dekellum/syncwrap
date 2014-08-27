@@ -132,7 +132,7 @@ module SyncWrap
 
     def pumactl_command
       if puma_version
-        [ ruby_command, '-S', 'puma', "_#{puma_version}_" ]
+        [ ruby_command, '-S', 'pumactl', "_#{puma_version}_" ]
       else
         [ "bin/pumactl" ]
       end
