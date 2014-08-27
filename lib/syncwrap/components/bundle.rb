@@ -23,8 +23,7 @@ module SyncWrap
 
   # Provision to `bundle install`, optionally triggered by a state change key.
   #
-  # Host component dependencies: RunUser, BundlerGem
-  #
+  # Host component dependencies: RunUser?, SourceTree?, BundlerGem
   class Bundle < Component
     include PathUtil
 
@@ -36,6 +35,14 @@ module SyncWrap
       @bundle_path || remote_source_path
     end
 
+    # The path to install bin stubs, if any. If relative, it is
+    # relative to #bundle_path.
+    # (Default: sbin; directory in #bundle_path)
+    # The default is purposefully not 'bin', so as to avoid clashes
+    # with source trees that already have a 'bin', for example that
+    # contain gem source as well.
+    attr_accessor :bundle_install_bin_stubs
+
     protected
 
     # An optional state key to check, indicating changes requiring
@@ -46,12 +53,28 @@ module SyncWrap
     # (Default: {} -> none)
     attr_accessor :bundle_install_env
 
+    # User to perform the bundle install
+    # (Default: RunUser#run_user)
+    attr_writer :bundle_install_user
+
+    def bundle_install_user
+      @bundle_install_user || run_user
+    end
+
+    # The path to bundle install dependencies. If relative, it is
+    # relative to #bundle_path.
+    # (Default: ~/.gem -> the #bundle_install_user gems)
+    attr_accessor :bundle_install_path
+
     public
 
     def initialize( opts = {} )
       @change_key = nil
       @bundle_path = nil
       @bundle_install_env = {}
+      @bundle_install_path = '~/.gem'
+      @bundle_install_user = nil
+      @bundle_install_bin_stubs = 'sbin'
       super
     end
 
@@ -60,15 +83,24 @@ module SyncWrap
     end
 
     def bundle_install
-      rudo( "( cd #{bundle_path}", close: ')' ) do
-        rudo( "#{bundle_preamble} #{bundle_command} _#{bundler_version}_ " +
-              "install --path ~/.gem --binstubs ./bin" )
+      sh( "( cd #{bundle_path}", close: ')', user: bundle_install_user ) do
+        cmd = [ preamble, bundle_command, '_' + bundler_version + '_', 'install' ]
+
+        if bundle_install_path
+          cmd += [ '--path', bundle_install_path ]
+        end
+
+        if bundle_install_bin_stubs
+          cmd += [ '--binstubs', bundle_install_bin_stubs ]
+        end
+
+        sh( cmd.join(' '), user: bundle_install_user )
       end
     end
 
     protected
 
-    def bundle_preamble
+    def preamble
       setters = bundle_install_env.map do |k,v|
         k.to_s + '="' + v.gsub( /["\\]/ ) { |c| '\\' + c } + '"'
       end

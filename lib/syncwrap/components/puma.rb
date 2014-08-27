@@ -126,7 +126,7 @@ module SyncWrap
       if puma_version
         [ ruby_command, '-S', 'puma', "_#{puma_version}_" ]
       else
-        [ "bin/puma" ]
+        [ "#{bundle_install_bin_stubs}/puma" ]
       end
     end
 
@@ -134,7 +134,7 @@ module SyncWrap
       if puma_version
         [ ruby_command, '-S', 'pumactl', "_#{puma_version}_" ]
       else
-        [ "bin/pumactl" ]
+        [ "#{bundle_install_bin_stubs}/pumactl" ]
       end
     end
 
