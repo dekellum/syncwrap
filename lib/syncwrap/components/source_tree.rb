@@ -84,6 +84,7 @@ module SyncWrap
     end
 
     def install
+      chown_run_user( remote_source_path )
       changes = sync_source
       on_change( changes ) unless changes.empty?
       changes
