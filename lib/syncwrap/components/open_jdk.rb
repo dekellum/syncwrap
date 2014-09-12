@@ -75,7 +75,7 @@ module SyncWrap
       when Debian
         dist_install( "openjdk-#{jdk_major_minor}-jdk" )
       when Arch
-        dist_install( 'jdk7-openjdk' )
+        dist_install( "jdk#{jdk_major_minor}-openjdk" )
       else
         raise ContextError, "Unknown distro type"
       end
