@@ -1,4 +1,32 @@
 === 2.3.0 (TBD)
+* Add SyncWrap::Debian (with Ubuntu as child), SyncWrap::CentOS and
+  SyncWrap::AmazonLinux (with RHEL as parent) to form a Distro
+  hierarchy with various version properties. Extends distribution
+  support and enables better distro-specific defaults (for example in
+  PostgreSQL).
+* Add Debian Network and PostgreSQL support
+* SyncWrap::OpenJDK notes on Debian JDK bloat from X11
+* Add preliminary (dev environment) support for SyncWrap::Arch Linux,
+  including support in OpenJDK and Hashdot.
+* Add SyncWrap::SourceTree and SyncWrap::Bundle components
+* Add SyncWrap::Puma component
+* Add SyncWrap::BundlerGem, SyncWrap::RakeGem, SyncWrap::TarpitGem
+  components
+* Add SyncWrap::BundledIyyovDaemon for Iyyov support for bundled Iyyov
+  daemons
+* Fix JRubyVM#gem_install version check
+* Add RubySupport#gem_install support for user_install as specific
+  user.
+* Protect various component accessors which should not be visible at
+  the Context level.
+* The SyncWrap::PostgreSQL#version deprecated/aliased in favor of
+  SyncWrap::PostgreSQL#pg_version
+* SyncWrap::RunUser#make_dir deprecated/aliased in favor of
+  SyncWrap::RunUser#mkdir_run_user
+* Introduce SyncWrap::VersionSupport and use for array-version
+  comparisons
+* Add TestComponents bash validate assertions, and random permutation
+  for changes
 
 === 2.2.0 (2014-7-13)
 * New SyncWrap::Component#sh :pipefail option to pass bash flag "-o
