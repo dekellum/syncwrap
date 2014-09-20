@@ -63,7 +63,8 @@ module SyncWrap
       @require_clean
     end
 
-    # The state key to set to if there are any changes to the tree
+    # The state key (or Array of keys) to set to if there are any
+    # changes to the tree
     # (Default: :source_tree)
     attr_accessor :change_key
 
@@ -105,7 +106,12 @@ module SyncWrap
     end
 
     def on_change( changes )
-      state[ change_key ] = changes unless change_key.nil? || changes.empty?
+      unless changes.empty? || change_key.nil?
+        Array(change_key).each do |key|
+          state[ key ] ||= []
+          state[ key ] += changes
+        end
+      end
     end
 
     def sync_source
