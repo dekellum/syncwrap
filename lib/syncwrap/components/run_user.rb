@@ -73,7 +73,7 @@ module SyncWrap
     # Create and set owner/permission of run_dir, such that run_user may
     # create new directories there.
     def create_run_dir
-      make_dir( run_dir )
+      mkdir_run_user( run_dir )
     end
 
     def service_dir( sname, instance = nil )
@@ -84,14 +84,18 @@ module SyncWrap
     # run_dir.
     def create_service_dir( sname, instance = nil )
       sdir = service_dir( sname, instance )
-      make_dir( sdir )
+      mkdir_run_user( sdir )
     end
 
-    def make_dir( dir )
+    # Make dir including parents, chown to run_user and chmod 775.
+    def mkdir_run_user( dir )
       sudo "mkdir -p #{dir}"
       chown_run_user dir
       sudo "chmod 775 #{dir}"
     end
+
+    # Deprecated
+    alias make_dir mkdir_run_user
 
     # Chown to user:run_group where args may be flags and files/directories.
     def chown_run_user( *args )

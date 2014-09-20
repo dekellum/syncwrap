@@ -93,7 +93,7 @@ module SyncWrap
     end
 
     def install
-      make_dir( remote_source_path )
+      mkdir_run_user( remote_source_path )
       changes = sync_source
       on_change( changes ) unless changes.empty?
       changes
