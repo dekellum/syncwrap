@@ -19,9 +19,8 @@ require 'syncwrap/distro'
 
 module SyncWrap
 
-  # Customizations for RedHat Enterprise Linux and derivatives like
-  # CentOS and Amazon Linux.  Specific distros/versions may further
-  # override these.
+  # Customizations for RedHat Enterprise Linux and base class for
+  # derivatives like CentOS and AmazonLinux.
   class RHEL < Component
     include SyncWrap::Distro
 

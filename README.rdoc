@@ -108,7 +108,8 @@ Components implementing \#install:
 
 * SyncWrap::JRubyVM and/or SyncWrap::CRubyVM (MRI, from source)
 
-* SyncWrap::BundlerGem and SyncWrap::RakeGem - base Rubygems
+* SyncWrap::BundlerGem, SyncWrap::RakeGem, SyncWrap::TarpitGem - base
+  (pre-bundle) Rubygems
 
 * SyncWrap::SourceTree, SyncWrap::Bundle
 

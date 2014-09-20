@@ -47,8 +47,9 @@ module SyncWrap
     def install
       opts = { version: tarpit_version, user_install: user_install? && run_user }
 
-      # tarpit depends on rake, etc., so use format_executable even
-      # though tarpit doesn't have any bin scripts
+      # tarpit depends on rake, etc. which could be installed with it,
+      # so use format_executable even though tarpit doesn't have any
+      # bin scripts
       opts[ :format_executable ] = true if ruby_command == 'jruby'
 
       gem_install( 'rjack-tarpit', opts )
