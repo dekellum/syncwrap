@@ -48,6 +48,9 @@ module SyncWrap
       [ AmazonLinux, RunUser, CRubyVM, BundlerGem,
         SourceTree, { source_dir: 'lib', require_clean: false },
         Bundle ],
+      [ Ubuntu, RunUser, JRubyVM, BundlerGem, Iyyov,
+        SourceTree, { source_dir: 'lib', require_clean: false },
+        Bundle, BundledIyyovDaemon ],
       [ Ubuntu, RunUser, CRubyVM, BundlerGem, Puma,
         puma_version: '2.9.0', rack_path: File.expand_path( '../../lib', __FILE__ ) ],
       [ RHEL, RunUser, JRubyVM, BundlerGem,
@@ -72,6 +75,9 @@ module SyncWrap
       [ CentOS, QpidRepo, qpid_prebuild_repo: 'http://localhost' ],
       [ RHEL ],
       [ RunUser ],
+      [ RHEL,  CRubyVM, TarpitGem ],
+      [ RHEL,  JRubyVM, TarpitGem ],
+      [ RHEL, RunUser, JRubyVM, TarpitGem, user_install: true ],
       [ Users, home_users: [ 'bob' ] ] ]
 
   # Test overrides to standard Context.

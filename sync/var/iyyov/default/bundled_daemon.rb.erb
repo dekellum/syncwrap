@@ -1,0 +1,31 @@
+Iyyov.context do |c|
+
+  c.define_daemon do |d|
+    d.name     = "<%= name %>"
+<% if instance %>
+    d.instance = "<%= instance %>"
+<% end %>
+    d.exe_path = "<%= exe_path %>"
+    d.log_rotate
+
+    def d.start
+      epath = File.expand_path( exe_path, run_dir )
+      eargs = args.map { |a| a.to_s.strip }.compact
+      @log.info { ( [ "starting", epath ] + eargs ).join(' ') }
+      Dir.chdir( run_dir ) do
+        system( "<%= bundle_command %>",
+                'exec',
+                exe_path,
+                *eargs ) or raise( Iyyov::DaemonFailed, "Start failed with #{$?}" )
+      end
+      @state = :up
+      true
+    rescue Iyyov::DaemonFailed, Errno::ENOENT => e
+      @log.error( "On exec", e )
+      @state = :failed
+      false
+    end
+
+  end
+
+end

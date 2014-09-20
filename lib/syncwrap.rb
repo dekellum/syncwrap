@@ -359,6 +359,7 @@ module SyncWrap
 
   autoload :AmazonLinux,   'syncwrap/components/amazon_linux'
   autoload :Bundle,        'syncwrap/components/bundle'
+  autoload :BundledIyyovDaemon, 'syncwrap/components/bundled_iyyov_daemon'
   autoload :BundlerGem,    'syncwrap/components/bundler_gem'
   autoload :Arch,          'syncwrap/components/arch'
   autoload :CentOS,        'syncwrap/components/centos'
@@ -382,6 +383,7 @@ module SyncWrap
   autoload :RHEL,          'syncwrap/components/rhel'
   autoload :RunUser,       'syncwrap/components/run_user'
   autoload :SourceTree,    'syncwrap/components/source_tree'
+  autoload :TarpitGem,     'syncwrap/components/tarpit_gem'
   autoload :Ubuntu,        'syncwrap/components/ubuntu'
   autoload :Users,         'syncwrap/components/users'
 

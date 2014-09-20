@@ -34,6 +34,7 @@ lib/syncwrap/version_support.rb
 lib/syncwrap/components/amazon_linux.rb
 lib/syncwrap/components/arch.rb
 lib/syncwrap/components/bundle.rb
+lib/syncwrap/components/bundled_iyyov_daemon.rb
 lib/syncwrap/components/bundler_gem.rb
 lib/syncwrap/components/centos.rb
 lib/syncwrap/components/commercial_jdk.rb
@@ -55,6 +56,7 @@ lib/syncwrap/components/rake_gem.rb
 lib/syncwrap/components/rhel.rb
 lib/syncwrap/components/run_user.rb
 lib/syncwrap/components/source_tree.rb
+lib/syncwrap/components/tarpit_gem.rb
 lib/syncwrap/components/ubuntu.rb
 lib/syncwrap/components/users.rb
 sync/etc/gemrc
@@ -80,6 +82,7 @@ sync/src/hashdot/profiles/jruby.hdp.erb
 sync/src/hashdot/profiles/shortlived.hdp
 sync/usr/local/etc/qpidd.conf
 sync/var/iyyov/jobs.rb.erb
+sync/var/iyyov/default/bundled_daemon.rb.erb
 sync/var/iyyov/default/config.rb
 sync/var/iyyov/default/daemon.rb.erb
 test/muddled_sync.rb
