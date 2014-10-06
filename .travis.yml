@@ -1,4 +1,5 @@
 language: ruby
+before_script: "unset rvm_debug"
 before_install: "gem install rjack-tarpit -v'~>2.1' || \
       ( sleep 1; gem install rjack-tarpit -v'~>2.1' ) || \
       ( sleep 5; gem install rjack-tarpit -v'~>2.1' )"
