@@ -252,7 +252,7 @@ class TestShell < MiniTest::Unit::TestCase
     cmd = ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v, user: :root )
     exit_code, outputs = capture3( cmd )
     assert_equal( 0, exit_code )
-    assert_equal( [ [:err, "echo foo\n"],
+    assert_equal( [ [:err, "cd /\necho foo\n"],
                     [:out, "foo\n" ] ],
                   outputs.sort ) #order uncertain
   end
@@ -268,7 +268,7 @@ class TestShell < MiniTest::Unit::TestCase
       unmerged << [ stream, chunk ]
     end
     assert_equal( 0, exit_code )
-    assert_equal( [[:err, "echo foo\nfoo\necho bar\nbar\n"]],
+    assert_equal( [[:err, "cd /\necho foo\nfoo\necho bar\nbar\n"]],
                   merged, merged )
     post_merged = unmerged.map {|s,c| c}.inject( "", :+ )
     assert_equal( merged[0][1], post_merged )
