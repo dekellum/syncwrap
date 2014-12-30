@@ -252,9 +252,10 @@ class TestShell < MiniTest::Unit::TestCase
     cmd = ssh_args( SAFE_SSH, 'echo foo', sh_verbose: :v, user: :root )
     exit_code, outputs = capture3( cmd )
     assert_equal( 0, exit_code )
-    assert_equal( [ [:err, "cd /\necho foo\n"],
-                    [:out, "foo\n" ] ],
-                  outputs.sort ) #order uncertain
+    assert_equal( "cd /\necho foo\n",
+                  collect_stream( :err, outputs ) )
+    assert_equal( "foo\n",
+                  collect_stream( :out, outputs ) )
   end
 
   def test_ssh_sudo_coalesce
