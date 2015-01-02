@@ -1,4 +1,7 @@
 === 2.3.1 (TBD)
+* Upgrade SyncWrap::CRubyVM default version to 2.1.5 and add libffi as
+  build dependency.
+* Upgrade SyncWrap::JRubyVM default version to 1.7.17
 
 === 2.3.0 (2014-9-20)
 * Add SyncWrap::Debian (with Ubuntu as child), SyncWrap::CentOS and
