@@ -2,6 +2,13 @@
 * Upgrade SyncWrap::CRubyVM default version to 2.1.5 and add libffi as
   build dependency.
 * Upgrade SyncWrap::JRubyVM default version to 1.7.17
+* When using the sh :user option which uses `sudo` on the remote, add
+  a `cd /` to the start of the shell command sequence. Prior to this
+  change, the working directory remained the home directory of the ssh
+  user (by convention, a dev. user) which shouldn't be writable and
+  might not even by readable by the target :user (ex: runr). This
+  caused often cryptic warnings or even fatal errors when accessing
+  certain command line tools from the shell.
 
 === 2.3.0 (2014-9-20)
 * Add SyncWrap::Debian (with Ubuntu as child), SyncWrap::CentOS and
