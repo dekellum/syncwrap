@@ -9,7 +9,7 @@ rvm:
   - 2.0.0
   - ruby-head
   - rbx
-  - jruby-1.7.16
+  - jruby-1.7.17
 script: "bundle exec rake test"
 matrix:
   allow_failures:
