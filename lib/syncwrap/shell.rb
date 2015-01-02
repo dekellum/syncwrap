@@ -102,6 +102,7 @@ module SyncWrap
         if opts[ :sh_verbose ]
           cmd << "set " << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' ) << "\n"
         end
+        cmd << "cd /\n" if opts[:user]
         cmd << command_lines_cleanup( command )
         args << cmd
       else
@@ -109,7 +110,10 @@ module SyncWrap
           args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
         end
         args << '-c'
-        args << command_lines_cleanup( command )
+        cmd = ""
+        cmd << "cd /\n" if opts[:user]
+        cmd << command_lines_cleanup( command )
+        args << cmd
       end
       args
     end
