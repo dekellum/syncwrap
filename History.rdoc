@@ -1,4 +1,4 @@
-=== 2.4.0 (TBD)
+=== 2.4.0 (2015-1-2)
 * Upgrade SyncWrap::CRubyVM default version to 2.1.5 and add libffi as
   build dependency.
 * Upgrade SyncWrap::JRubyVM default version to 1.7.17
