@@ -21,7 +21,7 @@ module SyncWrap
   # Customizations for Amazon Linux.
   class AmazonLinux < RHEL
 
-    # Amazon Linux version, i.e. '2014.03.2'. No default value.
+    # Amazon Linux version, i.e. '2014.09.1'. No default value.
     attr_accessor :amazon_version
 
     alias :distro_version :amazon_version
