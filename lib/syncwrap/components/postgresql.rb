@@ -38,7 +38,8 @@ module SyncWrap
   #
   # * RHEL, CentOS 6: 8.4
   # * RHEL, CentOS 7: 9.2
-  # * AmazonLinux 2013.03: 8.4 and 9.2
+  # * AmazonLinux 2013.03: 8.4 9.2
+  # * AmazonLinux 2014.09: 8.4 9.2 9.3
   # * Debian 7: 9.1
   # * Ubuntu 14: 9.3
   #
@@ -126,7 +127,9 @@ module SyncWrap
     def package_names
       ( @package_names ||
         ( distro.is_a?( Debian ) && [ "postgresql-#{pg_version}" ] ) ||
-        ( distro.is_a?( AmazonLinux ) && [ "postgresql9-server" ] ) ||
+        ( distro.is_a?( AmazonLinux ) &&
+          ( ( version_gte?( amazon_version, [2014,9] ) && [ "postgresql92-server" ] ) ||
+            [ "postgresql9-server" ] ) ) ||
         [ "postgresql-server" ] )
     end
 

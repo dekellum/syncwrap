@@ -27,7 +27,7 @@
 # Memory units:  kB = kilobytes        Time units:  ms  = milliseconds
 #                MB = megabytes                     s   = seconds
 #                GB = gigabytes                     min = minutes
-#                                                   h   = hours
+#                TB = terabytes                     h   = hours
 #                                                   d   = days
 
 #------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ max_connections = 100                   # (change requires restart)
 #superuser_reserved_connections = 3     # (change requires restart)
 #unix_socket_directory = '/var/run/postgresql' # < 9.3
 #unix_socket_directories = '/var/run/postgresql, /tmp'
-                                        # comma-separated list of directories (9.3)
+                                        # comma-separated list of directories (9.3+)
                                         # (change requires restart)
 #unix_socket_group = ''                 # (change requires restart)
 #unix_socket_permissions = 0777         # begin with 0 to use octal notation
@@ -101,8 +101,10 @@ max_connections = 100                   # (change requires restart)
 
 #authentication_timeout = 1min          # 1s-600s
 #ssl = off                              # (change requires restart)
-#ssl_ciphers = 'DEFAULT:!LOW:!EXP:!MD5:@STRENGTH'       # allowed SSL ciphers
+#ssl_ciphers = 'HIGH:MEDIUM:+3DES:!aNULL' # allowed SSL ciphers
                                         # (change requires restart)
+#ssl_prefer_server_ciphers = on         # (change requires restart) (9.4+)
+#ssl_ecdh_curve = 'prime256v1'          # (change requires restart) (9.4+)
 #ssl_renegotiation_limit = 512MB        # amount of data between renegotiations
 #ssl_cert_file = 'server.crt'           # (change requires restart)
 #ssl_key_file = 'server.key'            # (change requires restart)
@@ -111,9 +113,8 @@ max_connections = 100                   # (change requires restart)
 #password_encryption = on
 #db_user_namespace = off
 
-# Kerberos and GSSAPI
+# GSSAPI using Kerberos
 #krb_server_keyfile = ''
-#krb_srvname = 'postgres'               # (Kerberos only)
 #krb_caseins_users = off
 
 # - TCP Keepalives -
@@ -134,6 +135,7 @@ max_connections = 100                   # (change requires restart)
 
 shared_buffers = <%= shared_buffers %>  # min 128kB
                                         # (change requires restart)
+#huge_pages = try                       # on, off, or try (9.4+)
 #temp_buffers = 8MB                     # min 800kB
 #max_prepared_transactions = 0          # zero disables the feature
                                         # (change requires restart)
@@ -144,6 +146,13 @@ shared_buffers = <%= shared_buffers %>  # min 128kB
 work_mem = <%= work_mem %>              # min 64kB
 maintenance_work_mem = <%= maintenance_work_mem %> # min 1MB
 max_stack_depth = <%= max_stack_depth %> # min 100kB
+#dynamic_shared_memory_type = posix     # the default is the first option (9.4+)
+                                        # supported by the operating system:
+                                        #   posix
+                                        #   sysv
+                                        #   windows
+                                        #   mmap
+                                        # use none to disable dynamic shared memory
 
 # - Disk -
 
@@ -173,7 +182,8 @@ max_stack_depth = <%= max_stack_depth %> # min 100kB
 # - Asynchronous Behavior -
 
 effective_io_concurrency = <%= effective_io_concurrency %>
-                                        # 1-1000. 0 disables prefetching
+                                        # 1-1000; 0 disables prefetching
+#max_worker_processes = 8               # (9.4+)
 
 #------------------------------------------------------------------------------
 # WRITE AHEAD LOG
@@ -181,7 +191,7 @@ effective_io_concurrency = <%= effective_io_concurrency %>
 
 # - Settings -
 
-#wal_level = minimal                    # minimal, archive, or hot_standby
+#wal_level = minimal                    # minimal, archive, hot_standby, or logical
                                         # (change requires restart)
 #fsync = on                             # turns forced synchronization on or off
 synchronous_commit = <%= synchronous_commit %>  # synchronization level;
@@ -194,6 +204,8 @@ synchronous_commit = <%= synchronous_commit %>  # synchronization level;
                                         #   fsync_writethrough
                                         #   open_sync
 #full_page_writes = on                  # recover from partial page writes
+#wal_log_hints = off                    # also do full page writes of non-critical updates
+                                        # (change requires restart) (9.4+)
 #wal_buffers = -1                       # min 32kB, -1 sets based on shared_buffers
                                         # (change requires restart)
 #wal_writer_delay = 200ms               # 1-10000 milliseconds
@@ -203,7 +215,7 @@ commit_delay = <%= commit_delay %>      # range 0-100000, in microseconds
 
 # - Checkpoints -
 
-checkpoint_segments = <%= checkpoint_segments %> # in logfile segments (16MB each)
+checkpoint_segments = <%= checkpoint_segments %> # in logfile segments, min 1, 16MB each
 #checkpoint_timeout = 5min              # range 30s-1h
 #checkpoint_completion_target = 0.5     # checkpoint target duration, 0.0 - 1.0
 #checkpoint_warning = 30s               # 0 disables
@@ -231,7 +243,9 @@ checkpoint_segments = <%= checkpoint_segments %> # in logfile segments (16MB eac
                                 # (change requires restart)
 #wal_keep_segments = 0          # in logfile segments, 16MB each; 0 disables
 #replication_timeout = 60s      # < 9.3
-#wal_sender_timeout = 60s       # in milliseconds; 0 disables (9.3)
+#wal_sender_timeout = 60s       # in milliseconds; 0 disables (9.3+)
+#max_replication_slots = 0      # max number of replication slots
+                                # (change requires restart) (9.4+)
 
 # - Master Server -
 
@@ -287,7 +301,7 @@ checkpoint_segments = <%= checkpoint_segments %> # in logfile segments (16MB eac
 #cpu_tuple_cost = 0.01                  # same scale as above
 #cpu_index_tuple_cost = 0.005           # same scale as above
 #cpu_operator_cost = 0.0025             # same scale as above
-#effective_cache_size = 128MB
+#effective_cache_size = 4GB             # 128MB default < 9.4
 
 # - Genetic Query Optimizer -
 
@@ -480,7 +494,7 @@ log_timezone = 'UTC'
 #autovacuum_analyze_scale_factor = 0.1  # fraction of table size before analyze
 #autovacuum_freeze_max_age = 200000000  # maximum XID age before forced vacuum
                                         # (change requires restart)
-#autovacuum_multixact_freeze_max_age = 400000000        # maximum Multixact age
+#autovacuum_multixact_freeze_max_age = 400000000        # maximum multixact age
                                         # before forced vacuum
                                         # (change requires restart)
 #autovacuum_vacuum_cost_delay = 20ms    # default vacuum cost delay for
@@ -523,7 +537,7 @@ timezone = 'UTC'
 #timezone_abbreviations = 'Default'     # Select the set of available time zone
                                         # abbreviations.  Currently, there are
                                         #   Default
-                                        #   Australia
+                                        #   Australia (historical usage)
                                         #   India
                                         # You can create your own file in
                                         # share/timezonesets/.
@@ -545,6 +559,7 @@ default_text_search_config = 'pg_catalog.english'
 
 #dynamic_library_path = '$libdir'
 #local_preload_libraries = ''
+#session_preload_libraries = ''         # (9.4+)
 
 #------------------------------------------------------------------------------
 # LOCK MANAGEMENT
