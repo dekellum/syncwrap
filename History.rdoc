@@ -1,4 +1,5 @@
 === 2.4.1 (TBD)
+* Merge 9.4 release postgresql.conf additions (comments only).
 
 === 2.4.0 (2015-1-2)
 * Upgrade SyncWrap::CRubyVM default version to 2.1.5 and add libffi as
