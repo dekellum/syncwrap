@@ -385,8 +385,7 @@ module SyncWrap
     #              `rsync --perms --chmod=VALUE`
     #
     # :sync_paths:: Array of one or more local directories in which to
-    #               find source files.
-    #               Effectively required.
+    #               find source files. Effectively required.
     #
     # :verbose::   Output stdout/stderr from rsync (default: false)
     #
