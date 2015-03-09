@@ -350,7 +350,11 @@ module SyncWrap
     # :dryrun::    Don't actually make any changes, but report files
     #              that would be changed. (default: false)
     #
-    # :recursive:: Recurse into sub-directories (default: true)
+    # :recursive:: Recurse into sub-directories (default: true, unless
+    #              :manifest is used)
+    #
+    # :manifest::  Use the specified file as an explicit list of files
+    #              to transfer. (Default: none)
     #
     # :links::     Recreate symlinks on the destination (default: true)
     #

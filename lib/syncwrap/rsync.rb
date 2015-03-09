@@ -37,7 +37,10 @@ module SyncWrap
       flags = %w[ -i ]
 
       # -r --recursive
-      flags << '-r' unless opts[:recursive] == false
+      flags << '-r' if ( opts[:recursive] ||
+                         ( !opts[:manifest] && ( opts[:recursive] != false ) ) )
+
+      flags << "--files-from=#{opts[:manifest]}" if opts[:manifest]
 
       # -l --links (recreate symlinks on the destination)
       flags << '-l' unless opts[:links] == false
