@@ -1,5 +1,6 @@
 === 2.5.0 (TBD)
 * Merge 9.4 release postgresql.conf additions (comments only).
+* Add :manifest option to rput and SourceTree (with ./Manifest.txt default)
 
 === 2.4.0 (2015-1-2)
 * Upgrade SyncWrap::CRubyVM default version to 2.1.5 and add libffi as
