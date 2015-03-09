@@ -71,6 +71,9 @@ module SyncWrap
     # Any additional options for the rput (Default: {} -> none)
     attr_accessor :rput_options
 
+    # A file name found at the root of source_dir containing the
+    # complete list of files to transfer. The value `true` is a synonym
+    # for 'Manifest.txt'. (Default: nil -> none)
     attr_accessor :manifest
 
     public
