@@ -71,6 +71,11 @@ module SyncWrap
     # Any additional options for the rput (Default: {} -> none)
     attr_accessor :rput_options
 
+    # A file name found at the root of source_dir containing the
+    # complete list of files to transfer. The value `true` is a synonym
+    # for 'Manifest.txt'. (Default: nil -> none)
+    attr_accessor :manifest
+
     public
 
     def initialize( opts = {} )
@@ -83,6 +88,7 @@ module SyncWrap
       @require_clean = true
       @rput_options = {}
       @change_key = :source_tree
+      @manifest = nil
       super
 
       raise "SourceTree#source_dir not set" unless source_dir
@@ -119,8 +125,14 @@ module SyncWrap
       opts = { erb_process: false,
                excludes: [ :dev, '.bundle/' ],
                user: run_user,
-               sync_paths: [ local_source_root ] }.
-        merge( rput_options )
+               sync_paths: [ local_source_root ] }
+      mf = manifest
+      if mf
+        mf = 'Manifest.txt' if mf == true
+        mf = File.join( local_source_root, source_dir, mf )
+        opts[:manifest] = mf
+      end
+      opts.merge!( rput_options )
       rput( source_dir + '/', remote_source_path, opts )
     end
 

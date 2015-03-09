@@ -350,7 +350,12 @@ module SyncWrap
     # :dryrun::    Don't actually make any changes, but report files
     #              that would be changed. (default: false)
     #
-    # :recursive:: Recurse into sub-directories (default: true)
+    # :recursive:: Recurse into sub-directories (default: true unless
+    #              :manifest is specified)
+    #
+    # :manifest::  Use the specified file (full path) as an explicit
+    #              list of files to transfer, as via rsync
+    #              `--files-from`. (default: none)
     #
     # :links::     Recreate symlinks on the destination (default: true)
     #
@@ -381,8 +386,7 @@ module SyncWrap
     #              `rsync --perms --chmod=VALUE`
     #
     # :sync_paths:: Array of one or more local directories in which to
-    #               find source files.
-    #               Effectively required.
+    #               find source files. Effectively required.
     #
     # :verbose::   Output stdout/stderr from rsync (default: false)
     #
