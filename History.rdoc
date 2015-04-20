@@ -1,4 +1,6 @@
 === 2.6.0 (TBD)
+* Add SyncWrap::LVMCache component, with
+  SyncWrap::Distro#unmount_device moved from MDRaid.
 
 === 2.5.0 (2015-3-20)
 * Merge 9.4 release postgresql.conf additions (comments only).
