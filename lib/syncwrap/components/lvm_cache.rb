@@ -18,7 +18,7 @@ require 'syncwrap/component'
 
 module SyncWrap
 
-  # Provision a cache using a fast drive (typically and SSD) over a
+  # Provision a cache using a fast drive (like an SSD) over a
   # slow drive (magnetic or network attached) via LVM's cache-pool
   # mechanism and dm-cache.
   #
