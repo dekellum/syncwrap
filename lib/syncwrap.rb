@@ -372,6 +372,7 @@ module SyncWrap
   autoload :Iyyov,         'syncwrap/components/iyyov'
   autoload :IyyovDaemon,   'syncwrap/components/iyyov_daemon'
   autoload :JRubyVM,       'syncwrap/components/jruby_vm'
+  autoload :LVMCache,      'syncwrap/components/lvm_cache'
   autoload :MDRaid,        'syncwrap/components/mdraid'
   autoload :Network,       'syncwrap/components/network'
   autoload :OpenJDK,       'syncwrap/components/open_jdk'

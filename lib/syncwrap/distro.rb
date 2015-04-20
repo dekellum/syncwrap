@@ -67,6 +67,17 @@ module SyncWrap
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
+    # If found mounted, unmount the specified device and also remove
+    # it from fstab.
+    def unmount_device( dev )
+      sudo <<-SH
+        if mount | grep -q '^#{dev} '; then
+          umount #{dev}
+          sed -r -i '\\|^#{dev}\\s|d' /etc/fstab
+        fi
+      SH
+    end
+
   end
 
 end
