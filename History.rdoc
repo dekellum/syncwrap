@@ -1,3 +1,5 @@
+=== 2.6.0 (TBD)
+
 === 2.5.0 (2015-3-20)
 * Merge 9.4 release postgresql.conf additions (comments only).
 * Add :manifest option to rput and SourceTree (with ./Manifest.txt default)
