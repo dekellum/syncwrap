@@ -51,8 +51,10 @@ module SyncWrap
       sudo( "apt-get -yq install #{args.join ' '}" )
     end
 
-    # Uninstall the specified package names.
+    # Uninstall the specified package names. A trailing hash is
+    # interpreted as options.
     def dist_uninstall( *pkgs )
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
       sudo "aptitude -yq purge #{pkgs.join ' '}"
     end
 

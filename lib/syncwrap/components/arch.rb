@@ -29,6 +29,7 @@ module SyncWrap
     end
 
     def dist_uninstall( *pkgs )
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
       sudo "pacman -R --noconfirm #{pkgs.join ' '}"
     end
 
