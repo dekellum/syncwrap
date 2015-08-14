@@ -77,6 +77,7 @@ module SyncWrap
         sh_verbose: :v,
         sync_paths: [ File.join( SyncWrap::GEM_ROOT, 'sync' ) ] }
       @formatter = Formatter.new
+      @composed = 0
     end
 
     # Load the specified file path as per a sync.rb, into this
@@ -192,6 +193,18 @@ module SyncWrap
         flatten.
         map( &:class ).
         uniq
+    end
+
+    # Creates a new component class with &block as implementation of
+    # its :install method. Convenient for quick one-off glue but will
+    # you move to a real component class once it gets complex?
+    def compose( &block )
+      cc = Class.new(Component) do
+        define_method( :install, &block)
+      end
+      @composed += 1
+      self.class.const_set( "Composed#{@composed}", cc )
+      cc.new
     end
 
     # Returns a new component_plan from plan, looking up any Class
