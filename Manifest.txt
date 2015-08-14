@@ -30,6 +30,7 @@ lib/syncwrap/path_util.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
+lib/syncwrap/user_data.rb
 lib/syncwrap/version_support.rb
 lib/syncwrap/components/amazon_linux.rb
 lib/syncwrap/components/arch.rb
