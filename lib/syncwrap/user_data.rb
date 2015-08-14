@@ -33,6 +33,8 @@ module SyncWrap
       script.split( "\n" ).map( &:strip ).join( "\n" )
     end
 
+    module_function :no_tty_sudoer
+
   end
 
 end
