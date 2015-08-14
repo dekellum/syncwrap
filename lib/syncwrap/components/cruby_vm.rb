@@ -93,9 +93,11 @@ module SyncWrap
 
     def uninstall_distro_ruby
       if distro.is_a?( RHEL )
-        dist_uninstall( %w[ ruby ruby18 ruby19 ruby20 ruby21 ] )
+        dist_uninstall( %w[ ruby ruby18 ruby19 ruby20 ruby21 ruby22 ],
+                        succeed: true )
       else
-        dist_uninstall( %w[ ruby ruby1.8 ruby1.9 ruby1.9.1 ruby1.9.3 ruby2.0 ruby2.1 ] )
+        dist_uninstall( %w[ ruby ruby1.8 ruby1.9 ruby1.9.1
+                            ruby1.9.3 ruby2.0 ruby2.1 ruby2.2 ] )
       end
     end
 
