@@ -51,9 +51,24 @@ module SyncWrap
       end
     end
 
-    # Uninstall the specified package names.
+    # Uninstall the specified package names. A trailing hash is
+    # interpreted as options, see below.
+    #
+    # ==== Options
+    # :succeed:: Succeed even if no such packages are installed
+    #
+    # Other options will be ignored.
     def dist_uninstall( *pkgs )
-      sudo "yum remove -q -y #{pkgs.join( ' ' )}"
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
+      if opts[ :succeed ]
+        sudo <<-SH
+          if yum list -q installed #{pkgs.join( ' ' )} >/dev/null 2>&1; then
+            yum remove -q -y #{pkgs.join( ' ' )}
+          fi
+        SH
+      else
+        sudo "yum remove -q -y #{pkgs.join( ' ' )}"
+      end
     end
 
     # Install a System V style init.d service script
