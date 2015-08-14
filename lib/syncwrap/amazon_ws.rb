@@ -257,10 +257,10 @@ module SyncWrap
     end
 
     # Terminate an instance and wait for it to be terminated. If
-    # requested, /dev/sdh# attached EBS volumes which are not
-    # otherwise marked for :delete_on_termination will _also_ be
-    # terminated.  The minimum required properties in iprops are
-    # :region and :id.
+    # requested, /dev/sdh# (PV style) or /dev/sd[f-p] attached EBS
+    # volumes which are not otherwise marked for
+    # :delete_on_termination will _also_ be terminated.  The minimum
+    # required properties in iprops are :region and :id.
     #
     # _WARNING_: data _will_ be lost!
     def aws_terminate_instance( iprops, delete_attached_storage = false, do_wait = true )
@@ -274,7 +274,10 @@ module SyncWrap
       if delete_attached_storage
         ebs_volumes = inst.block_devices.map do |dev|
           ebs = dev[ :ebs ]
-          if ebs && dev[:device_name] =~ /dh\d+$/ && !ebs[:delete_on_termination]
+
+          if ebs && !ebs[:delete_on_termination] &&
+             ( dev[:device_name] =~ /dh\d+$/ ||
+               dev[:device_name] =~ /sd[f-p]$/ )
             ebs[ :volume_id ]
           end
         end.compact
