@@ -195,6 +195,13 @@ module SyncWrap
     # (Default: 300MB if #pg_version < 9.3)
     attr_writer :shared_memory_max
 
+    # A command pattern to initialize the database on first
+    # install. This is used on systemd distro's only.  The pattern is
+    # expanded using #pg_data_dir as the first (optional) replacement.
+    #
+    # (Default: "/usr/bin/initdb %s")
+    attr_accessor :initdb_cmd
+
     def shared_memory_max
       @shared_memory_max || ( version_lt?(pg_version, [9,3]) && 300_000_000 )
     end
@@ -232,6 +239,7 @@ module SyncWrap
       @network_v4_mask = nil
       @network_v6_mask = nil
       @shared_memory_max = nil
+      @initdb_cmd = "/usr/bin/initdb %s"
       super
     end
 
@@ -281,7 +289,7 @@ module SyncWrap
             chown postgres:postgres #{pg_data_dir}
             chmod 700 #{pg_data_dir}
           SH
-          dist_service( service_name, 'initdb' )
+          pg_initdb
         end
 
       when Debian
@@ -298,6 +306,18 @@ module SyncWrap
       end
 
       changes
+    end
+
+    def pg_initdb
+      if distro.systemd?
+        if initdb_cmd
+          sudo( initdb_cmd % [ pg_data_dir ] )
+        else
+          raise ContextError, "PostgreSQL#initdb_cmd is required with systemd"
+        end
+      else
+        dist_service( service_name, 'initdb' )
+      end
     end
 
     # Update the \PostgreSQL configuration files
