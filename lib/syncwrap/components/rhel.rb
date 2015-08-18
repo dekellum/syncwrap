@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/version_support'
 require 'syncwrap/distro'
 
 module SyncWrap
@@ -23,6 +24,7 @@ module SyncWrap
   # derivatives like CentOS and AmazonLinux.
   class RHEL < Component
     include Distro
+    include VersionSupport
 
     # RHEL version, i.e. '6'. No default value.
     attr_accessor :rhel_version
@@ -31,6 +33,10 @@ module SyncWrap
 
     def initialize( opts = {} )
       super
+    end
+
+    def systemd?
+      version_gte?( rhel_version, [7] )
     end
 
     # Install the specified package names. A trailing hash is

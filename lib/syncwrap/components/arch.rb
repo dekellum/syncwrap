@@ -23,6 +23,10 @@ module SyncWrap
   class Arch < Component
     include Distro
 
+    def systemd?
+      true
+    end
+
     def dist_install( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
       sudo "pacman -S --noconfirm #{pkgs.join ' '}"

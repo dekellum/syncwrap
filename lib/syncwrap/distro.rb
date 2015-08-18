@@ -78,6 +78,11 @@ module SyncWrap
       SH
     end
 
+    # Is the Distro running systemd?
+    def systemd?
+      false
+    end
+
   end
 
 end
