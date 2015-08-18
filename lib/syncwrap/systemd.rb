@@ -14,32 +14,24 @@
 # permissions and limitations under the License.
 #++
 
-require 'syncwrap/component'
-require 'syncwrap/distro'
-require 'syncwrap/systemd'
-
 module SyncWrap
 
-  # \Arch Linux distro, partial implementation for pacman.
-  class Arch < Component
-    include Distro
-    include SystemD
+  # Support module for the systemd service manager, PID 1
+  module SystemD
 
-    def systemd?
-      true
+    def systemctl( *args )
+      sudo "/usr/bin/systemctl #{args.join ' '}"
     end
 
-    def dist_install( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      sudo "pacman -S --noconfirm #{pkgs.join ' '}"
+    def dot_service( shortname )
+      shortname + ".service"
     end
 
-    def dist_uninstall( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      sudo "pacman -R --noconfirm #{pkgs.join ' '}"
+    protected
+
+    def dist_service_via_systemctl( shortname, action )
+      systemctl( action, dot_service( shortname ) )
     end
 
-    alias_method :dist_service, :dist_service_via_systemctl
   end
-
 end
