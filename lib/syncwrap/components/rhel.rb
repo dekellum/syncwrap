@@ -22,7 +22,7 @@ module SyncWrap
   # Customizations for RedHat Enterprise Linux and base class for
   # derivatives like CentOS and AmazonLinux.
   class RHEL < Component
-    include SyncWrap::Distro
+    include Distro
 
     # RHEL version, i.e. '6'. No default value.
     attr_accessor :rhel_version

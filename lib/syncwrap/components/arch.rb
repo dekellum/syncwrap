@@ -21,7 +21,7 @@ module SyncWrap
 
   # \Arch Linux distro, partial implementation for pacman.
   class Arch < Component
-    include SyncWrap::Distro
+    include Distro
 
     def dist_install( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}

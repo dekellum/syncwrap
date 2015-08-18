@@ -23,8 +23,8 @@ module SyncWrap
   # Customizations for \Debian and possibly other deb packaged
   # derivatives. Specific distros/versions may further specialize.
   class Debian < Component
-    include SyncWrap::Distro
-    include SyncWrap::VersionSupport
+    include Distro
+    include VersionSupport
 
     # Debian version, i.e. '7.6' No default value.
     attr_accessor :debian_version
