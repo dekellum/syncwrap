@@ -3,6 +3,10 @@
   SyncWrap::Distro#unmount_device moved from MDRaid.
 * Add SyncWrap::Space#compose (and main) utility for sync file inline
   components.
+* Add systemd support for all distros: Arch, RHEL/CentOS 7+, and by
+  default, Debian 8+ and Ubuntu 15.04+ via the SyncWrap::SystemD
+  module. See also various updates in SyncWrap::Distro.
+* Add SyncWrap::Iyyov systemd service unit file and install support.
 * Move AmazonEC2.ec2_user_data to SyncWrap::UserData module for
   broader use.
 * Add SyncWrap::RHEL#dist_uninstall :succeed flag for removing
