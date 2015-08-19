@@ -19,16 +19,22 @@ module SyncWrap
   # Support module for the systemd service manager, PID 1
   module SystemD
 
+    # Run systemd `systemctl` command with args via sudo as root.
     def systemctl( *args )
       sudo "/usr/bin/systemctl #{args.join ' '}"
     end
 
+    # Expand given shortname to "shortname.service" as used for the
+    # systemd unit.
     def dot_service( shortname )
       shortname + ".service"
     end
 
     protected
 
+    # Provides Distro#dist_service compatibility via #systemctl. The
+    # argument order is swapped and shortname is passed through
+    # #dot_service.
     def dist_service_via_systemctl( shortname, action )
       systemctl( action, dot_service( shortname ) )
     end
