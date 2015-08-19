@@ -50,6 +50,10 @@ module SyncWrap
     # Default: lv_cache_target + '_cache'
     attr_writer :lv_cache
 
+    # Array of additional flags to vgextend
+    # Default: ['-y']
+    attr_accessor :vgextend_flags
+
     def lv_cache
       @lv_cache || ( lv_cache_target + '_cache' )
     end
@@ -70,6 +74,7 @@ module SyncWrap
       @raw_device = nil
       @lv_cache_target = nil
       @lv_cache = nil
+      @vgextend_flags = %w[ -y ]
       super
 
       raise "LVMCache#raw_device not set" unless raw_device
@@ -81,7 +86,7 @@ module SyncWrap
       sudo( "if ! lvs /dev/#{vg}/#{lv_cache}; then", close: "fi" ) do
         unmount_device( raw_device )
         sudo <<-SH
-          vgextend #{vg} #{raw_device}
+          vgextend #{vgextend_flags.join ' '} #{vg} #{raw_device}
           lvcreate -L #{meta_size} -n #{lv_cache_meta} #{vg} #{raw_device}
           lvcreate -l 100%FREE -n #{lv_cache} #{vg} #{raw_device}
           lvconvert --type cache-pool --cachemode writethrough --yes \
