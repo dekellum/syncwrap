@@ -37,7 +37,8 @@ module SyncWrap
       super
     end
 
-    # Deploy iyyov gem, init.d/iyyov and at least an empty jobs.rb.
+    # Deploy iyyov gem, init.d script or systemd unit, and at least an
+    # empty jobs.rb.
     def install
       # Shorten if the desired iyyov version is already running
       pid, ver = capture_running_version( 'iyyov' )
@@ -130,18 +131,23 @@ module SyncWrap
       SH
     end
 
-    # Ensure install of same gem version as init.d/iyyov script
+    # Ensure install of same gem version as init.d script or unit file
     def install_iyyov_gem
       jruby_gem_install( 'iyyov', version: iyyov_version )
     end
 
-    # Install iyyov daemon init.d script and add to init daemons
+    # Install iyyov daemon init.d script or service unit
     def install_iyyov_init
-      rput( 'etc/init.d/iyyov', user: :root,
-            erb_vars: { lsb: distro.kind_of?( Debian ) } )
+      if systemd?
+        changes = rput( 'etc/systemd/system/iyyov.service', user: :root )
+        systemctl( 'enable', 'iyyov.service' )
+      else
+        rput( 'etc/init.d/iyyov', user: :root,
+              erb_vars: { lsb: distro.kind_of?( Debian ) } )
 
-      # Add to init.d
-      dist_install_init_service( 'iyyov' )
+        # Add to init.d
+        dist_install_init_service( 'iyyov' )
+      end
     end
 
     def iyyov_start

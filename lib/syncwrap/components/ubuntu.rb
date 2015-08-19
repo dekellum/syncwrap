@@ -32,6 +32,7 @@ module SyncWrap
     # an approximation of the LTS lineage.
     def debian_version
       super ||
+        ( version_gte?( ubuntu_version, [15,4] ) && '8' ) ||
         ( version_gte?( ubuntu_version, [14,4] ) && '7' ) ||
         ( version_gte?( ubuntu_version, [12,4] ) && '6' )
     end

@@ -15,14 +15,18 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/version_support'
 require 'syncwrap/distro'
+require 'syncwrap/systemd'
 
 module SyncWrap
 
   # Customizations for RedHat Enterprise Linux and base class for
   # derivatives like CentOS and AmazonLinux.
   class RHEL < Component
-    include SyncWrap::Distro
+    include Distro
+    include VersionSupport
+    include SystemD
 
     # RHEL version, i.e. '6'. No default value.
     attr_accessor :rhel_version
@@ -31,6 +35,10 @@ module SyncWrap
 
     def initialize( opts = {} )
       super
+    end
+
+    def systemd?
+      @is_systemd ||= version_gte?( rhel_version, [7] )
     end
 
     # Install the specified package names. A trailing hash is
@@ -76,15 +84,25 @@ module SyncWrap
       sudo "/sbin/chkconfig --add #{name}"
     end
 
-    # Enable the System V style init.d service
+    # Enable a service by (short) name either via RHEL/System V
+    # `chkconfig on` or systemd `systemctl enable`.
     def dist_enable_init_service( name )
-      sudo "/sbin/chkconfig #{name} on"
+      if systemd?
+        systemctl( 'enable', dot_service( name ) )
+      else
+        sudo "/sbin/chkconfig #{name} on"
+      end
     end
 
-    # Run via sudo, the service command typically supporting 'start',
-    # 'stop', 'restart', 'status', etc. arguments.
+    # Run the service command typically supporting 'start', 'stop',
+    # 'restart', 'status', etc. actions.
+    # Arguments are in order: shortname, action
     def dist_service( *args )
-      sudo( [ '/sbin/service', *args ].join( ' ' ) )
+      if systemd?
+        dist_service_via_systemctl( *args )
+      else
+        sudo( [ '/sbin/service', *args ].join( ' ' ) )
+      end
     end
 
   end

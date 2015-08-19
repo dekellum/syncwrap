@@ -23,16 +23,29 @@ module SyncWrap
   # Customizations for \Debian and possibly other deb packaged
   # derivatives. Specific distros/versions may further specialize.
   class Debian < Component
-    include SyncWrap::Distro
-    include SyncWrap::VersionSupport
+    include Distro
+    include VersionSupport
+    include SystemD
 
     # Debian version, i.e. '7.6' No default value.
     attr_accessor :debian_version
 
     alias :distro_version :debian_version
 
+    protected
+
+    # Set true/false to override the default, distro version based
+    # determination of whether systemd is PID 1 on the system.
+    attr_writer :systemd
+
+    public
+
     def initialize( opts = {} )
       super
+    end
+
+    def systemd?
+      @systemd ||= version_gte?( debian_version, [8] )
     end
 
     # Install the specified package names. The first time this is
@@ -63,15 +76,25 @@ module SyncWrap
       sudo "/usr/sbin/update-rc.d #{name} defaults"
     end
 
-    # Enable the System V style init.d service
+    # Enable a service by (short) name either via Debian/System V
+    # `update-rc.d` or systemd `systemctl enable`.
     def dist_enable_init_service( name )
-      sudo "/usr/sbin/update-rc.d #{name} enable"
+      if systemd?
+        systemctl( 'enable', dot_service( name ) )
+      else
+        sudo "/usr/sbin/update-rc.d #{name} enable"
+      end
     end
 
-    # Run via sudo, the service command typically supporting 'start',
-    # 'stop', 'restart', 'status', etc. arguments.
+    # Run the service command typically supporting 'start', 'stop',
+    # 'restart', 'status', etc. actions.
+    # Arguments are in order: shortname, action
     def dist_service( *args )
-      sudo( [ '/usr/sbin/service', *args ].join( ' ' ) )
+      if systemd?
+        dist_service_via_systemctl( *args )
+      else
+        sudo( [ '/usr/sbin/service', *args ].join( ' ' ) )
+      end
     end
 
     protected
