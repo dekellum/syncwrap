@@ -70,6 +70,7 @@ sync/etc/init.d/iyyov.erb
 sync/etc/init.d/qpidd
 sync/etc/sysconfig/pgsql/postgresql.erb
 sync/etc/sysctl.d/61-postgresql-shm.conf.erb
+sync/etc/systemd/system/iyyov.service.erb
 sync/jruby/bin/jgem
 sync/postgresql/environment
 sync/postgresql/pg_ctl.conf
