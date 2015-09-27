@@ -1,6 +1,7 @@
 [Unit]
 Description=Iyyov JRuby Job Control Daemon
-AssertFileIsExecutable=<%= jruby_gem_home %>/gems/iyyov-<%= iyyov_version %>-java/init/iyyov
+# Introduced in systemd v218+:
+# AssertFileIsExecutable=<%= jruby_gem_home %>/gems/iyyov-<%= iyyov_version %>-java/init/iyyov
 
 [Service]
 User=<%= run_user %>
