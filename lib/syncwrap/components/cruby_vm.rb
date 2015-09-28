@@ -46,19 +46,19 @@ module SyncWrap
     include RubySupport
     include HashSupport
 
-    # DEFAULT version of #ruby_version to install
-    DEFAULT_VERSION = '2.1.5'
+    # Default version of #ruby_version to install
+    DEFAULT_VERSION = '2.1.7'
 
     # SHA256 #hash for DEFAULT_VERSION
     DEFAULT_VERSION_HASH =
-      '4305cc6ceb094df55210d83548dcbeb5117d74eea25196a9b14fa268d354b100'
+      'f59c1596ac39cc7e60126e7d3698c19f482f04060674fdfe0124e1752ba6dd81'
 
     # The ruby version to install, as it appears in source packages
     # from ruby-lang.org. Note that starting with 2.1.0, the patch
     # release (p#) no longer appears in package names.
     # (Default: DEFAULT_VERSION)
     #
-    # Example values: '2.0.0-p481', '2.1.5'
+    # Example values: '2.0.0-p481', '2.1.7'
     attr_accessor :ruby_version
 
     # If true, attempt to uninstall any pre-existing distro packaged
