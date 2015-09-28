@@ -24,6 +24,7 @@ lib/syncwrap/context.rb
 lib/syncwrap/distro.rb
 lib/syncwrap/formatter.rb
 lib/syncwrap/git_help.rb
+lib/syncwrap/hash_support.rb
 lib/syncwrap/host.rb
 lib/syncwrap/main.rb
 lib/syncwrap/path_util.rb

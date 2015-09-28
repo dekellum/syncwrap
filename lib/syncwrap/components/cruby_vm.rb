@@ -18,6 +18,7 @@ require 'syncwrap/component'
 require 'syncwrap/components/rhel'
 require 'syncwrap/ruby_support'
 require 'syncwrap/version_support'
+require 'syncwrap/hash_support'
 
 module SyncWrap
 
@@ -43,11 +44,19 @@ module SyncWrap
   class CRubyVM < Component
     include VersionSupport
     include RubySupport
+    include HashSupport
+
+    # DEFAULT version of #ruby_version to install
+    DEFAULT_VERSION = '2.1.5'
+
+    # SHA256 #hash for DEFAULT_VERSION
+    DEFAULT_VERSION_HASH =
+      '4305cc6ceb094df55210d83548dcbeb5117d74eea25196a9b14fa268d354b100'
 
     # The ruby version to install, as it appears in source packages
     # from ruby-lang.org. Note that starting with 2.1.0, the patch
     # release (p#) no longer appears in package names.
-    # (Default: 2.1.5)
+    # (Default: DEFAULT_VERSION)
     #
     # Example values: '2.0.0-p481', '2.1.5'
     attr_accessor :ruby_version
@@ -57,11 +66,19 @@ module SyncWrap
     # (Default: true)
     attr_accessor :do_uninstall_distro_ruby
 
-    def initialize( opts = {} )
-      @ruby_version = "2.1.5"
-      @do_uninstall_distro_ruby = true
+    # A cryptographic hash value (hexadecimal, some standard length)
+    # to use for verifying the 'source.tar.gz' package.
+    attr_writer :hash
 
+    def initialize( opts = {} )
+      @ruby_version = DEFAULT_VERSION
+      @do_uninstall_distro_ruby = true
+      @hash = nil
       super
+    end
+
+    def hash
+      @hash || ( ruby_version == DEFAULT_VERSION && DEFAULT_VERSION_HASH )
     end
 
     def install
@@ -134,11 +151,19 @@ module SyncWrap
       # Arguably all but the final install should be run by an
       # unprivileged user. But its more likely merged this way, and if
       # "configure" or "make" can be exploited, so can "make install".
+      sfile = File.basename( src_url )
       sudo <<-SH
         [ -e /tmp/src ] && rm -rf /tmp/src || true
         mkdir -p /tmp/src/ruby
         cd /tmp/src/ruby
-        curl -sSL #{src_url} | tar -zxf -
+        curl -sSL -o #{sfile} #{src_url}
+      SH
+
+      hash_verify( hash, sfile, user: :root ) if hash
+
+      sudo <<-SH
+        tar -zxf #{sfile}
+        rm -f #{sfile}
         cd ruby-#{ruby_version}
         ./configure --prefix=#{local_root} #{redirect?}
         make #{redirect?}
