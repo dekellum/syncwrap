@@ -18,6 +18,7 @@ require 'syncwrap/component'
 
 # For distro class comparison only (pre-load for safety)
 require 'syncwrap/components/debian'
+require 'syncwrap/components/rhel'
 
 module SyncWrap
 
