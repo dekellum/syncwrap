@@ -53,7 +53,7 @@ module SyncWrap
       when 64
         :sha256
       when 96
-        :sha385
+        :sha384
       when 128
         :sha512
       end
