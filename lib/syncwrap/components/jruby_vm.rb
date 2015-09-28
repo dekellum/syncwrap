@@ -29,11 +29,14 @@ module SyncWrap
     include VersionSupport
     include RubySupport
 
-    # JRuby version to install (default: 1.7.19)
+    # Default version of #jruby_version to install
+    DEFAULT_VERSION = '1.7.22'
+
+    # JRuby version to install (default: DEFAULT_VERSION)
     attr_accessor :jruby_version
 
     def initialize( opts = {} )
-      @jruby_version = '1.7.19'
+      @jruby_version = DEFAULT_VERSION
 
       super( { ruby_command: 'jruby',
                 gem_command: 'jgem' }.merge( opts ) )
