@@ -197,7 +197,8 @@ module SyncWrap
 
     # A command pattern to initialize the database on first
     # install. This is used on systemd distro's only.  The pattern is
-    # expanded using #pg_data_dir as the first (optional) replacement.
+    # expanded using #pg_data_dir as the first (optional)
+    # replacement. The command is run by the postgres user.
     #
     # (Default: "/usr/bin/initdb %s")
     attr_accessor :initdb_cmd
@@ -311,7 +312,9 @@ module SyncWrap
     def pg_initdb
       if distro.systemd?
         if initdb_cmd
-          sudo( initdb_cmd % [ pg_data_dir ] )
+          sudo <<-SH
+            su postgres -c '#{initdb_cmd % [ pg_data_dir ]}'
+          SH
         else
           raise ContextError, "PostgreSQL#initdb_cmd is required with systemd"
         end

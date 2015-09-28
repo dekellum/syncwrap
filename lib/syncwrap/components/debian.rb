@@ -17,6 +17,7 @@
 require 'syncwrap/component'
 require 'syncwrap/distro'
 require 'syncwrap/version_support'
+require 'syncwrap/systemd'
 
 module SyncWrap
 
