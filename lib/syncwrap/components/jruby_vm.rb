@@ -17,6 +17,7 @@
 require 'syncwrap/component'
 require 'syncwrap/ruby_support'
 require 'syncwrap/version_support'
+require 'syncwrap/hash_support'
 
 module SyncWrap
 
@@ -28,18 +29,31 @@ module SyncWrap
   class JRubyVM < Component
     include VersionSupport
     include RubySupport
+    include HashSupport
 
     # Default version of #jruby_version to install
     DEFAULT_VERSION = '1.7.22'
 
+    # The #hash for DEFAULT_VERSION. Prefer sha256 but sha1 is what is
+    # currently published.
+    DEFAULT_VERSION_HASH = '6b9e310a04ad8173d0d6dbe299da04c0ef85fc15'
+
     # JRuby version to install (default: DEFAULT_VERSION)
     attr_accessor :jruby_version
 
+    # A cryptographic hash value (hexadecimal, some standard length)
+    # to use for verifying the 'jruby-bin-*.tar.gz' package.
+    attr_writer :hash
+
     def initialize( opts = {} )
       @jruby_version = DEFAULT_VERSION
-
+      @hash = nil
       super( { ruby_command: 'jruby',
                 gem_command: 'jgem' }.merge( opts ) )
+    end
+
+    def hash
+      @hash || ( jruby_version == DEFAULT_VERSION && DEFAULT_VERSION_HASH )
     end
 
     def jruby_dist_path
@@ -70,12 +84,20 @@ module SyncWrap
     def jruby_install
 
       root = "#{local_root}/lib/jruby"
+      distro = "/tmp/jruby-bin-#{jruby_version}.tar.gz"
 
       sudo <<-SH
         if [ ! -d #{jruby_dist_path} ]; then
           mkdir -p #{root}
           mkdir -p #{root}/gems
-          curl -sSL #{jruby_bin_url} | tar -C #{root} -zxf -
+          curl -sSL -o #{distro} #{jruby_bin_url}
+      SH
+
+      hash_verify( hash, distro, user: :root ) if hash
+
+      sudo <<-SH
+          tar -C #{root} -zxf #{distro}
+          rm -f #{distro}
           mkdir -p #{gemrc_path}
           cd #{root} && ln -sfn jruby-#{jruby_version} jruby
           cd #{local_root}/bin && ln -sf ../lib/jruby/jruby/bin/jirb .
