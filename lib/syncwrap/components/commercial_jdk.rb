@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/hash_support'
 
 module SyncWrap
 
@@ -30,6 +31,7 @@ module SyncWrap
   #
   # Host component dependencies: <Distro>
   class CommercialJDK < Component
+    include HashSupport
 
     # HTTP URL to repo base directory. Note that the default
     # (http://localhost/repo) is unlikely to work here.
@@ -40,10 +42,15 @@ module SyncWrap
     # directory when unpackaged.
     attr_accessor :jdk_name
 
+    # An optional cryptographic hash value (hexadecimal, some standard
+    # length) to use for verifying the 'jdk_name.tar.gz' package.
+    # Default: nil (no verification)
+    attr_accessor :hash
+
     def initialize( opts = {} )
       @java_repo_base_url = 'http://localhost/repo'
       @jdk_name = 'jrs-ora-1.7.0_51-x64'
-
+      @hash = nil
       super
     end
 
@@ -58,17 +65,25 @@ module SyncWrap
     end
 
     def install
+      distro = "/tmp/#{jdk_name}.tar.gz"
       bins = %w[ java jmap jstack jstat jps jinfo jhat javac ].
         map { |b| "../lib/java/bin/#{b}" }.
         join( ' ' )
 
-      sudo <<-SH
-        if [ ! -d #{jdk_dir} ]; then
-          curl -sSL #{jdk_url} | tar -C #{local_root}/lib -zxf -
+      sudo( "if [ ! -d #{jdk_dir} ]; then", close: "fi" ) do
+        sudo <<-SH
+          curl -sSL -o #{distro} #{jdk_url}
+        SH
+
+        hash_verify( hash, distro, user: :root ) if hash
+
+        sudo <<-SH
+          tar -C #{local_root}/lib -zxf #{distro}
+          rm -f #{distro}
           cd #{local_root}/lib && ln -sfn #{jdk_name} java
           cd #{local_root}/bin && ln -sfn #{bins} .
-        fi
-      SH
+        SH
+      end
     end
 
   end
