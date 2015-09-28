@@ -15,9 +15,11 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/hash_support'
 
 # For distro class comparison only (pre-load for safety)
 require 'syncwrap/components/debian'
+require 'syncwrap/components/rhel'
 
 module SyncWrap
 
@@ -26,14 +28,30 @@ module SyncWrap
   #
   # Host component dependencies: <Distro>, <JDK>, JRubyVM
   class Hashdot < Component
+    include HashSupport
 
-    # Hashdot version (default: 1.4.0)
+    # Default version of #hashdot_version to install
+    DEFAULT_VERSION = '1.4.0'
+
+    # SHA256 #hash for DEFAULT_VERSION
+    DEFAULT_VERSION_HASH =
+      '131e01b4ee2c6f63c4850bbcb71a83f902646436b4791a8717cc76efe26afab7'
+
+    # Hashdot version (default: DEFAULT_VERSION)
     attr_accessor :hashdot_version
 
-    def initialize( opts = {} )
-      @hashdot_version = '1.4.0'
+    # A cryptographic hash value (hexadecimal, some standard length)
+    # to use for verifying the 'hashdot-*-src.tar.gz' package.
+    attr_writer :hash
 
+    def initialize( opts = {} )
+      @hashdot_version = DEFAULT_VERSION
+      @hash = nil
       super
+    end
+
+    def hash
+      @hash || ( hashdot_version == DEFAULT_VERSION && DEFAULT_VERSION_HASH )
     end
 
     def hashdot_bin_url
@@ -92,11 +110,18 @@ module SyncWrap
     def install_hashdot
       src_root = '/tmp/src/hashdot'
       src = "#{src_root}/hashdot-#{hashdot_version}"
+      sfile = "#{src_root}/hashdot-#{hashdot_version}-src.tar.gz"
 
       sh <<-SH
         sudo rm -rf /tmp/src
         mkdir -p #{src_root}
-        curl -sSL #{hashdot_bin_url} | tar -C #{src_root} -zxf -
+        curl -sSL -o #{sfile} #{hashdot_bin_url}
+      SH
+
+      hash_verify( hash, sfile ) if hash
+
+      sh <<-SH
+        tar -C #{src_root} -zxf #{sfile}
       SH
 
       rput( 'src/hashdot/', "#{src}/", :excludes => :dev )
@@ -105,6 +130,7 @@ module SyncWrap
         cd #{src}
         make
         sudo make install
+        rm -rf #{src_root}
       SH
 
     end
