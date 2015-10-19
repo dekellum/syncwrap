@@ -128,14 +128,14 @@ Components implementing \#install:
 The above only represents my more recent project needs. Pull requests
 to add, for example, the following would be well received:
 
-* Bluepill
-* Rails (extra credit: without git fetch or per-host asset compile)
+* Rails (based on SourceTree, Bundle and ideally without per-host
+  asset compile)
 * Nginx
 * Mongo
 * Redis
 
-\SyncWrap makes it reasonable to implement any of the above in the
-privacy of your own office.
+\SyncWrap makes it reasonable to implement any of the above
+yourself.
 
 == License
 
