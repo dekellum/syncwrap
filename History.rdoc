@@ -1,7 +1,15 @@
-=== 2.5.1 (TBD)
+=== 2.5.1 (2015-10-19)
+* Add SyncWrap::RHEL#dist_uninstall :succeed flag for removing
+  packages which may not exist
+* Fix for CRubyVM on minimal CentOS 7.1: Use above :succeed flag on
+  distro ruby uninstall, add ruby 2.2
+* Fix --delete-attached-storage on AWS HVM by broadening pattern of
+  device names
+* Fix a timing issue observed with SyncWrap::AmazonEC2 instance
+  creation
 
 === 2.5.0 (2015-3-20)
-* Merge 9.4 release postgresql.conf additions (comments only).
+* Merge 9.4 release postgresql.conf additions (comments only)
 * Add :manifest option to rput and SourceTree (with ./Manifest.txt default)
 * Upgrade SyncWrap::JRubyVM default version to 1.7.19
 
