@@ -126,6 +126,10 @@ module SyncWrap
 
       inst = ec2.instances.create( iopts )
 
+      wait_until( "instance #{inst.id} to register" ) do
+        inst.status != :pending
+      end
+
       inst.add_tag( 'Name', value: name )
 
       if opts[ :roles ]
