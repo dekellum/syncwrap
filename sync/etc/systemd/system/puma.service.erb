@@ -1,0 +1,13 @@
+[Unit]
+Description=Puma HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+User=<%= run_user %>
+WorkingDirectory=<%= rack_path %>
+ExecStart=<%= puma_start_command %>
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
