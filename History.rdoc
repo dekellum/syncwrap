@@ -7,6 +7,7 @@
   default, Debian 8+ and Ubuntu 15.04+ via the SyncWrap::SystemD
   module. See also various updates in SyncWrap::Distro.
 * Add SyncWrap::Iyyov systemd service unit file and install support.
+* Add SyncWrap::Puma systemd service unit file and install support.
 * Add cryptographic hash verification support to SyncWrap::CRubyVM,
   SyncWrap::JRubyVM, SyncWrap::Hashdot, and SyncWrap::CommercialJDK.
 * Upgrade SyncWrap::JRubyVM default version to 1.7.22
