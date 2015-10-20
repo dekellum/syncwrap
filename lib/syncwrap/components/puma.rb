@@ -113,7 +113,7 @@ module SyncWrap
       args = puma_flags.map do |key,value|
         if value.is_a?( TrueClass )
           key_to_arg( key )
-        elsif value.is_a?( FalseClass )
+        elsif value.nil? || value.is_a?( FalseClass )
           nil
         else
           [ key_to_arg( key ), value && value.to_s ]
