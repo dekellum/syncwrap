@@ -106,6 +106,7 @@ class TestSpace < MiniTest::Unit::TestCase
     c2b = CompTwo.new
     host = sp.host( 'localhost', c1, :test, c2b )
     assert_equal( [ c1, c2, c2b ], host.components )
+    assert_equal( [ c2 ], host.components_in_roles( [ :test ] ) )
     assert_equal( c1, host.component( CompOne ) )
     assert_equal( c2b, host.component( CompTwo ) ) #last instance
   end
