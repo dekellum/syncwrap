@@ -10,6 +10,8 @@
 * Add SyncWrap::Puma systemd service unit file and install support.
 * Add cryptographic hash verification support to SyncWrap::CRubyVM,
   SyncWrap::JRubyVM, SyncWrap::Hashdot, and SyncWrap::CommercialJDK.
+* Add -R/--components-in-role flag support in CLI to limit components
+  executed to those contained by one or more roles.
 * Upgrade SyncWrap::JRubyVM default version to 1.7.22
 * Upgrade SyncWrap::CRubyVM default version to 2.1.7
 * Move AmazonEC2.ec2_user_data to SyncWrap::UserData module for
