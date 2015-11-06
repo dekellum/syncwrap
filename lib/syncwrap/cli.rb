@@ -31,6 +31,7 @@ module SyncWrap
       @list_components = false
       @component_plan = []
       @roles = []
+      @comp_roles = []
       @host_patterns = []
       @create_plan = []
       @image_plan = []
@@ -67,6 +68,11 @@ TEXT
         opts.on( "-r", "--hosts-with-role ROLE",
                  "Constrain hosts by ROLE (may use multiple)" ) do |r|
           @roles << r.sub(/^:/,'').to_sym
+        end
+
+        opts.on( "-R", "--components-in-role ROLE",
+                 "Constrain components by ROLE (may use multiple)" ) do |r|
+          @comp_roles << r.sub(/^:/,'').to_sym
         end
 
         opts.on( "-t", "--threads N",
@@ -269,6 +275,10 @@ TEXT
       list_hosts( @hosts, lists > 1) if @list_hosts
 
       exit( 0 ) if lists > 0
+
+      unless @comp_roles.empty?
+        @options[ :comp_roles ] = @comp_roles
+      end
 
       success = space.execute( @hosts, @component_plan, @options )
       exit( success ? 0 : 1 )

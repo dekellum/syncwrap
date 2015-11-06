@@ -292,8 +292,14 @@ module SyncWrap
     private
 
     def execute_host( host, component_plan = [], opts = {} )
+      comp_roles = opts[ :comp_roles ]
+      comps = if comp_roles && !comp_roles.empty?
+                host.components_in_roles( comp_roles )
+              else
+                host.components
+              end
       # Important: resolve outside of context
-      comp_methods = resolve_component_methods(host.components, component_plan)
+      comp_methods = resolve_component_methods(comps, component_plan)
       ctx = Context.new( host, opts )
       ctx.with do
         comp_methods.each do |comp, mths|
