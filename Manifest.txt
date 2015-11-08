@@ -24,12 +24,15 @@ lib/syncwrap/context.rb
 lib/syncwrap/distro.rb
 lib/syncwrap/formatter.rb
 lib/syncwrap/git_help.rb
+lib/syncwrap/hash_support.rb
 lib/syncwrap/host.rb
 lib/syncwrap/main.rb
 lib/syncwrap/path_util.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
+lib/syncwrap/systemd.rb
+lib/syncwrap/user_data.rb
 lib/syncwrap/version_support.rb
 lib/syncwrap/components/amazon_linux.rb
 lib/syncwrap/components/arch.rb
@@ -46,6 +49,7 @@ lib/syncwrap/components/hashdot.rb
 lib/syncwrap/components/iyyov.rb
 lib/syncwrap/components/iyyov_daemon.rb
 lib/syncwrap/components/jruby_vm.rb
+lib/syncwrap/components/lvm_cache.rb
 lib/syncwrap/components/mdraid.rb
 lib/syncwrap/components/network.rb
 lib/syncwrap/components/open_jdk.rb
@@ -67,6 +71,7 @@ sync/etc/init.d/iyyov.erb
 sync/etc/init.d/qpidd
 sync/etc/sysconfig/pgsql/postgresql.erb
 sync/etc/sysctl.d/61-postgresql-shm.conf.erb
+sync/etc/systemd/system/iyyov.service.erb
 sync/jruby/bin/jgem
 sync/postgresql/environment
 sync/postgresql/pg_ctl.conf

@@ -104,6 +104,14 @@ module SyncWrap
       end
     end
 
+    # Returns components under the specified role
+    def components_in_roles( roles )
+      roles.inject([]) do |m,r|
+        m += space.role( r ) if roles.include?( r )
+        m
+      end
+    end
+
     # Return the last component added to this Host prior to the given
     # component (either directly or via a role), or nil if there is no
     # such component.

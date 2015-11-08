@@ -1,0 +1,16 @@
+[Unit]
+Description=Iyyov JRuby Job Control Daemon
+# Introduced in systemd v218+:
+# AssertFileIsExecutable=<%= jruby_gem_home %>/gems/iyyov-<%= iyyov_version %>-java/init/iyyov
+
+[Service]
+User=<%= run_user %>
+Type=forking
+ExecStart=<%= jruby_gem_home %>/gems/iyyov-<%= iyyov_version %>-java/init/iyyov jobs.rb
+WorkingDirectory=<%= run_dir %>/iyyov
+PIDFile=<%= run_dir %>/iyyov/iyyov.pid
+Restart=always
+ExecReload=/usr/bin/touch <%= run_dir %>/iyyov/jobs.rb
+
+[Install]
+WantedBy=multi-user.target

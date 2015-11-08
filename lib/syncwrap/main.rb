@@ -40,6 +40,11 @@ module SyncWrap
       space.host( *args )
     end
 
+    # Shorthand for space.compose
+    def compose( &block )
+      space.compose(&block)
+    end
+
     # Merge options given, or (without opts) return space.default_options
     def options( opts = nil ) # :doc:
       if opts

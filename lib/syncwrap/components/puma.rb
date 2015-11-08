@@ -49,7 +49,7 @@ module SyncWrap
         control: "unix://#{rack_path}/control",
         environment: "production",
         port: 5874,
-        daemon: true }.merge( @puma_flags )
+        daemon: !foreground? }.merge( @puma_flags )
     end
 
     protected
@@ -66,6 +66,11 @@ module SyncWrap
       @always_restart
     end
 
+    # The name of the systemd unit file to create for this instance of
+    # puma. If specified, the name should include a '.service' suffix.
+    # (Default: nil -> no unit)
+    attr_accessor :systemd_unit
+
     public
 
     def initialize( opts = {} )
@@ -74,6 +79,7 @@ module SyncWrap
       @change_key = nil
       @rack_path = nil
       @puma_flags = {}
+      @systemd_unit = nil
       super
     end
 
@@ -83,12 +89,28 @@ module SyncWrap
       end
 
       changes = change_key && state[ change_key ]
-      rudo( "( cd #{rack_path}", close: ')' ) do
-        rudo( "if [ -f puma.state -a -e control ]; then", close: else_start ) do
-          if ( change_key && !changes ) && !always_restart?
-            rudo 'true' #no-op
-          else
-            restart
+
+      if systemd_unit
+        uchanges = rput( '/etc/systemd/system/puma.service',
+                         "/etc/systemd/system/#{systemd_unit}",
+                         user: :root )
+        if !uchanges.empty?
+          systemctl( 'enable', systemd_unit )
+        end
+        if( change_key.nil? || changes || uchanges || always_restart? )
+          systemctl( 'restart', systemd_unit )
+        else
+          systemctl( 'start', systemd_unit )
+        end
+      else
+        rudo( "( cd #{rack_path}", close: ')' ) do
+          rudo( "if [ -f puma.state -a -e control ]; then",
+                close: bare_else_start ) do
+            if ( change_key && !changes ) && !always_restart?
+              rudo 'true' #no-op
+            else
+              bare_restart
+            end
           end
         end
       end
@@ -97,11 +119,16 @@ module SyncWrap
 
     protected
 
-    def restart
+    # By default, runs in foreground if a systemd_unit is specified.
+    def foreground?
+      !!systemd_unit
+    end
+
+    def bare_restart
       rudo( ( pumactl_command + %w[ --state puma.state restart ] ).join( ' ' ) )
     end
 
-    def else_start
+    def bare_else_start
       <<-SH
         else
           #{puma_start_command}
@@ -113,7 +140,7 @@ module SyncWrap
       args = puma_flags.map do |key,value|
         if value.is_a?( TrueClass )
           key_to_arg( key )
-        elsif value.is_a?( FalseClass )
+        elsif value.nil? || value.is_a?( FalseClass )
           nil
         else
           [ key_to_arg( key ), value && value.to_s ]
@@ -126,7 +153,8 @@ module SyncWrap
       if puma_version
         [ ruby_command, '-S', 'puma', "_#{puma_version}_" ]
       else
-        [ "#{bundle_install_bin_stubs}/puma" ]
+        [ File.expand_path( File.join( bundle_install_bin_stubs, "puma" ),
+                            rack_path ) ]
       end
     end
 
@@ -134,7 +162,8 @@ module SyncWrap
       if puma_version
         [ ruby_command, '-S', 'pumactl', "_#{puma_version}_" ]
       else
-        [ "#{bundle_install_bin_stubs}/pumactl" ]
+        [ File.expand_path( File.join( bundle_install_bin_stubs, "pumactl" ),
+                            rack_path ) ]
       end
     end
 

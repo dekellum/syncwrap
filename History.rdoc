@@ -1,3 +1,22 @@
+=== 2.6.0 (TBD)
+* Add SyncWrap::LVMCache component, with
+  SyncWrap::Distro#unmount_device moved from MDRaid.
+* Add SyncWrap::Space#compose (and main) utility for sync file inline
+  components.
+* Add systemd support for all distros: Arch, RHEL/CentOS 7+, and by
+  default, Debian 8+ and Ubuntu 15.04+ via the SyncWrap::SystemD
+  module. See also various updates in SyncWrap::Distro.
+* Add SyncWrap::Iyyov systemd service unit file and install support.
+* Add SyncWrap::Puma systemd service unit file and install support.
+* Add cryptographic hash verification support to SyncWrap::CRubyVM,
+  SyncWrap::JRubyVM, SyncWrap::Hashdot, and SyncWrap::CommercialJDK.
+* Add -R/--components-in-role flag support in CLI to limit components
+  executed to those contained by one or more roles.
+* Upgrade SyncWrap::JRubyVM default version to 1.7.22
+* Upgrade SyncWrap::CRubyVM default version to 2.1.7
+* Move AmazonEC2.ec2_user_data to SyncWrap::UserData module for
+  broader use.
+
 === 2.5.1 (2015-10-19)
 * Add SyncWrap::RHEL#dist_uninstall :succeed flag for removing
   packages which may not exist

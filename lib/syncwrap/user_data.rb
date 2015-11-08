@@ -15,7 +15,26 @@
 #++
 
 module SyncWrap
-  VERSION='2.6.0'
 
-  GEM_ROOT = File.dirname(File.dirname(File.dirname(__FILE__))) # :nodoc:
+  # Utility methods for generating scripts to pass as user data.
+  module UserData
+
+    private
+
+    # Returns an sh script to allow no password, no tty sudo for a
+    # specified user by writing a file to /etc/sudoers.d/<user>
+    def no_tty_sudoer( user )
+      script = <<-SH
+        #!/bin/sh -e
+        echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
+        echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
+        chmod 440 /etc/sudoers.d/#{user}
+      SH
+      script.split( "\n" ).map( &:strip ).join( "\n" )
+    end
+
+    module_function :no_tty_sudoer
+
+  end
+
 end

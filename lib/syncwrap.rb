@@ -77,6 +77,7 @@ module SyncWrap
         sh_verbose: :v,
         sync_paths: [ File.join( SyncWrap::GEM_ROOT, 'sync' ) ] }
       @formatter = Formatter.new
+      @composed = 0
     end
 
     # Load the specified file path as per a sync.rb, into this
@@ -194,6 +195,18 @@ module SyncWrap
         uniq
     end
 
+    # Creates a new component class with &block as implementation of
+    # its :install method. Convenient for quick one-off glue but will
+    # you move to a real component class once it gets complex?
+    def compose( &block )
+      cc = Class.new(Component) do
+        define_method( :install, &block)
+      end
+      @composed += 1
+      self.class.const_set( "Composed#{@composed}", cc )
+      cc.new
+    end
+
     # Returns a new component_plan from plan, looking up any Class
     # string names and using :install for any missing methods:
     #
@@ -279,8 +292,14 @@ module SyncWrap
     private
 
     def execute_host( host, component_plan = [], opts = {} )
+      comp_roles = opts[ :comp_roles ]
+      comps = if comp_roles && !comp_roles.empty?
+                host.components_in_roles( comp_roles )
+              else
+                host.components
+              end
       # Important: resolve outside of context
-      comp_methods = resolve_component_methods(host.components, component_plan)
+      comp_methods = resolve_component_methods(comps, component_plan)
       ctx = Context.new( host, opts )
       ctx.with do
         comp_methods.each do |comp, mths|
@@ -372,6 +391,7 @@ module SyncWrap
   autoload :Iyyov,         'syncwrap/components/iyyov'
   autoload :IyyovDaemon,   'syncwrap/components/iyyov_daemon'
   autoload :JRubyVM,       'syncwrap/components/jruby_vm'
+  autoload :LVMCache,      'syncwrap/components/lvm_cache'
   autoload :MDRaid,        'syncwrap/components/mdraid'
   autoload :Network,       'syncwrap/components/network'
   autoload :OpenJDK,       'syncwrap/components/open_jdk'
@@ -392,5 +412,6 @@ module SyncWrap
   # Additional autoloads (optional support)
   autoload :AmazonEC2,     'syncwrap/amazon_ec2'
   autoload :GitHelp,       'syncwrap/git_help'
+  autoload :UserData,      'syncwrap/user_data'
 
 end

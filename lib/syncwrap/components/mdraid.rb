@@ -144,15 +144,6 @@ module SyncWrap
 
     private
 
-    def unmount_device( dev )
-      sudo <<-SH
-        if mount | grep -q '^#{dev} '; then
-          umount #{dev}
-          sed -r -i '\\|^#{dev}\\s|d' /etc/fstab
-        fi
-      SH
-    end
-
     def create_raid( md )
       rlevel = raid_level || default_raid_level
       sudo <<-SH

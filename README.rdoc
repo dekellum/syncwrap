@@ -91,7 +91,8 @@ like dist_install and other distribution-specific behaviors:
 
 Components implementing \#install:
 
-* SyncWrap::MDRaid - Software raid, lvm volumes, filesystems, mounts
+* SyncWrap::MDRaid, SyncWrap::LVMCache - Software raid, lvm volumes,
+  lvm cache, filesystems, mounts
 
 * SyncWrap::Network and SyncWrap::EtcHosts - hostname, static names,
   resolver config
@@ -127,14 +128,14 @@ Components implementing \#install:
 The above only represents my more recent project needs. Pull requests
 to add, for example, the following would be well received:
 
-* Bluepill
-* Rails (extra credit: without git fetch or per-host asset compile)
+* Rails (based on SourceTree, Bundle and ideally without per-host
+  asset compile)
 * Nginx
 * Mongo
 * Redis
 
-\SyncWrap makes it reasonable to implement any of the above in the
-privacy of your own office.
+\SyncWrap makes it reasonable to implement any of the above
+yourself.
 
 == License
 

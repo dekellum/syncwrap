@@ -55,16 +55,44 @@ module SyncWrap
     end
 
     # Install a System V style init.d script (already placed at remote
-    # /etc/init.d/<name>) via distro-specific command
+    # /etc/init.d/<name>) via distro-specific command. Note that this
+    # should not be called and may fail on a distro running systemd. A
+    # rough equivalent in this case is:
+    #
+    #   systemctl( 'enable', 'name.service' )
+    #
+    # See #systemd?, SystemD#systemctl
+    #
     def dist_install_init_service( name )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
-    # Run via sudo, the System V style, distro specific `service`
-    # command, typically supporting 'start', 'stop', 'restart',
-    # 'status', etc. arguments.
+    # Run via sudo as root, either a System V (distro specific)
+    # `service` command or the systemd `systemctl` equivalent.  In the
+    # System V case arguments are passed verbatim and are in the form:
+    # (name, command, options...) Typically supported commands
+    # include: start, stop, restart, reload and status.  For maximum
+    # compatibility, in the systemd case only two arguments are
+    # allowed: shortname, command. Note the order is reversed from the
+    # use of systemctl.
     def dist_service( *args )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
+    end
+
+    # If found mounted, unmount the specified device and also remove
+    # it from fstab.
+    def unmount_device( dev )
+      sudo <<-SH
+        if mount | grep -q '^#{dev} '; then
+          umount #{dev}
+          sed -r -i '\\|^#{dev}\\s|d' /etc/fstab
+        fi
+      SH
+    end
+
+    # Is the Distro running systemd?
+    def systemd?
+      false
     end
 
   end

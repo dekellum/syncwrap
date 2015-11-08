@@ -20,6 +20,7 @@ require 'securerandom'
 require 'syncwrap/amazon_ws'
 require 'syncwrap/path_util'
 require 'syncwrap/host'
+require 'syncwrap/user_data'
 
 module SyncWrap
 
@@ -37,6 +38,7 @@ module SyncWrap
   class AmazonEC2
     include AmazonWS
     include PathUtil
+    include UserData
 
     # FIXME: Interim strategy: use AmazonWS and defer deciding final
     # organization.
@@ -128,7 +130,7 @@ module SyncWrap
       # overrides (like for :availability_zone)?
 
       if profile[ :user_data ] == :ec2_user_sudo
-        profile[ :user_data ] = ec2_user_data
+        profile[ :user_data ] = no_tty_sudoer( 'ec2-user' )
       end
 
       dname = profile.delete( :default_name )
@@ -276,17 +278,6 @@ module SyncWrap
       else
         $stderr.puts( "WARNING: #{sync_file} entry not deleted (#{state})" )
       end
-    end
-
-    def ec2_user_data( user = 'ec2-user' )
-      #FIXME: Utility module for this (+ Users sudoers)?
-      script = <<-SH
-        #!/bin/sh -e
-        echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
-        echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
-        chmod 440 /etc/sudoers.d/#{user}
-      SH
-      script.split( "\n" ).map( &:strip ).join( "\n" )
     end
 
   end
