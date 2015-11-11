@@ -165,7 +165,7 @@ module SyncWrap
 
     # Maximum WAL size as string with units.
     # (Default: unset, PG Default: '1GB')
-    attr_writer :max_wal_size
+    attr_accessor :max_wal_size
 
     # Shared buffers (Default: '256MB' vs PG: '128MB')
     attr_accessor :shared_buffers
