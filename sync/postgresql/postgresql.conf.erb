@@ -105,13 +105,13 @@ max_connections = 100                   # (change requires restart)
                                         # (change requires restart)
 #ssl_prefer_server_ciphers = on         # (change requires restart) (9.4+)
 #ssl_ecdh_curve = 'prime256v1'          # (change requires restart) (9.4+)
-#ssl_renegotiation_limit = 512MB        # amount of data between renegotiations
 #ssl_cert_file = 'server.crt'           # (change requires restart)
 #ssl_key_file = 'server.key'            # (change requires restart)
 #ssl_ca_file = ''                       # (change requires restart)
 #ssl_crl_file = ''                      # (change requires restart)
 #password_encryption = on
 #db_user_namespace = off
+#row_security = on                      # (9.5+)
 
 # GSSAPI using Kerberos
 #krb_server_keyfile = ''
@@ -204,6 +204,7 @@ synchronous_commit = <%= synchronous_commit %>  # synchronization level;
                                         #   fsync_writethrough
                                         #   open_sync
 #full_page_writes = on                  # recover from partial page writes
+#wal_compression = off                  # enable compression of full-page writes (9.5+)
 #wal_log_hints = off                    # also do full page writes of non-critical updates
                                         # (change requires restart) (9.4+)
 #wal_buffers = -1                       # min 32kB, -1 sets based on shared_buffers
@@ -214,15 +215,23 @@ commit_delay = <%= commit_delay %>      # range 0-100000, in microseconds
 #commit_siblings = 5                    # range 1-1000
 
 # - Checkpoints -
-
+<% if version_gte?(pg_version, [9,5]) %>
+min_wal_size = <%= min_wal_size %>                     # (9.5+)
+<%   if max_wal_size %>
+max_wal_size = <%= max_wal_size %>                     # (9.5+)
+<%   else %>
+#max_wal_size = 1GB                     # (9.5+)
+<%   end %>
+<% else %>
 checkpoint_segments = <%= checkpoint_segments %> # in logfile segments, min 1, 16MB each
+<% end %>
 #checkpoint_timeout = 5min              # range 30s-1h
 #checkpoint_completion_target = 0.5     # checkpoint target duration, 0.0 - 1.0
 #checkpoint_warning = 30s               # 0 disables
 
 # - Archiving -
 
-#archive_mode = off             # allows archiving to be done
+#archive_mode = off             # enables archiving; off, on, (or 'always', 9.5+)
                                 # (change requires restart)
 #archive_command = ''           # command to use to archive a logfile segment
                                 # placeholders: %p = path of file to archive
@@ -246,6 +255,8 @@ checkpoint_segments = <%= checkpoint_segments %> # in logfile segments, min 1, 1
 #wal_sender_timeout = 60s       # in milliseconds; 0 disables (9.3+)
 #max_replication_slots = 0      # max number of replication slots
                                 # (change requires restart) (9.4+)
+#track_commit_timestamp = off   # collect timestamp of transaction commit
+                                # (change requires restart) (9.5+)
 
 # - Master Server -
 
@@ -275,6 +286,8 @@ checkpoint_segments = <%= checkpoint_segments %> # in logfile segments, min 1, 1
 #wal_receiver_timeout = 60s             # time that receiver waits for
                                         # communication from master
                                         # in milliseconds; 0 disables
+#wal_retrieve_retry_interval = 5s       # time to wait before retrying to
+                                        # retrieve WAL after a failed attempt (9.5+)
 
 #------------------------------------------------------------------------------
 # QUERY TUNING
@@ -447,10 +460,17 @@ log_line_prefix = '< %m >'              # special values:
                                         # e.g. '<%u%%%d> '
 #log_lock_waits = off                   # log lock waits >= deadlock_timeout
 #log_statement = 'none'                 # none, ddl, mod, all
+#log_replication_commands = off         # (9.5+)
 #log_temp_files = -1                    # log temporary files equal or larger
                                         # than the specified size in kilobytes;
                                         # -1 disables, 0 logs all temp files
 log_timezone = 'UTC'
+
+# - Process Title -
+
+#cluster_name = ''                      # added to process titles if nonempty
+                                        # (change requires restart) (9.5+)
+#update_process_title = on
 
 #------------------------------------------------------------------------------
 # RUNTIME STATISTICS
@@ -463,7 +483,6 @@ log_timezone = 'UTC'
 #track_io_timing = off
 #track_functions = none                 # none, pl, all
 #track_activity_query_size = 1024       # (change requires restart)
-#update_process_title = on
 #stats_temp_directory = 'pg_stat_tmp'
 
 # - Statistics Monitoring -
@@ -510,7 +529,7 @@ log_timezone = 'UTC'
 
 # - Statement Behavior -
 
-#search_path = '"$user",public'         # schema names
+#search_path = '"$user", public'        # schema names
 #default_tablespace = ''                # a tablespace name, '' uses the default
 #temp_tablespaces = ''                  # a list of tablespace names, '' uses
                                         # only default tablespace
@@ -528,6 +547,8 @@ log_timezone = 'UTC'
 #bytea_output = 'hex'                   # hex, escape
 #xmlbinary = 'base64'
 #xmloption = 'content'
+#gin_fuzzy_search_limit = 0             # (9.4+?)
+#gin_pending_list_limit = 4MB           # (9.5+)
 
 # - Locale and Formatting -
 
@@ -585,6 +606,7 @@ default_text_search_config = 'pg_catalog.english'
 #default_with_oids = off
 #escape_string_warning = on
 #lo_compat_privileges = off
+#operator_precedence_warning = off      # (9.5+)
 #quote_all_identifiers = off
 #sql_inheritance = on
 #standard_conforming_strings = on

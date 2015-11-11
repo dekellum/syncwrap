@@ -147,8 +147,25 @@ module SyncWrap
     # increased risk. (PG Default: 0 -> none)
     attr_accessor :commit_delay
 
-    # WAL log segments (16MB each) (PG Default: 3)
-    attr_accessor :checkpoint_segments
+    # WAL log segments (16MB each)
+    # Deprecated with PostgreSQL 9.5: Use min/max_wal_size instead
+    attr_writer :checkpoint_segments
+
+    def checkpoint_segments
+      @checkpoint_segments || ( version_lt?(pg_version, [9,5]) ? 3 : 5 )
+    end
+
+    # Minimum WAL size as string with units
+    # Default: PG <9.5: "48MB"; PG 9.5+: "80MB"
+    attr_writer :min_wal_size
+
+    def min_wal_size
+      @min_wal_size || "#{ checkpoint_segments * 16 }MB"
+    end
+
+    # Maximum WAL size as string with units.
+    # (Default: unset, PG Default: '1GB')
+    attr_writer :max_wal_size
 
     # Shared buffers (Default: '256MB' vs PG: '128MB')
     attr_accessor :shared_buffers
@@ -228,7 +245,9 @@ module SyncWrap
       @service_name = 'postgresql'
       @synchronous_commit = :on
       @commit_delay = 0
-      @checkpoint_segments = 3
+      @checkpoint_segments = nil
+      @min_wal_size = nil
+      @max_wal_size = nil
       @shared_buffers = '256MB'
       @work_mem = '128MB'
       @maintenance_work_mem = '128MB'
