@@ -40,6 +40,7 @@ module SyncWrap
   # * RHEL, CentOS 7: 9.2
   # * AmazonLinux 2013.03: 8.4 9.2
   # * AmazonLinux 2014.09: 8.4 9.2 9.3
+  # * AmazonLinux 2015.09: 9.2 9.3 9.4
   # * Debian 7: 9.1
   # * Ubuntu 14: 9.3
   #
