@@ -1,4 +1,4 @@
-=== 2.6.0 (TBD)
+=== 2.6.0 (2015-11-13)
 * Add SyncWrap::LVMCache component, with
   SyncWrap::Distro#unmount_device moved from MDRaid.
 * Add SyncWrap::Space#compose (and main) utility for sync file inline
