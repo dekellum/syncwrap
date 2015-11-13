@@ -32,6 +32,11 @@ module SyncWrap
     # minimum of 8M (MiB). Default: '8M'
     attr_accessor :meta_size
 
+    # The target size of the cache volume as a string. This may either
+    # express a percentage (via -l) or a real size (via -L, ex: '30G')
+    # Default: '100%FREE'
+    attr_accessor :cache_size
+
     # A volume group instance number compatible with the naming used
     # by MDRaid. The cache and cache-meta volumes must all be under
     # the same volume group as the lv_cache_target volume.
@@ -70,6 +75,7 @@ module SyncWrap
 
     def initialize( opts = {} )
       @meta_size = '8M'
+      @cache_size = '100%FREE'
       @vg_instance = 0
       @raw_device = nil
       @lv_cache_target = nil
@@ -88,7 +94,7 @@ module SyncWrap
         sudo <<-SH
           vgextend #{vgextend_flags.join ' '} #{vg} #{raw_device}
           lvcreate -L #{meta_size} -n #{lv_cache_meta} #{vg} #{raw_device}
-          lvcreate -l 100%FREE -n #{lv_cache} #{vg} #{raw_device}
+          lvcreate #{cache_size_flag} -n #{lv_cache} #{vg} #{raw_device}
           lvconvert --type cache-pool --cachemode writethrough --yes \
                     --poolmetadata #{vg}/#{lv_cache_meta} #{vg}/#{lv_cache}
           lvconvert --type cache --cachepool #{vg}/#{lv_cache} #{vg}/#{lv_cache_target}
@@ -96,6 +102,15 @@ module SyncWrap
       end
     end
 
+    protected
+
+    def cache_size_flag
+      if cache_size =~ /%/
+        "-l #{cache_size}"
+      else
+        "-L #{cache_size}"
+      end
+    end
   end
 
 end
