@@ -121,6 +121,8 @@ module SyncWrap
       end
     end
 
+    # Create new hosts and append host definitions to the sync_file.
+    # If a block is given, each new host is yielded before appending.
     def create_hosts( count, profile, name, sync_file )
       require_configured!
       profile = get_profile( profile ) if profile.is_a?( Symbol )
@@ -145,6 +147,7 @@ module SyncWrap
                 end
         props = aws_create_instance( hname, profile )
         host = space.host( props )
+        yield( host ) if block_given?
         append_host_definitions( [ host ], nil, sync_file )
         host[ :just_created ] = true
         # Need to use a host prop for this since context(s) do not
