@@ -1,4 +1,6 @@
 === 2.6.1 (TBD)
+* Add -a/--add-role flag to CLI to add role(s) with create or image
+  beyond what is specified by the profile.
 
 === 2.6.0 (2015-11-13)
 * Add SyncWrap::LVMCache component, with
