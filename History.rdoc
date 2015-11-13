@@ -1,3 +1,5 @@
+=== 2.6.1 (TBD)
+
 === 2.6.0 (2015-11-13)
 * Add SyncWrap::LVMCache component, with
   SyncWrap::Distro#unmount_device moved from MDRaid.
