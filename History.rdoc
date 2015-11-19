@@ -1,6 +1,9 @@
 === 2.6.1 (TBD)
 * Add -a/--add-role flag to CLI to add role(s) with create or image
   beyond what is specified by the profile.
+* Update SyncWrap::PostgreSQL for support of version 9.5 as of the
+  Beta 2 release. Changes, including postgresql.conf updates,
+  remain backward compatible with 9.1+ and SyncWrap 2.3.0+
 
 === 2.6.0 (2015-11-13)
 * Add SyncWrap::LVMCache component, with
