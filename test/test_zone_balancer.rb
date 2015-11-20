@@ -37,11 +37,11 @@ class TestZoneBalancer < MiniTest::Unit::TestCase
       sp.host( 'h4', :r3, availability_zone: 'b' )
 
       assert_equal( 'c', f.call )
-      assert_equal( 'c', zb.next_zone( %w[a b c], [:r2] ) )
-      assert_equal( 'b', zb.next_zone( %w[a b], [:r2] ) )
-      assert_equal( 'b', zb.next_zone( %w[a b c], [:r1] ) )
-      assert_equal( 'a', zb.next_zone( %w[a b c], [:rempty] ) )
-      assert_equal( 'c', zb.next_zone( %w[a b c] ) )
+      assert_equal( 'c', zb.next_zone( sp, %w[a b c], [:r2] ) )
+      assert_equal( 'b', zb.next_zone( sp, %w[a b], [:r2] ) )
+      assert_equal( 'b', zb.next_zone( sp, %w[a b c], [:r1] ) )
+      assert_equal( 'a', zb.next_zone( sp, %w[a b c], [:rempty] ) )
+      assert_equal( 'c', zb.next_zone( sp, %w[a b c] ) )
 
     end
   end
