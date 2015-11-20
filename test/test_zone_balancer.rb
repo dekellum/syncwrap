@@ -26,15 +26,23 @@ class TestZoneBalancer < MiniTest::Unit::TestCase
 
   def test
     sp = Space.new
+    zb = ZoneBalancer
     sp.with do
-      zb = ZoneBalancer.new( roles: [:r2], zones: %w[ a b c ] )
-      f = zb.zone
+      f = zb.zone( %w[a b c], [:r2] )
+      assert_equal( 'a', f.call )
+
       sp.host( 'h1', :r1, :r2,  availability_zone: 'a' )
       sp.host( 'h2', :r2, availability_zone: 'b' )
       sp.host( 'h3', :r2, availability_zone: 'a' )
-      sp.host( 'h3', :r3, availability_zone: 'b' )
-      assert_equal( 'c', zb.next_zone  )
-      assert_equal( 'c', f.call  )
+      sp.host( 'h4', :r3, availability_zone: 'b' )
+
+      assert_equal( 'c', f.call )
+      assert_equal( 'c', zb.next_zone( %w[a b c], [:r2] ) )
+      assert_equal( 'b', zb.next_zone( %w[a b], [:r2] ) )
+      assert_equal( 'b', zb.next_zone( %w[a b c], [:r1] ) )
+      assert_equal( 'a', zb.next_zone( %w[a b c], [:rempty] ) )
+      assert_equal( 'c', zb.next_zone( %w[a b c] ) )
+
     end
   end
 end

@@ -17,52 +17,45 @@
 module SyncWrap
 
   # Utility for balancing new hosts accross multiple (AWS)
-  # availability zones for fault tolarance purposes.
-  class ZoneBalancer
+  # availability zones for fault tolarance.
+  module ZoneBalancer
 
-    # One or more role symbols for which to compare existing host
-    # zones. If empty, all hosts will be compared.
-    # Default: []
-    attr_accessor :roles
-
-    # Required list of zone String names across which to balance new
-    # hosts. The zone order is honored when frequency of current hosts
-    # is the same (including 0). If not set, no zone will be selected
-    # by the zone method, leaving selection to AWS.
-    attr_accessor :zones
-
-    def initialize( opts = {} )
-      opts = opts.dup
-      @space = opts.delete( :space ) || Space.current
-      @roles = []
-      @zones = nil
-      opts.each { |name, val| send( name.to_s + '=', val ) }
+    # Returns a ruby Proc which when called will return the best
+    # pick of availability zone, via #next_zone
+    def self.zone( zones, roles )
+      lambda do
+        next_zone( zones, roles )
+      end
     end
 
-    # Returns a ruby Proc which when called will return the next, best
-    # pick of availability zone.
-    def zone
-      method :next_zone
+    # Return the next best zone from the zones Array of fymbols,
+    # preferring the least frequent :availability_zone of existing
+    # hosts in the specified roles (or if empty, all hosts).
+    def self.next_zone( zones, roles = [] )
+      if zones
+        hosts = filter_hosts( Space.current.hosts, roles )
+        zfreqs = {}
+        zones.each { |z| zfreqs[z] = 0 }
+        czones = hosts.map { |h| h[:availability_zone] }.compact
+        czones.each { |z| zfreqs[z] += 1 if zfreqs.has_key?( z ) }
+
+        # Sort by ascending frequency (lowest first). Keep order stable
+        # from original zones, when frequency tied.
+        # Return the first (least frequent, zones stables) zone.
+        n = 0
+        zfreqs.sort_by { |_,f| [ f, (n+=1) ] }.first[0]
+      end
     end
 
-    def next_zone
-      return nil unless @zones && !@zones.empty?
-      hosts = @space.hosts
-      unless @roles.empty?
+    private
+
+    def self.filter_hosts( hosts, roles )
+      unless roles.empty?
         hosts = hosts.select do |h|
-          h.roles.any? { |r| @roles.include?( r ) }
+          h.roles.any? { |r| roles.include?( r ) }
         end
       end
-      zfreqs = {}
-      @zones.each { |z| zfreqs[z] = 0 }
-      czones = hosts.map { |h| h[:availability_zone] }.compact
-      czones.each { |z| zfreqs[z] += 1 if zfreqs.has_key?( z ) }
-
-      # Sort by ascending frequency (lowest first). Keep order stable
-      # from original @zones, when frequency tied.
-      # Return the first (least frequent, zones stables) zone.
-      n = 0
-      zfreqs.sort_by { |_,f| [ f, (n+=1) ] }.first[0]
+      hosts
     end
 
   end
