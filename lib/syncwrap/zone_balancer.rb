@@ -42,7 +42,7 @@ module SyncWrap
 
         # Sort by ascending frequency (lowest first). Keep order stable
         # from original zones, when frequency tied.
-        # Return the first (least frequent, zones stables) zone.
+        # Return the first (least frequent, zones stable) zone.
         n = 0
         zfreqs.sort_by { |_,f| [ f, (n+=1) ] }.first[0]
       end
