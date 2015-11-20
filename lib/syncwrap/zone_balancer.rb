@@ -21,20 +21,21 @@ module SyncWrap
   module ZoneBalancer
 
     # Returns a ruby Proc which when called will return the best
-    # pick of availability zone, via ::next_zone
+    # pick of availability zone, via ::next_zone. This variant
+    # uses Space.current within a Space#with block.
     def self.zone( zones, roles )
+      space = Space.current
       lambda do
-        next_zone( zones, roles )
+        next_zone( space, zones, roles )
       end
     end
 
-    # Return the next best zone from zones Array<String>,
-    # preferring the least frequent :availability_zone of existing
-    # hosts in the specified roles (Array<Symbol>, if empty all
-    # hosts).
-    def self.next_zone( zones, roles = [] )
+    # Return the next best zone from zones Array<String>, preferring
+    # the least frequent :availability_zone of existing hosts in the
+    # specified space and roles (Array<Symbol>, if empty all hosts).
+    def self.next_zone( space, zones, roles = [] )
       if zones
-        hosts = filter_hosts( Space.current.hosts, roles )
+        hosts = filter_hosts( space.hosts, roles )
         zfreqs = {}
         zones.each { |z| zfreqs[z] = 0 }
         czones = hosts.map { |h| h[:availability_zone] }.compact
