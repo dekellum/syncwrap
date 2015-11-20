@@ -413,5 +413,6 @@ module SyncWrap
   autoload :AmazonEC2,     'syncwrap/amazon_ec2'
   autoload :GitHelp,       'syncwrap/git_help'
   autoload :UserData,      'syncwrap/user_data'
+  autoload :ZoneBalancer,  'syncwrap/zone_balancer'
 
 end

@@ -124,6 +124,9 @@ module SyncWrap
         aws_create_security_group( sg, region: region )
       end
 
+      az = iopts[ :availability_zone ]
+      iopts[ :availability_zone ] = az.call if az.is_a?( Proc )
+
       inst = ec2.instances.create( iopts )
 
       wait_until( "instance #{inst.id} to register" ) do
