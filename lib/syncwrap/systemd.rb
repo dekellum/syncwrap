@@ -21,7 +21,7 @@ module SyncWrap
 
     # Run systemd `systemctl` command with args via sudo as root.
     def systemctl( *args )
-      sudo "/usr/bin/systemctl #{args.join ' '}"
+      sudo "systemctl #{args.join ' '}"
     end
 
     # Expand given shortname to "shortname.service" as used for the
