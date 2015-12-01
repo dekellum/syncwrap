@@ -99,6 +99,15 @@ module SyncWrap
         set_sudoers( u )
       end
 
+      # Some distro's, like Debian, don't come with rsync installed so
+      # need to install it here. For backward compatibly, only do
+      # this if dist_install is defined (i.e. Distro component before
+      # self.)
+      if !users.empty? && respond_to?( :dist_install )
+        dist_install( 'rsync',
+                      ssh_flags.merge( minimal: true, check_install: true ) )
+      end
+
       users.each do |u|
         sync_home_files( u )
       end
