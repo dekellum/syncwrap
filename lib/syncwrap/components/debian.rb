@@ -66,10 +66,10 @@ module SyncWrap
     end
 
     # Uninstall the specified package names. A trailing hash is
-    # interpreted as options.
+    # interpreted as options, passed to the sudo calls.
     def dist_uninstall( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      sudo "aptitude -yq purge #{pkgs.join ' '}"
+      sudo( "apt-get -yq --purge remove #{pkgs.join ' '}", opts )
     end
 
     # Install a System V style init.d service script
