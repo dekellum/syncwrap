@@ -63,19 +63,21 @@ module SyncWrap
     # interpreted as options, see below.
     #
     # ==== Options
-    # :succeed:: Succeed even if no such packages are installed
     #
-    # Other options will be ignored.
+    # :succeed:: Succeed even if none of the packages are
+    #            installed. (Deprecated, Default: true)
+    #
+    # Additional options are passed to the sudo calls.
     def dist_uninstall( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      if opts[ :succeed ]
-        sudo <<-SH
+      if opts[ :succeed ] != false
+        sudo( <<-SH, opts )
           if yum list -q installed #{pkgs.join( ' ' )} >/dev/null 2>&1; then
             yum remove -q -y #{pkgs.join( ' ' )}
           fi
         SH
       else
-        sudo "yum remove -q -y #{pkgs.join( ' ' )}"
+        sudo( "yum remove -q -y #{pkgs.join( ' ' )}", opts )
       end
     end
 
