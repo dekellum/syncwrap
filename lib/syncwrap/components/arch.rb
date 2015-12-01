@@ -41,6 +41,7 @@ module SyncWrap
     def dist_install( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
       opts.delete( :minimal )
+      pkgs.flatten!
       chk = opts.delete( :check_install ) || opts.delete( :succeed )
       chk = check_install? if chk.nil?
       dist_if_not_installed?( pkgs, chk, opts ) do
@@ -53,6 +54,7 @@ module SyncWrap
     def dist_uninstall( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
       opts.delete( :succeed )
+      pkgs.flatten!
       pkgs.each do |pkg|
         dist_if_installed?( pkg, opts ) do
           sudo( "pacman -R --noconfirm #{pkg}", opts )

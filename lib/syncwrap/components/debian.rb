@@ -63,6 +63,7 @@ module SyncWrap
     # Additional options are passed to the sudo calls.
     def dist_install( *args )
       opts = args.last.is_a?( Hash ) && args.pop.dup || {}
+      args.flatten!
       flags = []
       flags << '--no-install-recommends' if opts.delete( :minimal )
       chk = opts.delete( :check_install ) || opts.delete( :succeed )
@@ -78,6 +79,7 @@ module SyncWrap
     def dist_uninstall( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
       opts.delete( :succeed )
+      pkgs.flatten!
       sudo( "apt-get -yq --purge remove #{pkgs.join ' '}", opts )
     end
 

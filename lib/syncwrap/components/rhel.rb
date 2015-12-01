@@ -55,6 +55,7 @@ module SyncWrap
     def dist_install( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
       opts.delete( :minimal )
+      pkgs.flatten!
       chk = opts.delete( :check_install ) || opts.delete( :succeed )
       chk = check_install? if chk.nil?
       dist_if_not_installed?( pkgs, chk, opts ) do
@@ -73,6 +74,7 @@ module SyncWrap
     # Additional options are passed to the sudo calls.
     def dist_uninstall( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
+      pkgs.flatten!
       if opts.delete( :succeed ) != false
         sudo( <<-SH, opts )
           if yum list -q installed #{pkgs.join( ' ' )} >/dev/null 2>&1; then
