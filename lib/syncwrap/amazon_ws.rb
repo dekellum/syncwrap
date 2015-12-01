@@ -65,11 +65,14 @@ module SyncWrap
     def aws_create_security_group( name, opts = {} )
       opts = opts.dup
       region = opts.delete( :region )
+      vpc = opts[ :vpc ]
       ec2 = AWS::EC2.new.regions[ region ]
-      unless ec2.security_groups.find { |sg| sg.name == name }
+      unless ec2.security_groups.find { |sg|
+               sg.name == name && ( vpc.nil? || sg.vpc_id == vpc )
+             }
         sg = ec2.security_groups.create( name, opts )
 
-        # FIXME: Allow ssh on the "default" region named group
+        # Allow ssh on the "default" region named group
         if name == region
           sg.authorize_ingress(:tcp, 22)
         end
@@ -111,6 +114,7 @@ module SyncWrap
       iopts.delete( :roles ) #-> tags
       iopts.delete( :description ) #-> tags
       iopts.delete( :tag ) #-> tags
+      iopts.delete( :vpc )
 
       if iopts[ :count ] && iopts[ :count ] != 1
         raise ":count #{iopts[ :count ]} != 1 is not supported"
@@ -121,7 +125,7 @@ module SyncWrap
       end
 
       iopts[ :security_groups ].each do |sg|
-        aws_create_security_group( sg, region: region )
+        aws_create_security_group( sg, region: region, vpc: opts[ :vpc ] )
       end
 
       inst = ec2.instances.create( iopts )
