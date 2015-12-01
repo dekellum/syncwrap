@@ -31,7 +31,7 @@ module SyncWrap
     # google name servers to avoid local negative caching)
     attr_accessor :resolver_options
 
-    def initialize
+    def initialize(*args)
       @default_instance_options = {
         ebs_volumes:        0,
         ebs_volume_options: { size: 16 }, #gb

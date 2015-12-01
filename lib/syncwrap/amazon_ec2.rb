@@ -17,6 +17,8 @@
 require 'time'
 require 'securerandom'
 
+require 'syncwrap/provider'
+
 require 'syncwrap/amazon_ws'
 require 'syncwrap/path_util'
 require 'syncwrap/host'
@@ -35,13 +37,15 @@ module SyncWrap
   #
   # Then add profiles via #profile, as needed.
   #
-  class AmazonEC2
+  class AmazonEC2 < Provider
     include AmazonWS
     include PathUtil
     include UserData
 
     # FIXME: Interim strategy: use AmazonWS and defer deciding final
     # organization.
+
+    protected
 
     # The json configuration file path, parsed and passed to
     # AWS::config. This file should contain a json object with the
@@ -50,14 +54,11 @@ module SyncWrap
     # option if provided on construction.  (default: private/aws.json)
     attr_accessor :aws_config
 
+    public
+
     def initialize( space, opts = {} )
-      super()
-      @profiles = {}
-      @space = space
       @aws_config = 'private/aws.json'
-      opts = opts.dup
-      sync_file_path = opts.delete( :sync_file_path )
-      opts.each { |name, val| send( name.to_s + '=', val ) }
+      super
 
       # Look up aws_config (i.e. default private/aws.json) relative to
       # the sync file path.
@@ -76,34 +77,7 @@ module SyncWrap
       end
     end
 
-    # Define a host profile by Symbol key and Hash value.
-    #
-    # Profiles may inherit properties from a :base_profile, either
-    # specified by that key, or the :default profile. The
-    # base_profile must be defined in advance (above in the sync
-    # file). When merging profile to any base_profile, the :roles
-    # property is concatenated via set union. All other properties are
-    # overwritten.
-    #
-    # FIXME: All other profile properties are as currently defined by
-    # #aws_create_instance.
-    def profile( key, profile )
-      profile = profile.dup
-      base = profile.delete( :base_profile ) || :default
-      base_profile = @profiles[ base ]
-      if base_profile
-        profile = base_profile.merge( profile )
-        if base_profile[ :roles ] && profile[ :roles ]
-          profile[ :roles ] = ( base_profile[ :roles ] | profile[ :roles ] )
-        end
-      end
-
-      @profiles[ key ] = profile
-    end
-
-    def get_profile( key )
-      @profiles[ key ] or raise "Profile #{key} not registered"
-    end
+    # FIXME: compare these for changes
 
     def import_hosts( regions, sync_file )
       require_configured!
@@ -117,7 +91,7 @@ module SyncWrap
 
         time = Time.now.utc
         cmt = "\n# Import of AWS #{regions.join ','} on #{time.iso8601}"
-        append_host_definitions( hlist, cmt, sync_file )
+        append_host_definitions( hlist, sync_file, cmt )
       end
     end
 
@@ -125,35 +99,11 @@ module SyncWrap
     # If a block is given, each new host is yielded before appending.
     def create_hosts( count, profile, name, sync_file )
       require_configured!
-      profile = get_profile( profile ) if profile.is_a?( Symbol )
-      profile = profile.dup
+      super
+    end
 
-      # FIXME: Support profile overrides? Also add some targeted CLI
-      # overrides (like for :availability_zone)?
-
-      if profile[ :user_data ] == :ec2_user_sudo
-        profile[ :user_data ] = no_tty_sudoer( 'ec2-user' )
-      end
-
-      dname = profile.delete( :default_name )
-      name ||= dname
-
-      count.times do
-        hname = if count == 1
-                  raise "Host #{name} already exists!" if space.get_host( name )
-                  name
-                else
-                  find_name( name )
-                end
-        props = aws_create_instance( hname, profile )
-        host = space.host( props )
-        yield( host ) if block_given?
-        append_host_definitions( [ host ], nil, sync_file )
-        host[ :just_created ] = true
-        # Need to use a host prop for this since context(s) do not
-        # exist yet. Note it is set after append_host_definitions, to
-        # avoid permanently writing this property to the sync_file.
-      end
+    def create_host( profile, hname )
+      aws_create_instance( hname, profile )
     end
 
     # Create a temporary host using the specified profile, yield to
@@ -194,92 +144,19 @@ module SyncWrap
 
     end
 
-    def terminate_hosts( names, delete_attached_storage, sync_file, do_wait = true )
+    def terminate_host( host, delete_attached_storage, do_wait = true )
       require_configured!
-      names.each do |name|
-        host = space.get_host( name )
-        raise "Host #{name} not found in Space, sync file." unless host
-        raise "Host #{name} missing :id" unless host[:id]
-        raise "Host #{name} missing :region" unless host[:region]
-        aws_terminate_instance( host, delete_attached_storage, do_wait )
-        delete_host_definition( host, sync_file )
-      end
+      raise "Host #{name} missing :id" unless host[:id]
+      raise "Host #{name} missing :region" unless host[:region]
+      aws_terminate_instance( host, delete_attached_storage, do_wait )
     end
 
-    private
-
-    attr_reader :space
+    protected
 
     def require_configured!
       unless @aws_config
         raise( ":aws_config file not found, " +
                "operation not supported without AWS credentials" )
-      end
-    end
-
-    def find_name( prefix )
-      i = 1
-      name = nil
-      loop do
-        name = "%s-%2d" % [ prefix, i ]
-        break if !space.get_host( name )
-        i += 1
-      end
-      name
-    end
-
-    def append_host_definitions( hosts, comment, sync_file )
-      File.open( sync_file, "a" ) do |out|
-        out.puts comment if comment
-
-        hosts.each do |host|
-          props = host.props.dup
-          props.delete( :name )
-
-          roles = ( host.roles - [:all] ).map { |s| ':' + s.to_s }.join ', '
-          roles << ',' unless roles.empty?
-          props = host.props.map do |key,val|
-            "#{key}: #{val.inspect}" unless key == :name
-          end.compact.join ",\n      "
-
-          out.puts "host( '#{host.name}', #{roles}"
-          out.puts "      #{props} ) # :auto-generated"
-        end
-      end
-    end
-
-    def delete_host_definition( host, sync_file )
-      lines = IO.readlines( sync_file )
-      out_lines = []
-      state = :find
-      lines.each do |line|
-        if state == :find
-          if line =~ /^host\( '#{host.name}',/
-            state = :just_found
-          else
-            out_lines << line
-          end
-        end
-        if state == :just_found || state == :found
-          if state == :found && line =~ /^host\(/
-            state = :no_end
-            break
-          end
-          state = :found
-          if line =~ /^\s*[^#].*\) # :auto-generated$/
-            state = :deleted
-          end
-        elsif state == :deleted
-          out_lines << line
-        end
-      end
-
-      if state == :deleted
-        File.open( sync_file, "w" ) do |out|
-          out.puts out_lines
-        end
-      else
-        $stderr.puts( "WARNING: #{sync_file} entry not deleted (#{state})" )
       end
     end
 

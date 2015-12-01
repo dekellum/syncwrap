@@ -28,6 +28,7 @@ lib/syncwrap/hash_support.rb
 lib/syncwrap/host.rb
 lib/syncwrap/main.rb
 lib/syncwrap/path_util.rb
+lib/syncwrap/provider.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
