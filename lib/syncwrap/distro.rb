@@ -41,15 +41,20 @@ module SyncWrap
     #
     # ==== Options
     #
-    # :succeed:: Always succeed (useful for local rpms which might
-    #            already be installed.
+    # :check_install:: Short-circuit if all packages already
+    #                  installed. Thus no upgrades will be performed.
     #
-    # :minimal:: Avoid additional "optional" packages when possible.
+    # :succeed:: Deprecated, use check_install instead
+    #
+    # :minimal:: Avoid additional "optional" packages when possible
+    #
+    # Additional options are passed to the sudo calls.
     def dist_install( *pkgs )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
-    # Uninstall the specified package names.
+    # Uninstall the specified package names. A trailing hash is
+    # interpreted as options, passed to the sudo calls.
     def dist_uninstall( *pkgs )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end

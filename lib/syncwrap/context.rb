@@ -82,6 +82,12 @@ module SyncWrap
       @default_options[ :verbose ]
     end
 
+    # Return any value of :check_install set in constructed default
+    # options.
+    def check_install?
+      @default_options[ :check_install ]
+    end
+
     # See Component#sh for interface details
     def sh( command, opts = {} )
       opts = @default_options.merge( opts )

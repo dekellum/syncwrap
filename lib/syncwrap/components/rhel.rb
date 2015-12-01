@@ -45,17 +45,20 @@ module SyncWrap
     # interpreted as options, see below.
     #
     # ==== Options
-    # :succeed:: Always succeed (useful for local rpm files which
-    #            might already be installed.)
     #
-    # Other options will be ignored.
+    # :check_install:: Short-circuit if all packages already
+    #                  installed. Thus no upgrades will be performed.
+    #
+    # :succeed:: Deprecated, use check_install instead
+    #
+    # Additional options are passed to the sudo calls.
     def dist_install( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-
-      if opts[ :succeed ]
-        sudo "yum install -q -y #{pkgs.join( ' ' )} || true"
-      else
-        sudo "yum install -q -y #{pkgs.join( ' ' )}"
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
+      opts.delete( :minimal )
+      chk = opts.delete( :check_install ) || opts.delete( :succeed )
+      chk = check_install? if chk.nil?
+      dist_if_not_installed?( pkgs, chk, opts ) do
+        sudo( "yum install -q -y #{pkgs.join( ' ' )}", opts )
       end
     end
 
@@ -69,8 +72,8 @@ module SyncWrap
     #
     # Additional options are passed to the sudo calls.
     def dist_uninstall( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      if opts[ :succeed ] != false
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
+      if opts.delete( :succeed ) != false
         sudo( <<-SH, opts )
           if yum list -q installed #{pkgs.join( ' ' )} >/dev/null 2>&1; then
             yum remove -q -y #{pkgs.join( ' ' )}
@@ -78,6 +81,18 @@ module SyncWrap
         SH
       else
         sudo( "yum remove -q -y #{pkgs.join( ' ' )}", opts )
+      end
+    end
+
+    # If chk is true, then wrap block in a sudo bash conditional
+    # testing if any specified pkgs are not installed. Otherwise just
+    # yield to block.
+    def dist_if_not_installed?( pkgs, chk, opts, &block )
+      if chk
+        c = "if ! yum list -q installed #{pkgs.join ' '} >/dev/null 2>&1; then"
+        sudo( c, opts.merge( close: 'fi' ), &block )
+      else
+        block.call
       end
     end
 
