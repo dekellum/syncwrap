@@ -80,7 +80,11 @@ module SyncWrap
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
       opts.delete( :succeed )
       pkgs.flatten!
-      sudo( "apt-get -yq --purge remove #{pkgs.join ' '}", opts )
+      pkgs.each do |pkg|
+        dist_if_installed?( pkg, opts ) do
+          sudo( "apt-get -yq --purge remove #{pkg}", opts )
+        end
+      end
     end
 
     # If chk is true, then wrap block in a sudo bash conditional
@@ -95,6 +99,13 @@ module SyncWrap
       else
         block.call
       end
+    end
+
+    def dist_if_installed?( pkg, opts, &block )
+      qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkg}"
+      tst = qry + " | grep -q 'installed'"
+      cond = "if #{tst}; then"
+      sudo( cond, opts.merge( close: 'fi' ), &block )
     end
 
     # Install a System V style init.d service script
