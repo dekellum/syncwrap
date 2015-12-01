@@ -22,6 +22,8 @@ space.use_provider( AmazonEC2 )
 profile( :default,
          region: 'us-west-2',
          instance_type: 't2.small',
+         vpc: 'vpc-58654f3d',          #default vpc
+         subnet_id: 'subnet-7b700522', #default vpc
          key_name: 'dek-key-pair-1' )
 
 # Centos 7.1 2014-09-29 HVM EBS 64 us-west-2
