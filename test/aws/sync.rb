@@ -19,6 +19,8 @@ include SyncWrap
 space.prepend_sync_path
 space.use_provider( AmazonEC2 )
 
+options( check_install: true )
+
 profile( :default,
          region: 'us-west-2',
          instance_type: 't2.small',
