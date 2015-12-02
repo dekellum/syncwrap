@@ -86,6 +86,8 @@ module SyncWrap
       root = "#{local_root}/lib/jruby"
       distro = "/tmp/jruby-bin-#{jruby_version}.tar.gz"
 
+      dist_install( 'curl', minimal: true, check_install: true )
+
       sudo <<-SH
         if [ ! -d #{jruby_dist_path} ]; then
           mkdir -p #{root}

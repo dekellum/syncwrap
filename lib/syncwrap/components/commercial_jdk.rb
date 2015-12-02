@@ -71,6 +71,7 @@ module SyncWrap
         join( ' ' )
 
       sudo( "if [ ! -d #{jdk_dir} ]; then", close: "fi" ) do
+        dist_install( 'curl', minimal: true, check_install: true )
         sudo <<-SH
           curl -sSL -o #{distro} #{jdk_url}
         SH
