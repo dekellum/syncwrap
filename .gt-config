@@ -13,7 +13,8 @@ Gravitext::DevTools.configure do |c|
 
   c.setup_manifest do |m|
     m.exclusions -= [ %r{(^|/)src(/|$)} ]
-    m.exclusions += %w[ .travis.yml test/local/**/* test/aws/**/* ]
+    m.exclusions += %w[ .travis.yml test/local/**/*
+                        test/aws/**/* test/libvirt/**/* ]
   end
 
 end

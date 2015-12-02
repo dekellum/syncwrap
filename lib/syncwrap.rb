@@ -412,6 +412,7 @@ module SyncWrap
   # Additional autoloads (optional support)
   autoload :AmazonEC2,     'syncwrap/amazon_ec2'
   autoload :GitHelp,       'syncwrap/git_help'
+  autoload :Libvirt,       'syncwrap/libvirt'
   autoload :UserData,      'syncwrap/user_data'
 
 end
