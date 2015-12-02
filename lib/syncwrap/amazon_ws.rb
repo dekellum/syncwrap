@@ -59,24 +59,41 @@ module SyncWrap
                               symbolize_names: true ) )
     end
 
-    # Create a security_group given name and options. :region is the
-    # only required option, :description is good to have. Currently
-    # this is a no-op if the security group already exists.
+    # Create a security_group given name and options.  Currently this
+    # is a no-op if the security group of the given name already
+    # exists (in the given or default VPC or without,
+    # e.g. EC2-Classic). In either case the associated SecurityGroup
+    # object is returned.
+    #
+    # === Options
+    #
+    # See
+    # {AWS::EC2::SecurityGroupCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/SecurityGroupCollection.html#create-instance_method]
+    # with the following additions/differences:
+    #
+    # :region:: Required
+    #
+    # :vpc:: The VPC ID in which to create the group. Required if host
+    #        is to be launched in a subnet of a non-default VPC.
+    #
+    # :description:: Optional text description. Set to name if unspecified.
     def aws_create_security_group( name, opts = {} )
       opts = opts.dup
       region = opts.delete( :region )
       vpc = opts[ :vpc ]
       ec2 = AWS::EC2.new.regions[ region ]
-      unless ec2.security_groups.find { |sg|
-               sg.name == name && ( vpc.nil? || sg.vpc_id == vpc )
-             }
-        sg = ec2.security_groups.create( name, opts )
 
-        # Allow ssh on the "default" region named group
+      sg = ec2.security_groups.find do |sg|
+        sg.name == name && ( vpc.nil? || sg.vpc_id == vpc )
+      end
+      unless sg
+        sg = ec2.security_groups.create( name, opts )
+        # Allow ssh on the special "default" region named group
         if name == region
           sg.authorize_ingress(:tcp, 22)
         end
       end
+      sg
     end
 
     # Create an instance, using name as the Name tag and assumed
