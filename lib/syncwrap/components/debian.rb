@@ -54,22 +54,58 @@ module SyncWrap
     # well.  A trailing hash is interpreted as options, see below.
     #
     # ==== Options
+    #
+    # :check_install:: Short-circuit if all packages already
+    #                  installed. Thus no upgrades will be performed.
+    #
     # :minimal:: Eqv to --no-install-recommends
     #
-    # Other options will be ignored.
+    # Additional options are passed to the sudo calls.
     def dist_install( *args )
-      opts = args.last.is_a?( Hash ) && args.pop || {}
-      args.unshift "--no-install-recommends" if opts[ :minimal ]
-
-      sudo( "apt-get -yqq update" ) if first_apt?
-      sudo( "apt-get -yq install #{args.join ' '}" )
+      opts = args.last.is_a?( Hash ) && args.pop.dup || {}
+      args.flatten!
+      flags = []
+      flags << '--no-install-recommends' if opts.delete( :minimal )
+      chk = opts.delete( :check_install ) || opts.delete( :succeed )
+      chk = check_install? if chk.nil?
+      dist_if_not_installed?( args, chk, opts ) do
+        sudo( "apt-get -yqq update", opts ) if first_apt?
+        sudo( "apt-get -yq install #{(flags + args).join ' '}", opts )
+      end
     end
 
     # Uninstall the specified package names. A trailing hash is
-    # interpreted as options.
+    # interpreted as options, passed to the sudo calls.
     def dist_uninstall( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      sudo "aptitude -yq purge #{pkgs.join ' '}"
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
+      opts.delete( :succeed )
+      pkgs.flatten!
+      pkgs.each do |pkg|
+        dist_if_installed?( pkg, opts ) do
+          sudo( "apt-get -yq --purge remove #{pkg}", opts )
+        end
+      end
+    end
+
+    # If chk is true, then wrap block in a sudo bash conditional
+    # testing if any specified pkgs are not installed. Otherwise just
+    # yield to block.
+    def dist_if_not_installed?( pkgs, chk, opts, &block )
+      if chk
+        qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkgs.join ' '}"
+        cnt = qry + " | grep -c -E '^installed$'"
+        cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}
+        sudo( cond, opts.merge( close: 'fi' ), &block )
+      else
+        block.call
+      end
+    end
+
+    def dist_if_installed?( pkg, opts, &block )
+      qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkg}"
+      tst = qry + " | grep -q 'installed'"
+      cond = "if #{tst}; then"
+      sudo( cond, opts.merge( close: 'fi' ), &block )
     end
 
     # Install a System V style init.d service script

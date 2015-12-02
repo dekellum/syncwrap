@@ -233,6 +233,11 @@ module SyncWrap
       ctx.verbose?
     end
 
+    # Return any value of :check_install set in default options.
+    def check_install?
+      ctx.check_install?
+    end
+
     # Return the path to the the specified src, as first found in the
     # :sync_paths option as per #rput, Source Resolution.  Return nil
     # if not found.  This allows optional, local behavior based on the
