@@ -137,12 +137,10 @@ module SyncWrap
         raise ":count #{iopts[ :count ]} != 1 is not supported"
       end
 
-      iopts[ :security_groups ].map! do |sg|
-        sg == :default ? region : sg
-      end
-
-      iopts[ :security_groups ].each do |sg|
-        aws_create_security_group( sg, region: region, vpc: opts[ :vpc ] )
+      iopts[ :security_groups ].map! do |gname|
+        gname = region if gname == :default
+        aws_create_security_group( gname,
+                                   region: region, vpc: opts[ :vpc ] )
       end
 
       inst = ec2.instances.create( iopts )
