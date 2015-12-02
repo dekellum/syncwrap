@@ -24,7 +24,7 @@
   all distros.
 * Some minimal distros like Debian 8 might not include rsync in a base
   image. Add a conditional dist_install of rsync to the
-  SyncWrapp::Users component before attempting to rput user home
+  SyncWrap::Users component before attempting to rput user home
   dirs. A distro component will needs to be included before Users for
   this to occur. Backward compatibility is maintained when this is not
   the case.
