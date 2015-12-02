@@ -77,7 +77,7 @@ module SyncWrap
       pkgs.flatten!
       if opts.delete( :succeed ) != false
         sudo( <<-SH, opts )
-          if yum list -q installed #{pkgs.join( ' ' )} >/dev/null 2>&1; then
+          if yum list -C -q installed #{pkgs.join( ' ' )} >/dev/null 2>&1; then
             yum remove -q -y #{pkgs.join( ' ' )}
           fi
         SH
@@ -91,8 +91,10 @@ module SyncWrap
     # yield to block.
     def dist_if_not_installed?( pkgs, chk, opts, &block )
       if chk
-        c = "if ! yum list -q installed #{pkgs.join ' '} >/dev/null 2>&1; then"
-        sudo( c, opts.merge( close: 'fi' ), &block )
+        qry = "yum list -C -q installed #{pkgs.join ' '}"
+        cnt = qry + " | tail -n +2 | wc -l"
+        cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}
+        sudo( cond, opts.merge( close: 'fi' ), &block )
       else
         block.call
       end
