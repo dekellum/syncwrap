@@ -5,6 +5,17 @@
   Beta 2 release. Changes, including postgresql.conf updates,
   remain backward compatible with 9.1+ and SyncWrap 2.3.0+
 
+=== 2.6.1 (2015-12-2)
+* Default SyncWrap::PostgreSQL to version 9.4 on Debian 8+.
+* Use PATH to find `systemctl`, like other system tools. Debian 8 still
+  doesn't have merged /usr/bin.
+* Add -a/--add-role flag to CLI to add role(s) with create or image
+  beyond what is specified by the profile.
+* Add curl to existing build deps of CRubyVM and Hashdot. This
+  resolves the simplest cases where a minimal base image, in this case
+  not-including curl, would have previously failed. Other cases will
+  be addressed in subsequent releases.
+
 === 2.6.0 (2015-11-13)
 * Add SyncWrap::LVMCache component, with
   SyncWrap::Distro#unmount_device moved from MDRaid.

@@ -42,6 +42,7 @@ module SyncWrap
   # * AmazonLinux 2014.09: 8.4 9.2 9.3
   # * AmazonLinux 2015.09: 9.2 9.3 9.4
   # * Debian 7: 9.1
+  # * Debian 8: 9.4
   # * Ubuntu 14: 9.3
   #
   # The latest stable and beta packages can also be obtained via the
@@ -70,6 +71,8 @@ module SyncWrap
             '9.2' if version_gte?( rhel_version, [7] )
           when Ubuntu
             '9.3' if version_gte?( ubuntu_version, [14,4] )
+          when Debian
+            '9.4' if version_gte?( debian_version, [8] )
           end
           ) ||
           '9.1' )

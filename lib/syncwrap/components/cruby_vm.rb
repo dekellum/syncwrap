@@ -139,10 +139,10 @@ module SyncWrap
 
     def install_build_deps
       if distro.is_a?( RHEL )
-        dist_install( %w[ gcc make autoconf zlib-devel
+        dist_install( %w[ curl gcc make autoconf zlib-devel
                           openssl-devel readline-devel libyaml-devel libffi-devel ] )
       else
-        dist_install( %w[ gcc make autoconf zlib1g-dev
+        dist_install( %w[ curl gcc make autoconf zlib1g-dev
                           libssl-dev libreadline-dev libyaml-dev libffi-dev ] )
       end
     end
