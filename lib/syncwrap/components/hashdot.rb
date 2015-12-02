@@ -80,7 +80,7 @@ module SyncWrap
     end
 
     def install_system_deps
-      deps = %w[ make gcc ]
+      deps = %w[ curl make gcc ]
       deps += case distro
               when Debian
                 %w[ libapr1 libapr1-dev ]
