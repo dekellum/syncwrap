@@ -6,9 +6,9 @@
   doesn't have merged /usr/bin.
 * Add -a/--add-role flag to CLI to add role(s) with create or image
   beyond what is specified by the profile.
-* Add curl to existing build deps of CRubyVM and Hashdot. This
-  resolves the simplest cases where a minimal base image, in this case
-  not-including curl, would have previously failed. Other cases will
+* Add curl to existing build deps of SyncWrap::CRubyVM and
+  SyncWrap::Hashdot. This resolves the simplest cases where a minimal
+  base image not-including curl would have failed. Other cases will
   be addressed in subsequent releases.
 
 === 2.6.0 (2015-11-13)
