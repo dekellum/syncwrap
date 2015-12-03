@@ -46,7 +46,7 @@ module SyncWrap
     include RubySupport
     include HashSupport
 
-    # Default version of #ruby_version to install
+    # Default #ruby_version to install
     DEFAULT_VERSION = '2.1.7'
 
     # SHA256 #hash for DEFAULT_VERSION

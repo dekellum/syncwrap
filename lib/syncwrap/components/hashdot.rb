@@ -30,7 +30,7 @@ module SyncWrap
   class Hashdot < Component
     include HashSupport
 
-    # Default version of #hashdot_version to install
+    # Default #hashdot_version to install
     DEFAULT_VERSION = '1.4.0'
 
     # SHA256 #hash for DEFAULT_VERSION
