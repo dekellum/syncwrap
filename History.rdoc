@@ -1,4 +1,8 @@
-=== 2.6.2 (TBD)
+=== 2.6.2 (2015-12-3)
+* By way of comparability to RHEL 7, SyncWrap::AmazonLinux with a
+  specified amazon_version property >= '2014.03' would incorrectly
+  return true for systemd?. As Amazon Linux has yet (2015.09) to
+  migrate to systemd, override this to return false.
 
 === 2.6.1 (2015-12-2)
 * Default SyncWrap::PostgreSQL to version 9.4 on Debian 8+.
