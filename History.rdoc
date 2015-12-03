@@ -4,16 +4,15 @@
 * Update SyncWrap::PostgreSQL for support of version 9.5 as of the
   Beta 2 release. Changes, including postgresql.conf updates,
   remain backward compatible with 9.1+ and SyncWrap 2.3.0+
-* Add a check_update option to Distro#dist_install for all
+* Add a check_install option to Distro#dist_install for all
   distros. This adds bash conditionals to check for the presence of
   system packages before invoking the package manager install/update
   commands. If already installed, this can greatly improve
   provisioning speed and will not perform updates which might be
   better left to when provisioning new hosts. The option is off by
-  default for now, but is used for more complete expression of some
-  existing component dependencies (see below). To enable
-  it globally, add `options( check_update: true )` to your sync.rb
-  file.
+  default for now, but is used for some more complete component
+  dependencies (see below). To enable it globally,
+  add `options( check_install: true )` to your sync.rb file.
 * Make SyncWrap::RHEL#dist_uninstall :succeed (don't fail even if no
   packages are present) the default. This option is now deprecated on
   dist_uninstall.
@@ -25,7 +24,7 @@
 * Some minimal distros like Debian 8 might not include rsync in a base
   image. Add a conditional dist_install of rsync to the
   SyncWrap::Users component before attempting to rput user home
-  dirs. A distro component will needs to be included before Users for
+  dirs. A distro component needs to be included before Users for
   this to occur. Backward compatibility is maintained when this is not
   the case.
 * Some minimal distro base images might not include curl. Add
