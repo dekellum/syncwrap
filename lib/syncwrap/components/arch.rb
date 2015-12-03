@@ -77,7 +77,7 @@ module SyncWrap
     # Wrap block in a sudo bash conditional testing if the single
     # specified pkg is installed. Otherwise just yield to block.
     def dist_if_installed?( pkg, opts, &block )
-      c = "if pacman -Q #{pkgs} >/dev/null 2>&1; then"
+      c = "if pacman -Q #{pkg} >/dev/null 2>&1; then"
       sudo( c, opts.merge( close: 'fi' ), &block )
     end
 

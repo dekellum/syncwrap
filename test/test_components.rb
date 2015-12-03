@@ -35,6 +35,7 @@ module SyncWrap
       [ Debian ],
       [ Debian, CRubyVM ],
       [ CentOS, CRubyVM ],
+      [ Arch, CRubyVM ],
       [ EtcHosts ],
       [ AmazonLinux, JRubyVM, RunUser, Iyyov, Geminabox ],
       [ RHEL,   JRubyVM, BundlerGem ],
