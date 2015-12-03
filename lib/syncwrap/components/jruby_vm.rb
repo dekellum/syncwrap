@@ -31,18 +31,21 @@ module SyncWrap
     include RubySupport
     include HashSupport
 
-    # Default version of #jruby_version to install
+    # Default #jruby_version to install
     DEFAULT_VERSION = '1.7.22'
 
-    # The #hash for DEFAULT_VERSION. Prefer sha256 but sha1 is what is
-    # currently published.
-    DEFAULT_VERSION_HASH = '6b9e310a04ad8173d0d6dbe299da04c0ef85fc15'
+    # A set of known cryptographic hashes, keyed by version
+    # string. Note, we prefer sha256 but sha1 is what is currently
+    # published.
+    KNOWN_HASHES = { '1.7.22' => '6b9e310a04ad8173d0d6dbe299da04c0ef85fc15',
+                     '1.7.23' => '2b5e796feeed2bcfab02f8bf2ff3d77ca318e310' }
 
     # JRuby version to install (default: DEFAULT_VERSION)
     attr_accessor :jruby_version
 
     # A cryptographic hash value (hexadecimal, some standard length)
     # to use for verifying the 'jruby-bin-*.tar.gz' package.
+    # (Default: KNOWN_HASHES[ jruby_version ])
     attr_writer :hash
 
     def initialize( opts = {} )
@@ -53,7 +56,7 @@ module SyncWrap
     end
 
     def hash
-      @hash || ( jruby_version == DEFAULT_VERSION && DEFAULT_VERSION_HASH )
+      @hash || KNOWN_HASHES[ jruby_version ]
     end
 
     def jruby_dist_path
@@ -85,6 +88,8 @@ module SyncWrap
 
       root = "#{local_root}/lib/jruby"
       distro = "/tmp/jruby-bin-#{jruby_version}.tar.gz"
+
+      dist_install( 'curl', minimal: true, check_install: true )
 
       sudo <<-SH
         if [ ! -d #{jruby_dist_path} ]; then
