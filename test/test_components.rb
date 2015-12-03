@@ -55,7 +55,7 @@ module SyncWrap
         puma_version: '2.9.0', rack_path: File.expand_path( '../../lib', __FILE__ ) ],
       [ RHEL, RunUser, JRubyVM, BundlerGem,
         SourceTree, { source_dir: 'lib', require_clean: false },
-        Bundle, Puma ],
+        Bundle, Puma, systemd_unit: 'puma.service' ],
       [ Debian, OpenJDK, JRubyVM, Hashdot ],
       [ RHEL,   JRubyVM, RunUser, Iyyov ],
       [ Ubuntu, JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
