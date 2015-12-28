@@ -156,6 +156,10 @@ module SyncWrap
         if maybes.empty?
           changes = rsync( plains, target, opts ) unless plains.empty?
         else
+          if ssh_host_name == 'localhost' && opts[ :user ]
+            # tmpdir needs to be visable to alt. opts[ :user ]
+            opts[ :tmpdir_mode ] = 0755
+          end
           process_templates( maybes, opts ) do |processed|
             unless processed.empty? || plains.empty?
               opts = opts.dup
