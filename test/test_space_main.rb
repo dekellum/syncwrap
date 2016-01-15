@@ -20,9 +20,11 @@
 require_relative 'setup'
 
 require 'syncwrap'
+require 'syncwrap/version_support.rb'
 
 class TestSpaceMain < MiniTest::Unit::TestCase
   include SyncWrap
+  include VersionSupport
 
   def setup
     @sp = Space.new
@@ -34,7 +36,12 @@ class TestSpaceMain < MiniTest::Unit::TestCase
   end
 
   def test
-    skip if defined?( JRUBY_VERSION ) # 1.6.8, 1.7.10-12 fail this test
+    skip if ( defined?( JRUBY_VERSION ) &&
+              ( version_lt?( JRUBY_VERSION, [1,7,24] ) ||
+                ( version_gte?( JRUBY_VERSION, [9] ) &&
+                  version_lt?(  JRUBY_VERSION, [9,0,5] ) ) ) )
+    # JRuby 1.6.x, 1.7.[0-23], 9.0.[0-4] all fail this test
+    # See also Space#wrap_sync_load?
     assert( @sp.execute( @sp.hosts, [ [IyyovDaemon, :daemon_service_dir] ] ) )
   end
 end
