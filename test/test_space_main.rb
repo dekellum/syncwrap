@@ -38,8 +38,7 @@ class TestSpaceMain < MiniTest::Unit::TestCase
   def test
     skip if ( defined?( JRUBY_VERSION ) &&
               ( version_lt?( JRUBY_VERSION, [1,7,24] ) ||
-                ( version_gte?( JRUBY_VERSION, [9] ) &&
-                  version_lt?(  JRUBY_VERSION, [9,0,5] ) ) ) )
+                version_gte?( JRUBY_VERSION, [9] ) ) )
     # JRuby 1.6.x, 1.7.[0-23], 9.0.[0-4] all fail this test
     # See also Space#wrap_sync_load?
     assert( @sp.execute( @sp.hosts, [ [IyyovDaemon, :daemon_service_dir] ] ) )
