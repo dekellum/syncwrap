@@ -299,8 +299,7 @@ module SyncWrap
     # See https://github.com/jruby/jruby/issues/3180
     def wrap_sync_load?
       ( !defined?( JRUBY_VERSION ) ||
-        version_lt?(  JRUBY_VERSION, [9] ) ||
-        version_gte?( JRUBY_VERSION, [9,0,5] ) )
+        version_lt?( JRUBY_VERSION, [9] ) )
     end
 
     def execute_host( host, component_plan = [], opts = {} )
