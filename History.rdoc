@@ -1,3 +1,66 @@
+=== 2.8.0 (TBD)
+
+=== 2.7.0 (2016-1-21)
+* Add SyncWrap::ZoneBalancer utility for balancing new hosts across
+  multiple (AWS) availability zones for fault tolerance.
+* Update SyncWrap::PostgreSQL for support of version 9.5. Changes,
+  including postgresql.conf updates, remain backward compatible with
+  9.1+ and SyncWrap 2.3.0+
+* Add a check_install option to Distro#dist_install for all
+  distros. This adds bash conditionals to check for the presence of
+  system packages before invoking the package manager install/update
+  commands. If already installed, this can greatly improve
+  provisioning speed and will not perform updates which might be
+  better left to when provisioning new hosts. The option is off by
+  default for now, but is used for some more complete component
+  dependencies (see below). To enable it globally,
+  add `options( check_install: true )` to your sync.rb file.
+* Make SyncWrap::RHEL#dist_uninstall :succeed (don't fail even if no
+  packages are present) the default. This option is now deprecated on
+  dist_uninstall.
+* Use `apt-get remove`, instead of aptitude on Debian and Ubuntu.
+* Since Debian's `apt-get remove` and Arch's `pacman -R` fail if any
+  specified package is not found, test if each package is installed
+  before removing it. The leniency of dist_uninstall is now consistent
+  across all distros.
+* Some minimal distros like Debian 8 might not include rsync in a base
+  image. Add a conditional dist_install of rsync to the
+  SyncWrap::Users component before attempting to rput user home
+  dirs. A distro component needs to be included before Users for
+  this to occur. Backward compatibility is maintained when this is not
+  the case.
+* Some minimal distro base images might not include curl. Add
+  dist_install of curl to components that use it, either as part of
+  build dependencies, or separately using the new check_install
+  feature (see above) to minimize performance impact.
+* Add preliminary support for non-default or multiple VPCs, or mixed
+  EC2-VPC and EC2-Classic deployments via the vpc and subnet_id
+  profile properties with the SyncWrap::AmazonEC2 provider.
+* Add workaround for crash on jruby 9.0.0-4 with (wrapped) sync file
+  load (See jruby#3180 and #3609). Tests show wrapped load working
+  correctly on jruby 1.7.24 and 9.0.5 snapshots.
+* Upgrade SyncWrap::JRubyVM default version to 1.7.23 (+ hash for 1.7.24)
+* Upgrade SyncWrap::CRubyVM default version to 2.1.8
+* Fix tmpdir access issue with rput with templates to localhost and
+  alt non-root :user option.
+
+=== 2.6.2 (2015-12-3)
+* By way of comparability to RHEL 7, SyncWrap::AmazonLinux with a
+  specified amazon_version property >= '2014.03' would incorrectly
+  return true for systemd?. As Amazon Linux has yet (2015.09) to
+  migrate to systemd, override this to return false.
+
+=== 2.6.1 (2015-12-2)
+* Default SyncWrap::PostgreSQL to version 9.4 on Debian 8+.
+* Use PATH to find `systemctl`, like other system tools. Debian 8 still
+  doesn't have merged /usr/bin.
+* Add -a/--add-role flag to CLI to add role(s) with create or image
+  beyond what is specified by the profile.
+* Add curl to existing build deps of SyncWrap::CRubyVM and
+  SyncWrap::Hashdot. This resolves the simplest cases where a minimal
+  base image not-including curl would have failed. Other cases will
+  be addressed in subsequent releases.
+
 === 2.6.0 (2015-11-13)
 * Add SyncWrap::LVMCache component, with
   SyncWrap::Distro#unmount_device moved from MDRaid.

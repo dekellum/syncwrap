@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -19,9 +19,13 @@ include SyncWrap
 space.prepend_sync_path
 space.use_provider( AmazonEC2 )
 
+options( check_install: true )
+
 profile( :default,
          region: 'us-west-2',
          instance_type: 't2.small',
+         vpc: 'vpc-58654f3d',          #default vpc
+         subnet_id: 'subnet-7b700522', #default vpc
          key_name: 'dek-key-pair-1' )
 
 # Centos 7.1 2014-09-29 HVM EBS 64 us-west-2

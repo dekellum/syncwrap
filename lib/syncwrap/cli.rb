@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -32,6 +32,7 @@ module SyncWrap
       @component_plan = []
       @roles = []
       @comp_roles = []
+      @add_roles = []
       @host_patterns = []
       @create_plan = []
       @image_plan = []
@@ -180,6 +181,13 @@ TEXT
           @image_plan << profile.to_sym
         end
 
+        opts.on( "-a", "--add-role ROLE",
+                 "When creating a new host or image, add ROLE",
+                 "beyond those specified by the profile",
+                 "(may use multiple)" ) do |r|
+          @add_roles << r.sub(/^:/,'').to_sym
+        end
+
         opts.on( "--import-hosts REGIONS",
                  "Import hosts form provider 'region' names, ",
                  "append to sync file and exit." ) do |rs|
@@ -243,6 +251,7 @@ TEXT
         p = space.provider
         @image_plan.each do |profile_key|
           ami,name = p.create_image_from_profile(profile_key, @sw_file) do |host|
+            host.add( *@add_roles ) unless @add_roles.empty?
             space.execute( [ host ], [], @options )
           end
           exit( 1 ) unless ami
@@ -252,7 +261,9 @@ TEXT
       end
 
       @create_plan.each do |count, profile, name|
-        space.provider.create_hosts( count, profile, name, @sw_file )
+        space.provider.create_hosts( count, profile, name, @sw_file ) do |host|
+          host.add( *@add_roles ) unless @add_roles.empty?
+        end
       end
 
       if @ssh_session

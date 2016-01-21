@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -231,6 +231,11 @@ module SyncWrap
     # Return true if :verbose is set in default options.
     def verbose?
       ctx.verbose?
+    end
+
+    # Return any value of :check_install set in default options.
+    def check_install?
+      ctx.check_install?
     end
 
     # Return the path to the the specified src, as first found in the

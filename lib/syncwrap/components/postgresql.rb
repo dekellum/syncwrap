@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -40,7 +40,9 @@ module SyncWrap
   # * RHEL, CentOS 7: 9.2
   # * AmazonLinux 2013.03: 8.4 9.2
   # * AmazonLinux 2014.09: 8.4 9.2 9.3
+  # * AmazonLinux 2015.09: 9.2 9.3 9.4
   # * Debian 7: 9.1
+  # * Debian 8: 9.4
   # * Ubuntu 14: 9.3
   #
   # The latest stable and beta packages can also be obtained via the
@@ -69,6 +71,8 @@ module SyncWrap
             '9.2' if version_gte?( rhel_version, [7] )
           when Ubuntu
             '9.3' if version_gte?( ubuntu_version, [14,4] )
+          when Debian
+            '9.4' if version_gte?( debian_version, [8] )
           end
           ) ||
           '9.1' )
@@ -147,8 +151,25 @@ module SyncWrap
     # increased risk. (PG Default: 0 -> none)
     attr_accessor :commit_delay
 
-    # WAL log segments (16MB each) (PG Default: 3)
-    attr_accessor :checkpoint_segments
+    # WAL log segments (16MB each)
+    # Deprecated with PostgreSQL 9.5: Use min/max_wal_size instead
+    attr_writer :checkpoint_segments
+
+    def checkpoint_segments
+      @checkpoint_segments || ( version_lt?(pg_version, [9,5]) ? 3 : 5 )
+    end
+
+    # Minimum WAL size as string with units
+    # Default: PG <9.5: "48MB"; PG 9.5+: "80MB"
+    attr_writer :min_wal_size
+
+    def min_wal_size
+      @min_wal_size || "#{ checkpoint_segments * 16 }MB"
+    end
+
+    # Maximum WAL size as string with units.
+    # (Default: unset, PG Default: '1GB')
+    attr_accessor :max_wal_size
 
     # Shared buffers (Default: '256MB' vs PG: '128MB')
     attr_accessor :shared_buffers
@@ -228,7 +249,9 @@ module SyncWrap
       @service_name = 'postgresql'
       @synchronous_commit = :on
       @commit_delay = 0
-      @checkpoint_segments = 3
+      @checkpoint_segments = nil
+      @min_wal_size = nil
+      @max_wal_size = nil
       @shared_buffers = '256MB'
       @work_mem = '128MB'
       @maintenance_work_mem = '128MB'

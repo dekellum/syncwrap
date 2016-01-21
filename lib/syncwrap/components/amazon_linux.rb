@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -26,8 +26,8 @@ module SyncWrap
 
     alias :distro_version :amazon_version
 
-    # Return RHEL#rhel_version if specified, or provide comparable
-    # default RHEL version if #amazon_vesion is specified.
+    # Return RHEL#rhel_version if specified, or a comparable
+    # RHEL version if #amazon_version if specified.
     #
     # History of Amazon Linux releases:
     #
@@ -43,6 +43,13 @@ module SyncWrap
           ( ( version_gte?( amazon_version, [2014,3] ) && '7' ) ||
             ( version_gte?( amazon_version, [2011,9] ) && '6' ) ||
             '5' ) )
+    end
+
+    # Despite later versions being comparable to #rhel_version '7',
+    # Amazon Linux has yet (2015.09) to migrate to systemd. Return
+    # false.
+    def systemd?
+      false
     end
 
   end

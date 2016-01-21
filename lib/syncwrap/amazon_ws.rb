@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -59,43 +59,75 @@ module SyncWrap
                               symbolize_names: true ) )
     end
 
-    # Create a security_group given name and options. :region is the
-    # only required option, :description is good to have. Currently
-    # this is a no-op if the security group already exists.
+    # Create a security_group given name and options.  Currently this
+    # is a no-op if the security group of the given name already
+    # exists (in the given or default VPC or without,
+    # e.g. EC2-Classic). In either case the associated SecurityGroup
+    # object is returned.
+    #
+    # === Options
+    #
+    # See
+    # {AWS::EC2::SecurityGroupCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/SecurityGroupCollection.html#create-instance_method]
+    # with the following additions/differences:
+    #
+    # :region:: Required
+    #
+    # :vpc:: The VPC ID in which to create the group. Required if host
+    #        is to be launched in a subnet of a non-default VPC.
+    #
+    # :description:: Optional text description. Set to name if unspecified.
     def aws_create_security_group( name, opts = {} )
       opts = opts.dup
       region = opts.delete( :region )
+      vpc = opts[ :vpc ]
       ec2 = AWS::EC2.new.regions[ region ]
-      unless ec2.security_groups.find { |sg| sg.name == name }
-        sg = ec2.security_groups.create( name, opts )
 
-        # FIXME: Allow ssh on the "default" region named group
+      sg = ec2.security_groups.find do |sg|
+        sg.name == name && ( vpc.nil? || sg.vpc_id == vpc )
+      end
+      unless sg
+        sg = ec2.security_groups.create( name, opts )
+        # Allow ssh on the special "default" region named group
         if name == region
           sg.authorize_ingress(:tcp, 22)
         end
       end
+      sg
     end
 
     # Create an instance, using name as the Name tag and assumed
-    # host name. For options see
+    # host name.
+    #
+    # === Options
+    #
+    # See
     # {AWS::EC2::InstanceCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/InstanceCollection.html#create-instance_method]
     # with the following additions/differences:
     #
     # :count:: must be 1 or unspecified.
+    #
     # :region:: Default 'us-east-1'
-    # :security_groups:: As per aws-sdk, but the special :default value
-    #                    is replaced with a single security group with
-    #                    same name as the :region.
-    # :ebs_volumes:: The number of EBS volumes to create and attach to this instance.
+    #
+    # :security_groups:: Array of Security Group names. The special
+    #                    :default value is replaced with a single
+    #                    security group with same name as the :region.
+    #
+    # :ebs_volumes:: The number of EBS volumes to create and attach to
+    #                this instance.
+    #
     # :ebs_volume_options:: A nested Hash of options, as per
     #                       {AWS::EC2::VolumeCollection.create}[http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/VolumeCollection.html#create-instance_method]
     #                       with custom default :size 16 GB, and the same
     #                       :availibility_zone as the instance.
+    #
     # :ebs_mounts:: Device mounting scheme. The value :sdf_p indicates
     #               "/dev/sd[f-p]", and should be used for HVM instances.
     #               The default scheme is currently :sdh1_6 "/dev/sdh[1-6]".
     #               See {EC2: Block Device Mapping}[http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html]
+    #
     # :lvm_volumes:: Ignored here.
+    #
     # :roles:: Array of role Strings or Symbols (applied as Roles tag)
     def aws_create_instance( name, opts = {} )
       opts = deep_merge_hashes( @default_instance_options, opts )
@@ -111,18 +143,20 @@ module SyncWrap
       iopts.delete( :roles ) #-> tags
       iopts.delete( :description ) #-> tags
       iopts.delete( :tag ) #-> tags
+      iopts.delete( :vpc )
 
       if iopts[ :count ] && iopts[ :count ] != 1
         raise ":count #{iopts[ :count ]} != 1 is not supported"
       end
 
-      iopts[ :security_groups ].map! do |sg|
-        sg == :default ? region : sg
+      iopts[ :security_groups ].map! do |gname|
+        gname = region if gname == :default
+        aws_create_security_group( gname,
+                                   region: region, vpc: opts[ :vpc ] )
       end
 
-      iopts[ :security_groups ].each do |sg|
-        aws_create_security_group( sg, region: region )
-      end
+      az = iopts[ :availability_zone ]
+      iopts[ :availability_zone ] = az.call if az.is_a?( Proc )
 
       inst = ec2.instances.create( iopts )
 

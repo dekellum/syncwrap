@@ -2,7 +2,7 @@
 #.hashdot.profile += jruby-shortlived
 
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -35,6 +35,7 @@ module SyncWrap
       [ Debian ],
       [ Debian, CRubyVM ],
       [ CentOS, CRubyVM ],
+      [ Arch, CRubyVM ],
       [ EtcHosts ],
       [ AmazonLinux, JRubyVM, RunUser, Iyyov, Geminabox ],
       [ RHEL,   JRubyVM, BundlerGem ],
@@ -55,7 +56,7 @@ module SyncWrap
         puma_version: '2.9.0', rack_path: File.expand_path( '../../lib', __FILE__ ) ],
       [ RHEL, RunUser, JRubyVM, BundlerGem,
         SourceTree, { source_dir: 'lib', require_clean: false },
-        Bundle, Puma ],
+        Bundle, Puma, systemd_unit: 'puma.service' ],
       [ Debian, OpenJDK, JRubyVM, Hashdot ],
       [ RHEL,   JRubyVM, RunUser, Iyyov ],
       [ Ubuntu, JRubyVM, RunUser, Iyyov, IyyovDaemon, name: 'test', version: '0' ],
@@ -72,9 +73,11 @@ module SyncWrap
       [ RHEL, { rhel_version: '7' }, Network ],
       [ AmazonLinux, Network ],
       [ Debian, OpenJDK ],
+      [ AmazonLinux, PostgreSQL ],
       [ Debian, PostgreSQL ],
       [ Ubuntu, PostgreSQL ],
       [ CentOS, PostgreSQL ],
+      [ CentOS, PostgreSQL, pg_version: '9.5' ],
       [ RHEL, Qpid ],
       [ CentOS, QpidRepo, qpid_prebuild_repo: 'http://localhost' ],
       [ RHEL ],

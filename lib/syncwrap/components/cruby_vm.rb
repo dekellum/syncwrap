@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -46,19 +46,23 @@ module SyncWrap
     include RubySupport
     include HashSupport
 
-    # Default version of #ruby_version to install
-    DEFAULT_VERSION = '2.1.7'
+    # Default #ruby_version to install
+    DEFAULT_VERSION = '2.1.8'
 
-    # SHA256 #hash for DEFAULT_VERSION
-    DEFAULT_VERSION_HASH =
-      'f59c1596ac39cc7e60126e7d3698c19f482f04060674fdfe0124e1752ba6dd81'
+    # A set of known (sha256) cryptographic hashes, keyed by version
+    # string.
+    KNOWN_HASHES = {
+      '2.1.7' =>
+      'f59c1596ac39cc7e60126e7d3698c19f482f04060674fdfe0124e1752ba6dd81',
+      '2.1.8' =>
+      'afd832b8d5ecb2e3e1477ec6a9408fdf9898ee73e4c5df17a2b2cb36bd1c355d' }
 
     # The ruby version to install, as it appears in source packages
     # from ruby-lang.org. Note that starting with 2.1.0, the patch
     # release (p#) no longer appears in package names.
     # (Default: DEFAULT_VERSION)
     #
-    # Example values: '2.0.0-p481', '2.1.7'
+    # Example values: '2.0.0-p481', '2.1.8'
     attr_accessor :ruby_version
 
     # If true, attempt to uninstall any pre-existing distro packaged
@@ -68,6 +72,7 @@ module SyncWrap
 
     # A cryptographic hash value (hexadecimal, some standard length)
     # to use for verifying the 'source.tar.gz' package.
+    # (Default: KNOWN_HASHES[ ruby_version ])
     attr_writer :hash
 
     def initialize( opts = {} )
@@ -78,7 +83,7 @@ module SyncWrap
     end
 
     def hash
-      @hash || ( ruby_version == DEFAULT_VERSION && DEFAULT_VERSION_HASH )
+      @hash || KNOWN_HASHES[ ruby_version ]
     end
 
     def install
@@ -110,11 +115,10 @@ module SyncWrap
 
     def uninstall_distro_ruby
       if distro.is_a?( RHEL )
-        dist_uninstall( %w[ ruby ruby18 ruby19 ruby20 ruby21 ruby22 ],
-                        succeed: true )
+        dist_uninstall( %w[ ruby ruby18 ruby19 ruby20 ruby21 ruby22 ruby23 ] )
       else
         dist_uninstall( %w[ ruby ruby1.8 ruby1.9 ruby1.9.1
-                            ruby1.9.3 ruby2.0 ruby2.1 ruby2.2 ] )
+                            ruby1.9.3 ruby2.0 ruby2.1 ruby2.2 ruby2.3 ] )
       end
     end
 
@@ -139,10 +143,10 @@ module SyncWrap
 
     def install_build_deps
       if distro.is_a?( RHEL )
-        dist_install( %w[ gcc make autoconf zlib-devel
+        dist_install( %w[ curl gcc make autoconf zlib-devel
                           openssl-devel readline-devel libyaml-devel libffi-devel ] )
       else
-        dist_install( %w[ gcc make autoconf zlib1g-dev
+        dist_install( %w[ curl gcc make autoconf zlib1g-dev
                           libssl-dev libreadline-dev libyaml-dev libffi-dev ] )
       end
     end

@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -29,17 +29,60 @@ module SyncWrap
       true
     end
 
+    # Install the specified package names. A trailing hash is
+    # interpreted as options, see below.
+    #
+    # ==== Options
+    #
+    # :check_install:: Short-circuit if all packages already
+    #                  installed. Thus no upgrades will be performed.
+    #
+    # Additional options are passed to the sudo calls.
     def dist_install( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      sudo "pacman -S --noconfirm #{pkgs.join ' '}"
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
+      opts.delete( :minimal )
+      pkgs.flatten!
+      chk = opts.delete( :check_install ) || opts.delete( :succeed )
+      chk = check_install? if chk.nil?
+      dist_if_not_installed?( pkgs, chk, opts ) do
+        sudo( "pacman -S --noconfirm #{pkgs.join ' '}", opts )
+      end
     end
 
+    # Uninstall the specified package names. A trailing hash is
+    # interpreted as options, passed to the sudo calls.
     def dist_uninstall( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
-      sudo "pacman -R --noconfirm #{pkgs.join ' '}"
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
+      opts.delete( :succeed )
+      pkgs.flatten!
+      pkgs.each do |pkg|
+        dist_if_installed?( pkg, opts ) do
+          sudo( "pacman -R --noconfirm #{pkg}", opts )
+        end
+      end
+    end
+
+    # If chk is true, then wrap block in a sudo bash conditional
+    # testing if any specified pkgs are not installed. Otherwise just
+    # yield to block.
+    def dist_if_not_installed?( pkgs, chk, opts, &block )
+      if chk
+        c = "if ! pacman -Q #{pkgs.join ' '} >/dev/null 2>&1; then"
+        sudo( c, opts.merge( close: 'fi' ), &block )
+      else
+        block.call
+      end
+    end
+
+    # Wrap block in a sudo bash conditional testing if the single
+    # specified pkg is installed. Otherwise just yield to block.
+    def dist_if_installed?( pkg, opts, &block )
+      c = "if pacman -Q #{pkg} >/dev/null 2>&1; then"
+      sudo( c, opts.merge( close: 'fi' ), &block )
     end
 
     alias_method :dist_service, :dist_service_via_systemctl
+
   end
 
 end

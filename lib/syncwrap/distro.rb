@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -41,15 +41,20 @@ module SyncWrap
     #
     # ==== Options
     #
-    # :succeed:: Always succeed (useful for local rpms which might
-    #            already be installed.
+    # :check_install:: Short-circuit if all packages already
+    #                  installed. Thus no upgrades will be performed.
     #
-    # :minimal:: Avoid additional "optional" packages when possible.
+    # :succeed:: Deprecated, use check_install instead
+    #
+    # :minimal:: Avoid additional "optional" packages when possible
+    #
+    # Additional options are passed to the sudo calls.
     def dist_install( *pkgs )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
-    # Uninstall the specified package names.
+    # Uninstall the specified package names. A trailing hash is
+    # interpreted as options, passed to the sudo calls.
     def dist_uninstall( *pkgs )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end

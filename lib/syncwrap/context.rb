@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -82,6 +82,12 @@ module SyncWrap
       @default_options[ :verbose ]
     end
 
+    # Return any value of :check_install set in constructed default
+    # options.
+    def check_install?
+      @default_options[ :check_install ]
+    end
+
     # See Component#sh for interface details
     def sh( command, opts = {} )
       opts = @default_options.merge( opts )
@@ -150,6 +156,10 @@ module SyncWrap
         if maybes.empty?
           changes = rsync( plains, target, opts ) unless plains.empty?
         else
+          if ssh_host_name == 'localhost' && opts[ :user ]
+            # tmpdir needs to be visable to alt. opts[ :user ]
+            opts[ :tmpdir_mode ] = 0755
+          end
           process_templates( maybes, opts ) do |processed|
             unless processed.empty? || plains.empty?
               opts = opts.dup

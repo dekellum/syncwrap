@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -21,7 +21,7 @@ module SyncWrap
 
     # Run systemd `systemctl` command with args via sudo as root.
     def systemctl( *args )
-      sudo "/usr/bin/systemctl #{args.join ' '}"
+      sudo "systemctl #{args.join ' '}"
     end
 
     # Expand given shortname to "shortname.service" as used for the
