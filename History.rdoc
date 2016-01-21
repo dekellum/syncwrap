@@ -18,9 +18,9 @@
   dist_uninstall.
 * Use `apt-get remove`, instead of aptitude on Debian and Ubuntu.
 * Since Debian's `apt-get remove` and Arch's `pacman -R` fail if any
-  specified package is not found, test each package for install before
-  removing it. The leniency of dist_uninstall is now consistent across
-  all distros.
+  specified package is not found, test if each package is installed
+  before removing it. The leniency of dist_uninstall is now consistent
+  across all distros.
 * Some minimal distros like Debian 8 might not include rsync in a base
   image. Add a conditional dist_install of rsync to the
   SyncWrap::Users component before attempting to rput user home
