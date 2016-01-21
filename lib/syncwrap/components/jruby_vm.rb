@@ -38,7 +38,8 @@ module SyncWrap
     # string. Note, we prefer sha256 but sha1 is what is currently
     # published.
     KNOWN_HASHES = { '1.7.22' => '6b9e310a04ad8173d0d6dbe299da04c0ef85fc15',
-                     '1.7.23' => '2b5e796feeed2bcfab02f8bf2ff3d77ca318e310' }
+                     '1.7.23' => '2b5e796feeed2bcfab02f8bf2ff3d77ca318e310',
+                     '1.7.24' => '0c321d2192768dfec419bee6b44c7190f4db32e1' }
 
     # JRuby version to install (default: DEFAULT_VERSION)
     attr_accessor :jruby_version
