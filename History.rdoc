@@ -1,9 +1,9 @@
 === 2.7.0 (TBD)
 * Add SyncWrap::ZoneBalancer utility for balancing new hosts across
   multiple (AWS) availability zones for fault tolerance.
-* Update SyncWrap::PostgreSQL for support of version 9.5 as of the
-  Beta 2 release. Changes, including postgresql.conf updates,
-  remain backward compatible with 9.1+ and SyncWrap 2.3.0+
+* Update SyncWrap::PostgreSQL for support of version 9.5. Changes,
+  including postgresql.conf updates, remain backward compatible with
+  9.1+ and SyncWrap 2.3.0+
 * Add a check_install option to Distro#dist_install for all
   distros. This adds bash conditionals to check for the presence of
   system packages before invoking the package manager install/update
@@ -34,6 +34,13 @@
 * Add preliminary support for non-default or multiple VPCs, or mixed
   EC2-VPC and EC2-Classic deployments via the vpc and subnet_id
   profile properties with the SyncWrap::AmazonEC2 provider.
+* Add workaround for crash on jruby 9.0.0-4 with (wrapped) sync file
+  load (See jruby#3180 and #3609). Tests show wrapped load working
+  correctly on jruby 1.7.24 and 9.0.5 snapshots.
+* Upgrade SyncWrap::JRubyVM default version to 1.7.23 (+ hash for 1.7.24)
+* Upgrade SyncWrap::CRubyVM default version to 2.1.8
+* Fix tmpdir access issue with rput with templates to localhost and
+  alt non-root :user option.
 
 === 2.6.2 (2015-12-3)
 * By way of comparability to RHEL 7, SyncWrap::AmazonLinux with a
