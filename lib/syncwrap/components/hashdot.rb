@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -30,7 +30,7 @@ module SyncWrap
   class Hashdot < Component
     include HashSupport
 
-    # Default version of #hashdot_version to install
+    # Default #hashdot_version to install
     DEFAULT_VERSION = '1.4.0'
 
     # SHA256 #hash for DEFAULT_VERSION

@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -22,6 +22,7 @@ require 'syncwrap/context'
 require 'syncwrap/host'
 require 'syncwrap/formatter'
 require 'syncwrap/path_util'
+require 'syncwrap/version_support.rb'
 
 module SyncWrap
 
@@ -51,6 +52,7 @@ module SyncWrap
   # level #execute.
   class Space
     include PathUtil
+    include VersionSupport
 
     # Return the current space, as setup within a Space#with block, or
     # raise something fierce.
@@ -92,11 +94,11 @@ module SyncWrap
     def load_sync_file( filename )
       require 'syncwrap/main'
       with do
-        load( filename, true )
-        # This is true -> wrapped to avoid pollution of sync
-        # namespace. This is particularly important given the dynamic
-        # binding scheme of components. If not done, top-level
-        # methods/vars in sync.rb would have precidents over
+        load( filename, wrap_sync_load? )
+        # Should wrap to avoid pollution of sync namespace, but there
+        # are jruby bugs to workaround. This is particularly important
+        # given the dynamic binding scheme of components. If not done,
+        # top-level methods/vars in sync.rb would have precidents over
         # component methods.
       end
     end
@@ -291,6 +293,16 @@ module SyncWrap
 
     private
 
+    # Return true if wrapped load should be attempted on this ruby
+    # Avoid this only on JRuby 9.0.0-9.0.4, which will fail hard.
+    #
+    # See https://github.com/jruby/jruby/issues/3180
+    def wrap_sync_load?
+      ( !defined?( JRUBY_VERSION ) ||
+        version_lt?(  JRUBY_VERSION, [9] ) ||
+        version_gte?( JRUBY_VERSION, [9,0,5] ) )
+    end
+
     def execute_host( host, component_plan = [], opts = {} )
       comp_roles = opts[ :comp_roles ]
       comps = if comp_roles && !comp_roles.empty?
@@ -413,5 +425,6 @@ module SyncWrap
   autoload :AmazonEC2,     'syncwrap/amazon_ec2'
   autoload :GitHelp,       'syncwrap/git_help'
   autoload :UserData,      'syncwrap/user_data'
+  autoload :ZoneBalancer,  'syncwrap/zone_balancer'
 
 end

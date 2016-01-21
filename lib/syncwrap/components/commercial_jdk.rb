@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -71,6 +71,7 @@ module SyncWrap
         join( ' ' )
 
       sudo( "if [ ! -d #{jdk_dir} ]; then", close: "fi" ) do
+        dist_install( 'curl', minimal: true, check_install: true )
         sudo <<-SH
           curl -sSL -o #{distro} #{jdk_url}
         SH

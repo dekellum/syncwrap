@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You may
@@ -97,6 +97,15 @@ module SyncWrap
       users.each do |u|
         create_user( u )
         set_sudoers( u )
+      end
+
+      # Some distro's, like Debian, don't come with rsync installed so
+      # need to install it here. For backward compatibly, only do
+      # this if dist_install is defined (i.e. Distro component before
+      # self.)
+      if !users.empty? && respond_to?( :dist_install )
+        dist_install( 'rsync',
+                      ssh_flags.merge( minimal: true, check_install: true ) )
       end
 
       users.each do |u|

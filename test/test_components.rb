@@ -2,7 +2,7 @@
 #.hashdot.profile += jruby-shortlived
 
 #--
-# Copyright (c) 2011-2015 David Kellum
+# Copyright (c) 2011-2016 David Kellum
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you
 # may not use this file except in compliance with the License.  You
@@ -35,6 +35,7 @@ module SyncWrap
       [ Debian ],
       [ Debian, CRubyVM ],
       [ CentOS, CRubyVM ],
+      [ Arch, CRubyVM ],
       [ EtcHosts ],
       [ AmazonLinux, JRubyVM, RunUser, Iyyov, Geminabox ],
       [ RHEL,   JRubyVM, BundlerGem ],
@@ -76,6 +77,7 @@ module SyncWrap
       [ Debian, PostgreSQL ],
       [ Ubuntu, PostgreSQL ],
       [ CentOS, PostgreSQL ],
+      [ CentOS, PostgreSQL, pg_version: '9.5' ],
       [ RHEL, Qpid ],
       [ CentOS, QpidRepo, qpid_prebuild_repo: 'http://localhost' ],
       [ RHEL ],

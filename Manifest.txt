@@ -34,6 +34,7 @@ lib/syncwrap/shell.rb
 lib/syncwrap/systemd.rb
 lib/syncwrap/user_data.rb
 lib/syncwrap/version_support.rb
+lib/syncwrap/zone_balancer.rb
 lib/syncwrap/components/amazon_linux.rb
 lib/syncwrap/components/arch.rb
 lib/syncwrap/components/bundle.rb
@@ -101,6 +102,7 @@ test/test_shell.rb
 test/test_space.rb
 test/test_space_main.rb
 test/test_version_support.rb
+test/test_zone_balancer.rb
 test/zfile
 test/sync/d1/bar
 test/sync/d1/foo.erb
