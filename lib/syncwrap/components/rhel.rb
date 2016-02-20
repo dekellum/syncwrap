@@ -91,7 +91,7 @@ module SyncWrap
     # testing if any specified pkgs are not installed. Otherwise just
     # yield to block.
     def dist_if_not_installed?( pkgs, chk, opts, &block )
-      if chk
+      if chk && pkgs.all? { |p| p !~ /\.rpm$/ && p !~ /^http(s)?:/ }
         qry = "yum list -C -q installed #{pkgs.join ' '}"
         cnt = qry + " | tail -n +2 | wc -l"
         cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}
