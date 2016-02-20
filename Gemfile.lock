@@ -23,7 +23,7 @@ GEM
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
     nokogiri (1.6.7.2-java)
-    rake (10.5.0)
+    rake (10.4.2)
     rdoc (4.0.1)
       json (~> 1.4)
     rjack-maven (3.0.5.0-java)
