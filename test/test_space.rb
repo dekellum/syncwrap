@@ -30,6 +30,10 @@ class TestSpace < MiniTest::Unit::TestCase
         # for test access:
         public :resolve_component_methods
       end
+      f = s.formatter
+      def f.write_component( *args )
+        #disable
+      end
     end
 
   end
@@ -63,6 +67,15 @@ class TestSpace < MiniTest::Unit::TestCase
   end
 
   class Turnip
+  end
+
+  class CompFailure < RuntimeError
+  end
+
+  class CompFail < Component
+    def install
+      raise CompFailure, "always fail"
+    end
   end
 
   def test_host_roles
@@ -213,6 +226,14 @@ class TestSpace < MiniTest::Unit::TestCase
       # No residual side effects on next call
       b2 = c2.send( :custom_binding )
       assert_raises( NameError ) { b2.eval( "x" ) }
+    end
+  end
+
+  def test_fail_raise
+    sp.host( 'localhost', CompFail.new )
+    sp.host( 'other', CompFail.new )
+    assert_raises( CompFailure ) do
+      sp.execute
     end
   end
 

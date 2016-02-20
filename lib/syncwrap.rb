@@ -361,9 +361,8 @@ module SyncWrap
 
       comp.send( mth )
 
-      ctx.flush if opts[ :flush_component ]
-
       if opts[ :flush_component ]
+        ctx.flush
         formatter.sync do
           formatter.write_component( host, comp, mth, "complete" )
         end
