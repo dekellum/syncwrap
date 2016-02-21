@@ -56,7 +56,8 @@ module SyncWrap
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
       opts.delete( :minimal )
       pkgs.flatten!
-      chk = opts.delete( :check_install ) || opts.delete( :succeed )
+      chk = opts.delete( :check_install )
+      chk = opts.delete( :succeed ) if chk.nil?
       chk = check_install? if chk.nil?
       dist_if_not_installed?( pkgs, chk, opts ) do
         sudo( "yum install -q -y #{pkgs.join( ' ' )}", opts )
@@ -90,7 +91,7 @@ module SyncWrap
     # testing if any specified pkgs are not installed. Otherwise just
     # yield to block.
     def dist_if_not_installed?( pkgs, chk, opts, &block )
-      if chk
+      if chk && pkgs.all? { |p| p !~ /\.rpm$/ && p !~ /^http(s)?:/ }
         qry = "yum list -C -q installed #{pkgs.join ' '}"
         cnt = qry + " | tail -n +2 | wc -l"
         cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}
