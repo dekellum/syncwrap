@@ -307,7 +307,7 @@ TEXT
       table = roles.map do |role|
         row = [ ':' + role.to_s ]
         classes = space.role( role ).map( &:class )
-        row << short_class_names( classes ).join(' ')
+        row << short_class_names( classes )
       end
       print_table( table )
       puts if multi
@@ -332,19 +332,56 @@ TEXT
     def print_table( table )
       max_columns = table.map( &:count ).max || 0
       col_widths = max_columns.times.map do |i|
-        table.map { |row| row[i] && row[i].length }.compact.max
+        table.map do |row|
+          case row[i]
+          when String
+            row[i].length
+          when Array
+            1
+          end
+        end.compact.max
       end
-      format = col_widths.inject("") do |f,w|
-        if f.empty? #first
-          f << "%-#{w}s     "
-        else
-          f << "%-#{w}s "
+      wfirst = unless col_widths.empty?
+                 col_widths[0] += 4 # Extra pad first col
+                 col_widths[0] + 1
+               end
+
+      table = table.map do |row|
+        row.map do |cell|
+          if cell.is_a?( Array )
+            l = 0
+            cell.inject( String.new ) do |m,i|
+              if l == 0 || ( wfirst + l + i.length + 1 < term_width )
+                m << i << ' '
+                l += i.length + 1
+              else
+                m << "\n" + (' ' * wfirst)
+                m << i << ' '
+                l = wfirst + i.length + 1
+              end
+              m
+            end
+          else
+            cell
+          end
         end
       end
 
+      wall = 0
+      format = col_widths.inject( String.new ) do |f,w|
+        if f.empty? || ( wall + w + 1 < term_width )
+          f << "%-#{w}s "
+          wall += w + 1
+        else
+          f[-1,1] = "\n"
+          f << ( ' ' * wfirst ) + "%-#{w}s "
+          wall = wfirst + w + 1
+        end
+        f
+      end
       table.each do |row|
         row[ max_columns ] = nil
-        puts format % row
+        puts (format % row ).gsub( /\s+$/, '' )
       end
     end
 
@@ -404,6 +441,32 @@ TEXT
           host.roles.any? { |r| @roles.include?( r ) }
         end
       end
+    end
+
+    def term_width
+      @term_width ||= ( unix? && check_stty_width || check_tput_width ) || 80
+    end
+
+    def unix?
+       !!( RbConfig::CONFIG['host_os'] =~
+           /(aix|darwin|linux|(net|free|open)bsd|cygwin|solaris|irix|hpux)/i )
+    end
+
+    def check_stty_width
+      s = `stty size 2>/dev/null`
+      s &&= s.split[1]
+      s &&= s.to_i
+      s if s && s >= 30
+    rescue
+      nil
+    end
+
+    def check_tput_width
+      s = `tput cols 2>/dev/null`
+      s &&= s.to_i
+      s if s && s >= 30
+    rescue
+      nil
     end
 
   end
