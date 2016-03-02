@@ -444,7 +444,7 @@ TEXT
     end
 
     def term_width
-      @term_width ||= ( unix? && check_stty_width || check_tput_width ) || 80
+      @term_width ||= ( unix? && (check_stty_width || check_tput_width) ) || 80
     end
 
     def unix?
