@@ -66,7 +66,8 @@ module SyncWrap
       args.flatten!
       flags = []
       flags << '--no-install-recommends' if opts.delete( :minimal )
-      chk = opts.delete( :check_install ) || opts.delete( :succeed )
+      chk = opts.delete( :check_install )
+      chk = opts.delete( :succeed ) if chk.nil?
       chk = check_install? if chk.nil?
       dist_if_not_installed?( args, chk, opts ) do
         sudo( "apt-get -yqq update", opts ) if first_apt?
