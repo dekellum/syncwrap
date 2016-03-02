@@ -1,4 +1,13 @@
-=== 2.7.1 (TBD)
+=== 2.7.1 (2016-3-2)
+* Fix handling of the -R/--components-in-role flag to correctly limit
+  to hosts including the role, for both execution and listing
+  (-l). Previously errors would occur in execution if a
+  matching (-h) host pattern restriction was not also provided.
+* Fix interpretation of check_install and (deprecated) succeed options
+  when used in calls to dist_install (all distros).
+* Avoid check_install on RHEL when local rpm files or URLs are passed
+  as a package to install. Previously the check_install conditional
+  would always yield true (install needed) for these.
 
 === 2.7.0 (2016-1-21)
 * Add SyncWrap::ZoneBalancer utility for balancing new hosts across
