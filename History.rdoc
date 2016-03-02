@@ -1,3 +1,5 @@
+=== 2.7.1 (TBD)
+
 === 2.7.0 (2016-1-21)
 * Add SyncWrap::ZoneBalancer utility for balancing new hosts across
   multiple (AWS) availability zones for fault tolerance.
