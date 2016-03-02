@@ -100,13 +100,16 @@ class TestSpace < MiniTest::Unit::TestCase
   def test_host_direct_components
     c1 = CompOne.new
     c2 = CompTwo.new
+    c3 = CompThree.new
     sp.role( :test, c2 )
+    sp.role( :alt,  c3 )
     assert_equal( [ c2 ], sp.role( :test ) )
 
     c2b = CompTwo.new
     host = sp.host( 'localhost', c1, :test, c2b )
     assert_equal( [ c1, c2, c2b ], host.components )
     assert_equal( [ c2 ], host.components_in_roles( [ :test ] ) )
+    assert_equal( [], host.components_in_roles( [ :alt ] ) )
     assert_equal( c1, host.component( CompOne ) )
     assert_equal( c2b, host.component( CompTwo ) ) #last instance
   end

@@ -304,6 +304,7 @@ TEXT
     def list_roles( hosts, multi )
       puts "Included Roles:" if multi
       roles = hosts.map( &:roles ).inject([],:|)
+      roles &= @comp_roles if !@comp_roles.empty?
       table = roles.map do |role|
         row = [ ':' + role.to_s ]
         classes = space.role( role ).map( &:class )
@@ -402,6 +403,12 @@ TEXT
       unless @roles.empty?
         @hosts.select! do |host|
           host.roles.any? { |r| @roles.include?( r ) }
+        end
+      end
+
+      unless @comp_roles.empty?
+        @hosts.select! do |host|
+          host.roles.any? { |r| @comp_roles.include?( r ) }
         end
       end
     end
