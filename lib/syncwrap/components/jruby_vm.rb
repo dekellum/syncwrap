@@ -22,8 +22,8 @@ require 'syncwrap/hash_support'
 module SyncWrap
 
   # Provision JRuby (jruby.org - Ruby on the Java Virtual Machine) by
-  # direct download from public S3 repo. Includes utility methods for
-  # checking and installing JRuby gems.
+  # direct download from the public S3 repo. Includes utility methods
+  # for checking and installing JRuby gems.
   #
   # Host component dependencies: <Distro>
   class JRubyVM < Component
