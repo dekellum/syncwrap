@@ -36,7 +36,7 @@ module SyncWrap
   # some common utility methods.
   #
   # Alternatives like RVM, rbenv, etc. are disfavored by this author
-  # for server provisioning because of their often arcane shell and
+  # for server provisioning because of their intrusive shell and
   # environment modifications and obscure interations with non-/login
   # or non-/interactive sessions. These are fine tools if needed for
   # development however. Again you are currently on your own (beyond
