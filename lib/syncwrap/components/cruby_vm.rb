@@ -47,7 +47,7 @@ module SyncWrap
     include HashSupport
 
     # Default #ruby_version to install
-    DEFAULT_VERSION = '2.1.8'
+    DEFAULT_VERSION = '2.1.10'
 
     # A set of known (sha256) cryptographic hashes, keyed by version
     # string, for the source ruby-(version).tar.gz package.
@@ -64,7 +64,7 @@ module SyncWrap
     # release (p#) no longer appears in package names.
     # (Default: DEFAULT_VERSION)
     #
-    # Example values: '2.0.0-p481', '2.1.8'
+    # Example values: '2.0.0-p481', '2.1.10'
     attr_accessor :ruby_version
 
     # If true, attempt to uninstall any pre-existing distro packaged
