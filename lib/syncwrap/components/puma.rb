@@ -18,10 +18,11 @@ require 'syncwrap/component'
 
 module SyncWrap
 
-  # Provision to install, start/restart a Puma HTTP
-  # server, optionally triggered by a state change key.
+  # Provision to install and start/restart a Puma HTTP server
+  # instance, optionally triggered by a state change key. Systemd
+  # service and socket units are supported.
   #
-  # Host component dependencies: RunUser, <ruby>
+  # Host component dependencies:  <Distro>?, RunUser, <ruby>, SourceTree?
   class Puma < Component
 
     # Puma version to install and run, if set. Otherwise assume puma
@@ -66,10 +67,44 @@ module SyncWrap
       @always_restart
     end
 
-    # The name of the systemd unit file to create for this instance of
-    # puma. If specified, the name should include a '.service' suffix.
-    # (Default: nil -> no unit)
-    attr_accessor :systemd_unit
+    # The name of the systemd service unit file to create for this
+    # instance of puma. If specified, the name should include a
+    # '.service' suffix. Will rput the same name (or .erb extended
+    # template) under :sync_paths /etc/systemd/system, or the generic
+    # puma.service at the same location if not found.
+    # (Default: nil -> no service unit)
+    attr_accessor :systemd_service
+
+    # Deprecated
+    alias :systemd_unit :systemd_service
+
+    # Deprecated
+    alias :systemd_unit= :systemd_service=
+
+    # The name of the systemd socket unit file to create for this
+    # instance of puma, for socket activation. If specified, the name
+    # should include a '.socket' suffix and #systemd_service is also
+    # required.  Will rput the same name (or .erb extended
+    # template) under :sync_paths /etc/systemd/system, or the generic
+    # puma.service at the same location if not found.
+    # (Default: nil -> no socket unit)
+    attr_accessor :systemd_socket
+
+    # An array of ListenStream configuration values for
+    # #systemd_socket. If a #puma_flags[:port] is specified, this
+    # defaults to a single '0.0.0.0:port' stream. Otherwise this
+    # setting is required if #systemd_socket is specified.
+    attr_writer :listen_streams
+
+    def listen_streams
+      if @listen_streams
+        @listen_streams
+      elsif p = puma_flags[:port]
+        [ "0.0.0.0:#{p}" ]
+      else
+        nil
+      end
+    end
 
     public
 
@@ -79,8 +114,16 @@ module SyncWrap
       @change_key = nil
       @rack_path = nil
       @puma_flags = {}
-      @systemd_unit = nil
+      @systemd_service = nil
+      @systemd_socket = nil
+      @listen_streams = nil
       super
+      if systemd_socket && !systemd_service
+        raise "Puma#systemd_service is required when #systemd_socket is specified"
+      end
+      if systemd_socket && (listen_streams.nil? || listen_streams.empty?)
+        raise "Neither #list_streams nor #puma_flags[:port] specified with Puma#systemd_socket"
+      end
     end
 
     def install
@@ -90,18 +133,35 @@ module SyncWrap
 
       changes = change_key && state[ change_key ]
 
-      if systemd_unit
-        uchanges = rput( '/etc/systemd/system/puma.service',
-                         "/etc/systemd/system/#{systemd_unit}",
-                         user: :root )
-        if !uchanges.empty?
-          systemctl( 'enable', systemd_unit )
+      if systemd_service
+        serv_changes = rput( src_for_systemd_service,
+                             "/etc/systemd/system/#{systemd_service}",
+                             user: :root )
+
+        sock_changes = if systemd_socket
+                         rput( src_for_systemd_socket,
+                               "/etc/systemd/system/#{systemd_socket}",
+                               user: :root )
+                       else
+                         []
+                       end
+
+        if !serv_changes.empty? || !sock_changes.empty?
+          systemctl( 'daemon-reload' )
+          systemctl( 'enable', *systemd_units )
         end
-        if( change_key.nil? || changes || uchanges || always_restart? )
-          systemctl( 'restart', systemd_unit )
+        if( change_key.nil? || changes ||
+            !serv_changes.empty? || !sock_changes.empty? || always_restart? )
+          if !sock_changes.empty?
+            systemctl( 'restart', *systemd_units )
+          else
+            systemctl( 'restart', systemd_service )
+          end
         else
-          systemctl( 'start', systemd_unit )
+          systemctl( 'start', *systemd_units )
         end
+
+        serv_changes + sock_changes
       else
         rudo( "( cd #{rack_path}", close: ')' ) do
           rudo( "if [ -f puma.state -a -e control ]; then",
@@ -113,19 +173,39 @@ module SyncWrap
             end
           end
         end
+        nil
       end
-      nil
+    end
+
+    def puma_restart
+      if systemd_service
+        systemctl( 'restart', systemd_service )
+      else
+        bare_restart
+      end
+    end
+
+    def puma_stop
+      if systemd_service
+        systemctl( 'stop', *systemd_units )
+      else
+        bare_stop
+      end
     end
 
     protected
 
-    # By default, runs in foreground if a systemd_unit is specified.
+    # By default, runs in foreground if a systemd_service is specified.
     def foreground?
-      !!systemd_unit
+      !!systemd_service
     end
 
     def bare_restart
       rudo( ( pumactl_command + %w[ --state puma.state restart ] ).join( ' ' ) )
+    end
+
+    def bare_stop
+      rudo( ( pumactl_command + %w[ --state puma.state stop ] ).join( ' ' ) )
     end
 
     def bare_else_start
@@ -169,6 +249,26 @@ module SyncWrap
 
     def key_to_arg( key )
       '--' + key.to_s.gsub( /_/, '-' )
+    end
+
+    def src_for_systemd_service
+      s = "/etc/systemd/system/#{systemd_service}"
+      unless find_source( s )
+        s = '/etc/systemd/system/puma.service'
+      end
+      s
+    end
+
+    def src_for_systemd_socket
+      s = "/etc/systemd/system/#{systemd_socket}"
+      unless find_source( s )
+        s = '/etc/systemd/system/puma.socket'
+      end
+      s
+    end
+
+    def systemd_units
+      [systemd_socket, systemd_service].compact
     end
 
   end
