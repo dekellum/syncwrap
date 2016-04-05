@@ -48,7 +48,6 @@ module SyncWrap
         state: "#{rack_path}/puma.state",
         control: "unix://#{rack_path}/control",
         environment: "production",
-        port: 5874,
         daemon: !foreground? }.merge( @puma_flags )
     end
 
