@@ -140,6 +140,7 @@ module SyncWrap
     def install_iyyov_init
       if systemd?
         changes = rput( 'etc/systemd/system/iyyov.service', user: :root )
+        systemctl( 'daemon-reload' ) unless changes.empty?
         systemctl( 'enable', 'iyyov.service' )
       else
         rput( 'etc/init.d/iyyov', user: :root,
