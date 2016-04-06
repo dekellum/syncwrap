@@ -1,6 +1,9 @@
 [Unit]
 Description=Puma HTTP Server
 After=network.target
+<% if systemd_socket %>
+Requires=<%= systemd_socket %>
+<% end %>
 
 [Service]
 Type=simple
