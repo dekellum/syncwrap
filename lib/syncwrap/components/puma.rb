@@ -102,7 +102,8 @@ module SyncWrap
       elsif p = puma_flags[:port]
         [ "0.0.0.0:#{p}" ]
       else
-        nil
+        raise( "Neither #listen_streams nor #puma_flags[:port] specified" +
+               " with Puma#systemd_socket" )
       end
     end
 
@@ -120,9 +121,6 @@ module SyncWrap
       super
       if systemd_socket && !systemd_service
         raise "Puma#systemd_service is required when #systemd_socket is specified"
-      end
-      if systemd_socket && (listen_streams.nil? || listen_streams.empty?)
-        raise "Neither #list_streams nor #puma_flags[:port] specified with Puma#systemd_socket"
       end
     end
 
