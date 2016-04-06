@@ -6,9 +6,10 @@ Description=Puma HTTP Server Accept Sockets
 ListenStream=<%= s %>
 <% end %>
 
-# Socket options matching what Puma wants
+# Socket options matching Puma defaults
 NoDelay=true
 ReusePort=true
+Backlog=1024
 
 [Install]
 WantedBy=sockets.target
