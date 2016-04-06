@@ -69,10 +69,10 @@ module SyncWrap
 
     # The name of the systemd service unit file to create for this
     # instance of puma. If specified, the name should include a
-    # '.service' suffix. Will rput the same name (or .erb extended
-    # template) under :sync_paths /etc/systemd/system, or the generic
-    # puma.service at the same location if not found.
-    # (Default: nil -> no service unit)
+    # ".service" suffix, e.g. "puma.service". Will rput the same name
+    # (or .erb extended template) under :sync_paths
+    # /etc/systemd/system, or the generic puma.service(.erb) at the
+    # same location if not found. (Default: nil -> no service unit)
     attr_accessor :systemd_service
 
     # Deprecated
@@ -83,11 +83,11 @@ module SyncWrap
 
     # The name of the systemd socket unit file to create for this
     # instance of puma, for socket activation. If specified, the name
-    # should include a '.socket' suffix and #systemd_service is also
-    # required.  Will rput the same name (or .erb extended
-    # template) under :sync_paths /etc/systemd/system, or the generic
-    # puma.service at the same location if not found.
-    # (Default: nil -> no socket unit)
+    # should include a ".socket" suffix, e.g. "puma.socket". The
+    # #systemd_service is also required if this is specified.  Will
+    # rput the same name (or .erb extended template) under :sync_paths
+    # /etc/systemd/system, or the generic puma.socket(.erb) at the
+    # same location if not found. (Default: nil -> no socket unit)
     attr_accessor :systemd_socket
 
     # An array of ListenStream configuration values for
