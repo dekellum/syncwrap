@@ -5,9 +5,10 @@ before_install: "gem install rjack-tarpit -v'~>2.1' || \
 bundler_args: ""
 sudo: false
 rvm:
-  - 1.9.3
+  - 2.0
   - 2.1
   - 2.2
+  - 2.3
   - ruby-head
   - rbx
   - jruby-1.7.24
