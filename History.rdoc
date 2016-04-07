@@ -1,10 +1,10 @@
 === 2.8.0 (TBD)
 * Add optional SyncWrap::Puma#systemd_socket (activation) support
-    * Puma#systemd_unit property is deprecated in favor of #systemd_service
-    * Add lookup for systemd unit source files under the specific names
-      configured, before using generic puma.service/puma.socket
-    * Add systemctl daemon-reload based on changes
-    * Restart service or both socket and service based on changes
+  * Puma#systemd_unit property is deprecated in favor of #systemd_service
+  * Add lookup for systemd unit source files under the specific names
+    configured, before using generic puma.service/puma.socket
+  * Add systemctl daemon-reload based on changes
+  * Restart service or both socket and service based on changes
 * Add Puma#puma_restart and #puma_stop (CLI) utility methods
 * Don't specify an alternative default port for SyncWrap::Puma (as
   user might rather to do that in config). You'll need to update your
