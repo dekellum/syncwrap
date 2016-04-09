@@ -56,30 +56,29 @@ module SyncWrap
     # ==== Options
     #
     # :check_install:: Short-circuit if all packages already
-    #                  installed. Thus no upgrades will be performed.
+    #                  installed. Thus no upgrades will be
+    #                  performed. (Default: true)
     #
     # :minimal:: Eqv to --no-install-recommends
     #
-    # Additional options are passed to the sudo calls.
+    # Options are also passed to the sudo calls.
     def dist_install( *args )
-      opts = args.last.is_a?( Hash ) && args.pop.dup || {}
+      opts = args.last.is_a?( Hash ) && args.pop || {}
       args.flatten!
       flags = []
-      flags << '--no-install-recommends' if opts.delete( :minimal )
-      chk = opts.delete( :check_install )
-      chk = opts.delete( :succeed ) if chk.nil?
+      flags << '--no-install-recommends' if opts[ :minimal ]
+      chk = opts[ :check_install ]
       chk = check_install? if chk.nil?
-      dist_if_not_installed?( args, chk, opts ) do
+      dist_if_not_installed?( args, chk != false, opts ) do
         sudo( "apt-get -yqq update", opts ) if first_apt?
         sudo( "apt-get -yq install #{(flags + args).join ' '}", opts )
       end
     end
 
     # Uninstall the specified package names. A trailing hash is
-    # interpreted as options, passed to the sudo calls.
+    # interpreted as options and passed to the sudo calls.
     def dist_uninstall( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
-      opts.delete( :succeed )
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
       pkgs.flatten!
       pkgs.each do |pkg|
         dist_if_installed?( pkg, opts ) do

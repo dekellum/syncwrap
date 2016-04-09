@@ -23,6 +23,12 @@ require 'syncwrap'
 
 module SyncWrap
 
+  class RpmUrlInstaller < Component
+    def install
+      dist_install( "http://foo.bar/goo-3.3.4.x86_64.rpm" )
+    end
+  end
+
   # Each of the following are default auto test construction plans,
   # for all components, used below.  The last component is under test
   # and run via #install if implemented.  The prior components are
@@ -86,6 +92,7 @@ module SyncWrap
       [ RHEL, Qpid ],
       [ CentOS, QpidRepo, qpid_prebuild_repo: 'http://localhost' ],
       [ RHEL ],
+      [ RHEL, RpmUrlInstaller ],
       [ RunUser ],
       [ RHEL,  CRubyVM, TarpitGem ],
       [ RHEL,  JRubyVM, TarpitGem ],

@@ -93,7 +93,7 @@ module SyncWrap
       opts = @default_options.merge( opts )
       close = opts.delete( :close )
 
-      flush if opts != @queued_opts #may still be a no-op
+      flush unless sh_opts_equal?( @queued_opts, opts ) #may still be a no-op
 
       @queued_cmd << command
       @queued_opts = opts
@@ -184,6 +184,19 @@ module SyncWrap
     end
 
     private
+
+    SH_OPT_KEYS = [ :accept, :coalesce, :dryrun, :error, :pipefail,
+                    :sh_verbose, :ssh_flags, :ssh_options, :ssh_user,
+                    :ssh_user_pem, :sudo_flags, :user, :verbose ].freeze
+
+    # Compare options hashes for equality, but only keys that
+    # influence execution of #sh, ignoring others.
+    def sh_opts_equal?( o1, o2 )
+      SH_OPT_KEYS.each do |k|
+        return false if o1[k] != o2[k]
+      end
+      true
+    end
 
     def ssh_host_name
       host.space.ssh_host_name( host )

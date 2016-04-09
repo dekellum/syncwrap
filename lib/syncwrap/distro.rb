@@ -41,20 +41,19 @@ module SyncWrap
     #
     # ==== Options
     #
-    # :check_install:: Short-circuit if all packages already
-    #                  installed. Thus no upgrades will be performed.
-    #
-    # :succeed:: Deprecated, use check_install instead
+    # :check_install:: Short-circuit if packages are already
+    #                  installed. Thus no upgrades will be
+    #                  performed. (Default: true)
     #
     # :minimal:: Avoid additional "optional" packages when possible
     #
-    # Additional options are passed to the sudo calls.
+    # Options are also passed to the sudo calls.
     def dist_install( *pkgs )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
 
     # Uninstall the specified package names. A trailing hash is
-    # interpreted as options, passed to the sudo calls.
+    # interpreted as options and passed to the sudo calls.
     def dist_uninstall( *pkgs )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
@@ -67,7 +66,6 @@ module SyncWrap
     #   systemctl( 'enable', 'name.service' )
     #
     # See #systemd?, SystemD#systemctl
-    #
     def dist_install_init_service( name )
       raise "Include a distro-specific component, e.g. Debian, RHEL"
     end
