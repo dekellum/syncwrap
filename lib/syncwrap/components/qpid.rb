@@ -131,7 +131,7 @@ module SyncWrap
 
     def corosync_install!( opts = {} )
       corosync_build
-      dist_install( "#{corosync_src}/x86_64/*.rpm", succeed: true )
+      dist_install( "#{corosync_src}/x86_64/*.rpm" )
     end
 
     def qpid_tools_install!
@@ -287,7 +287,7 @@ module SyncWrap
         cd /tmp/rpm-drop
         #{curls.join("\n")}
       SH
-      dist_install( "/tmp/rpm-drop/*.rpm", succeed: true )
+      dist_install( "/tmp/rpm-drop/*.rpm" )
     end
 
     protected
