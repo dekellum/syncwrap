@@ -1,15 +1,16 @@
 === 2.8.0 (TBD)
-* Add optional SyncWrap::Puma#systemd_socket (activation) support
+* Add optional SyncWrap::Puma#systemd_socket (activation) support:
   * Puma#systemd_unit property is deprecated in favor of #systemd_service
   * Add lookup for systemd unit source files under the specific names
     configured, before using generic puma.service/puma.socket
   * Add systemctl daemon-reload based on changes
   * Restart service or both socket and service based on changes
 * Add Puma#puma_restart and #puma_stop (CLI) utility methods
-* Don't specify an alternative default port for SyncWrap::Puma (as
-  user might rather to do that in config). You'll need to update your
-  config if you relied on this default.
-* Attempt to have CLI (-l) listings output wrap to (unix) terminal width
+* Don't set a default port for SyncWrap::Puma, since users may prefer
+  to set port(s) in a puma config file. If relying on this port
+  selection, users will need to specify `port: 5874` on upgrade.
+* CLI (-l --list*) listings now attempt to format output to (Unix)
+  terminal width
 * SyncWrap::Iyyov with systemd should also conditionally daemon-reload
 * Upgrade SyncWrap::CRubyVM default version to 2.1.10
 * Upgrade SyncWrap::JRubyVM default version to 1.7.24
