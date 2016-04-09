@@ -41,57 +41,72 @@ module SyncWrap
       @is_systemd ||= version_gte?( rhel_version, [7] )
     end
 
-    # Install the specified package names. A trailing hash is
-    # interpreted as options, see below.
+    # Install the specified packages. When rpm HTTP URLs or local file
+    # paths are given instead of package names, these are installed
+    # first and individually via #dist_install_url. Calling that
+    # explicitly may be preferable. A trailing hash is interpreted as
+    # options, see below.
     #
     # ==== Options
     #
-    # :check_install:: Short-circuit if all packages already
-    #                  installed. Thus no upgrades will be performed.
+    # :check_install:: Short-circuit if packages are already
+    #                  installed, and thus don't perform updates
+    #                  unless versions are specified. (Default: true)
     #
-    # :succeed:: Deprecated, use check_install instead
-    #
-    # Additional options are passed to the sudo calls.
+    # Options are also passed to the sudo calls.
     def dist_install( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
-      opts.delete( :minimal )
-      pkgs.flatten!
-      chk = opts.delete( :check_install )
-      chk = opts.delete( :succeed ) if chk.nil?
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
+      chk = opts[ :check_install ]
       chk = check_install? if chk.nil?
-      dist_if_not_installed?( pkgs, chk, opts ) do
-        sudo( "yum install -q -y #{pkgs.join( ' ' )}", opts )
+      pkgs.flatten!
+      rpms,names = pkgs.partition { |p| p =~ /\.rpm$/ || p =~ /^http(s)?:/i }
+      rpms.each do |url|
+        dist_install_url( url, nil, opts )
+      end
+      !names.empty? && dist_if_not_installed?( names, chk != false, opts ) do
+        sudo( "yum install -q -y #{names.join ' '}", opts )
+      end
+    end
+
+    # Install packages by HTTP URL or local file path to rpm. Uses
+    # name to check_install. If not specified, name is deduced via
+    # `File.basename( url, '.rpm' )`. It is not recommended to set
+    # option `check_install: false`, because `yum` will fail with
+    # "Error: Nothing to do" if given a file/URL and the package is
+    # already installed.
+    #
+    # ==== Options
+    #
+    # :check_install:: Short-circuit if package is already
+    #                  installed. (Default: true)
+    #
+    # Options are also passed to the sudo calls.
+    def dist_install_url( url, name = nil, opts = {} )
+      name ||= File.basename( url, '.rpm' )
+      chk = opts[ :check_install ]
+      dist_if_not_installed?( name, chk != false, opts ) do
+        sudo( "yum install -q -y #{url}", opts )
       end
     end
 
     # Uninstall the specified package names. A trailing hash is
-    # interpreted as options, see below.
-    #
-    # ==== Options
-    #
-    # :succeed:: Succeed even if none of the packages are
-    #            installed. (Deprecated, Default: true)
-    #
-    # Additional options are passed to the sudo calls.
+    # interpreted as options. These are passed to the sudo.
     def dist_uninstall( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
       pkgs.flatten!
-      if opts.delete( :succeed ) != false
-        sudo( <<-SH, opts )
-          if yum list -C -q installed #{pkgs.join( ' ' )} >/dev/null 2>&1; then
-            yum remove -q -y #{pkgs.join( ' ' )}
-          fi
-        SH
-      else
-        sudo( "yum remove -q -y #{pkgs.join( ' ' )}", opts )
-      end
+      sudo( <<-SH, opts )
+        if yum list -C -q installed #{pkgs.join ' '} >/dev/null 2>&1; then
+          yum remove -q -y #{pkgs.join ' '}
+        fi
+      SH
     end
 
-    # If chk is true, then wrap block in a sudo bash conditional
-    # testing if any specified pkgs are not installed. Otherwise just
+    # If chk is true, then wrap block in a sudo bash conditional that tests
+    # if any specified pkgs are not installed. Otherwise just
     # yield to block.
     def dist_if_not_installed?( pkgs, chk, opts, &block )
-      if chk && pkgs.all? { |p| p !~ /\.rpm$/ && p !~ /^http(s)?:/ }
+      if chk
+        pkgs = Array( pkgs )
         qry = "yum list -C -q installed #{pkgs.join ' '}"
         cnt = qry + " | tail -n +2 | wc -l"
         cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}

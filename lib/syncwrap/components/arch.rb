@@ -35,26 +35,24 @@ module SyncWrap
     # ==== Options
     #
     # :check_install:: Short-circuit if all packages already
-    #                  installed. Thus no upgrades will be performed.
+    #                  installed. Thus no upgrades will be
+    #                  performed. (Default: true)
     #
-    # Additional options are passed to the sudo calls.
+    # Options are also passed to the sudo calls.
     def dist_install( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
-      opts.delete( :minimal )
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
       pkgs.flatten!
-      chk = opts.delete( :check_install )
-      chk = opts.delete( :succeed ) if chk.nil?
+      chk = opts[ :check_install ]
       chk = check_install? if chk.nil?
-      dist_if_not_installed?( pkgs, chk, opts ) do
+      dist_if_not_installed?( pkgs, chk != false, opts ) do
         sudo( "pacman -S --noconfirm #{pkgs.join ' '}", opts )
       end
     end
 
     # Uninstall the specified package names. A trailing hash is
-    # interpreted as options, passed to the sudo calls.
+    # interpreted as options and passed to the sudo calls.
     def dist_uninstall( *pkgs )
-      opts = pkgs.last.is_a?( Hash ) && pkgs.pop.dup || {}
-      opts.delete( :succeed )
+      opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
       pkgs.flatten!
       pkgs.each do |pkg|
         dist_if_installed?( pkg, opts ) do
