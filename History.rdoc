@@ -1,4 +1,11 @@
 === 2.8.0 (TBD)
+* The :check_install option to Distro#dist_install added in 2.7.0 is
+  now true (on) by default
+* The previously deprecated :succeed flag to
+  Disto#dist_install/dist_uninstall has been dropped
+* Fully replace the original use case for the :succeed option with
+  SyncWrap::RHEL#dist_install_url, defaulting to package name
+  extracted from rpm URL or file path for the install check
 * Add optional SyncWrap::Puma#systemd_socket (activation) support:
   * Puma#systemd_unit property is deprecated in favor of #systemd_service
   * Add lookup for systemd unit source files under the specific names
