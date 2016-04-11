@@ -15,6 +15,9 @@
   now true (on) by default
 * The previously deprecated :succeed flag to
   Disto#dist_install/dist_uninstall has been dropped
+* Replace RHEL installed test with "rpm -q" which is considerably
+  faster than "yum list"
+* Add RHEL#dist_install :yum_flags options for special cases
 * Fully replace the original use case for the :succeed option with
   SyncWrap::RHEL#dist_install_url, defaulting to package name
   extracted from rpm URL or file path for the install check
