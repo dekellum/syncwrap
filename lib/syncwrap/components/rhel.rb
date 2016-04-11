@@ -107,8 +107,7 @@ module SyncWrap
     def dist_if_not_installed?( pkgs, chk, opts, &block )
       if chk
         pkgs = Array( pkgs )
-        qry = "yum list -C -q installed #{pkgs.join ' '}"
-        cnt = qry + " | tail -n +2 | wc -l"
+        cnt = "rpm -q #{pkgs.join ' '} | grep -cv 'not installed'"
         cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}
         sudo( cond, opts.merge( close: 'fi' ), &block )
       else
