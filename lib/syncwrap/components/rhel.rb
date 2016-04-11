@@ -53,18 +53,21 @@ module SyncWrap
     #                  installed, and thus don't perform updates
     #                  unless versions are specified. (Default: true)
     #
+    # :yum_flags:: Additional array of flags to pass to `yum install`.
+    #
     # Options are also passed to the sudo calls.
     def dist_install( *pkgs )
       opts = pkgs.last.is_a?( Hash ) && pkgs.pop || {}
       chk = opts[ :check_install ]
       chk = check_install? if chk.nil?
+      flags = Array( opts[ :yum_flags ] )
       pkgs.flatten!
       rpms,names = pkgs.partition { |p| p =~ /\.rpm$/ || p =~ /^http(s)?:/i }
       rpms.each do |url|
         dist_install_url( url, nil, opts )
       end
       !names.empty? && dist_if_not_installed?( names, chk != false, opts ) do
-        sudo( "yum install -q -y #{names.join ' '}", opts )
+        sudo( "yum install -q -y #{(flags + names).join ' '}", opts )
       end
     end
 
@@ -80,12 +83,15 @@ module SyncWrap
     # :check_install:: Short-circuit if package is already
     #                  installed. (Default: true)
     #
+    # :yum_flags:: Additional array of flags to pass to `yum install`.
+    #
     # Options are also passed to the sudo calls.
     def dist_install_url( url, name = nil, opts = {} )
       name ||= File.basename( url, '.rpm' )
       chk = opts[ :check_install ]
+      flags = Array( opts[ :yum_flags ] )
       dist_if_not_installed?( name, chk != false, opts ) do
-        sudo( "yum install -q -y #{url}", opts )
+        sudo( "yum install -q -y #{(flags + [url]).join ' '}", opts )
       end
     end
 
@@ -107,8 +113,7 @@ module SyncWrap
     def dist_if_not_installed?( pkgs, chk, opts, &block )
       if chk
         pkgs = Array( pkgs )
-        qry = "yum list -C -q installed #{pkgs.join ' '}"
-        cnt = qry + " | tail -n +2 | wc -l"
+        cnt = "rpm -q #{pkgs.join ' '} | grep -cv 'not installed'"
         cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}
         sudo( cond, opts.merge( close: 'fi' ), &block )
       else
