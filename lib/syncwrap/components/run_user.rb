@@ -36,6 +36,9 @@ module SyncWrap
       @run_dir || "/var/local/#{run_user}"
     end
 
+    # File mode as integer for the #run_dir (default: 0755)
+    attr_accessor :run_dir_mode
+
     # Home directory for the #run_user
     # (default: nil -> same as #run_dir)
     attr_writer :run_user_home
@@ -48,6 +51,7 @@ module SyncWrap
       @run_user    = 'runr'
       @run_group   = nil
       @run_dir     = nil
+      @run_dir_mode = 0755
       @run_user_home = nil
       super
     end
@@ -73,7 +77,7 @@ module SyncWrap
     # Create and set owner/permission of run_dir, such that run_user may
     # create new directories there.
     def create_run_dir
-      mkdir_run_user( run_dir )
+      mkdir_run_user( run_dir, mode: run_dir_mode )
     end
 
     def service_dir( sname, instance = nil )
@@ -87,11 +91,14 @@ module SyncWrap
       mkdir_run_user( sdir )
     end
 
-    # Make dir including parents, chown to run_user and chmod 775.
-    def mkdir_run_user( dir )
+    # Make dir including parents via sudo, chown to run_user, and chmod
+    # === Options
+    # :mode:: Integer file mode for directory set via chmod (Default: 0775)
+    def mkdir_run_user( dir, opts = {} )
+      mode = opts[:mode] || 0775
       sudo "mkdir -p #{dir}"
       chown_run_user dir
-      sudo "chmod 775 #{dir}"
+      sudo( "chmod %o %s" % [ mode, dir ] )
     end
 
     # Deprecated
