@@ -197,7 +197,8 @@ module SyncWrap
         flags[ :ssh_user ] = ssh_user
         if ssh_user_pem
           flags[ :ssh_user_pem ] = ssh_user_pem
-          flags[ :ssh_options ] = { 'IdentitiesOnly' => 'yes' }
+          flags[ :ssh_options ] = { 'IdentitiesOnly' => 'yes',
+                                    'PasswordAuthentication' => 'no' }
         end
       end
       flags
