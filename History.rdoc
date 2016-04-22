@@ -13,6 +13,11 @@
   0755. This was previously hardcoded to 0775, which caused ssh access
   as the :run_user to fail (when :run_dir and :run_user_home are the
   same).
+* Set ssh option PasswordAuthentication=no when using
+  Users#ssh_user_pem. This is reasonable with use of a PEM file and
+  provides a (partial) workaround for an occasionally observed timing
+  issue causing a password prompt to be temporarily offered on a
+  booting CentOS host with Cloud-Init.
 * CLI (-l --list*) listings now attempt to format output to (Unix)
   terminal width
 * The :check_install option to Distro#dist_install added in 2.7.0 is
