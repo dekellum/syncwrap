@@ -53,6 +53,9 @@ module SyncWrap
       @remote_dir || source_dir
     end
 
+    # File mode as integer for the #remote_dir (Default: 0755)
+    attr_accessor :remote_dir_mode
+
     protected
 
     # Require local source_dir to be clean per Git before #rput of the
@@ -84,6 +87,7 @@ module SyncWrap
       @local_source_root = path_relative_to_caller( '..', clr )
       @source_dir = nil
       @remote_dir = nil
+      @remote_dir_mode = 0755
       @remote_source_root = nil
       @require_clean = true
       @rput_options = {}
@@ -99,7 +103,7 @@ module SyncWrap
     end
 
     def install
-      mkdir_run_user( remote_source_path )
+      mkdir_run_user( remote_source_path, mode: remote_dir_mode )
       changes = sync_source
       on_change( changes ) unless changes.empty?
       changes
