@@ -174,7 +174,15 @@ module SyncWrap
       end
     end
 
-    def puma_restart
+    def start
+      if systemd_service
+        systemctl( 'start', *systemd_units )
+      else
+        bare_start
+      end
+    end
+
+    def restart
       if systemd_service
         systemctl( 'restart', systemd_service )
       else
@@ -182,11 +190,19 @@ module SyncWrap
       end
     end
 
-    def puma_stop
+    def stop
       if systemd_service
         systemctl( 'stop', *systemd_units )
       else
         bare_stop
+      end
+    end
+
+    def status
+      if systemd_service
+        systemctl( 'status', *systemd_units )
+      else
+        bare_status
       end
     end
 
@@ -203,6 +219,14 @@ module SyncWrap
 
     def bare_stop
       rudo( ( pumactl_command + %w[ --state puma.state stop ] ).join( ' ' ) )
+    end
+
+    def bare_status
+      rudo( ( pumactl_command + %w[ --state puma.state status ] ).join( ' ' ) )
+    end
+
+    def bare_start
+      rudo( "cd #{rack_path} && #{puma_start_command}" )
     end
 
     def bare_else_start

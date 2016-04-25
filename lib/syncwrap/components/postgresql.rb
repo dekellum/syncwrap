@@ -369,6 +369,22 @@ module SyncWrap
       dist_service( service_name, 'stop' )
     end
 
+    protected :pg_start, :pg_restart, :pg_stop
+
+    alias :start   :pg_start
+    alias :restart :pg_restart
+    alias :stop    :pg_stop
+
+    # Output the server status (useful via CLI with --verbose)
+    def status
+      dist_service( service_name, 'status' )
+    end
+
+    # Reload server configuration
+    def reload
+      dist_service( service_name, 'reload' )
+    end
+
   end
 
 end
