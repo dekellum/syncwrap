@@ -134,7 +134,7 @@ module SyncWrap
     # Don't run rsync. Return some or no changes at random.
     def rsync( srcs, target, opts )
       @commands << rsync_args( host, srcs, target, opts )
-      ( rand(2) == 1 ) ? [ :something ] : []
+      ( rand(2) == 1 ) ? [ [ 'something', 'somefile' ] ] : []
     end
 
   end

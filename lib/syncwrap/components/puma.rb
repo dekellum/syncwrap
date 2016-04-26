@@ -15,6 +15,8 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/change_key_listener'
+require 'syncwrap/systemd_service'
 
 module SyncWrap
 
@@ -24,10 +26,12 @@ module SyncWrap
   #
   # Host component dependencies:  <Distro>?, RunUser, <ruby>, SourceTree?
   class Puma < Component
+    include ChangeKeyListener
+    include SystemDService
 
     # Puma version to install and run, if set. Otherwise assume puma
     # is bundled with the application (i.e. Bundle) and use bin stubs
-    # to run.  (Default: nil; Example: 2.9.0)
+    # to run.  (Default: nil; Example: 3.3.0)
     attr_accessor :puma_version
 
     # Path to the application/configuration directory which
@@ -54,10 +58,6 @@ module SyncWrap
 
     protected
 
-    # An optional state key to check, indicating changes requiring
-    # a Puma restart (Default: nil; Example: :source_tree)
-    attr_accessor :change_key
-
     # Should Puma be restarted even when there were no source bundle
     # changes? (Default: false)
     attr_writer :always_restart
@@ -66,28 +66,11 @@ module SyncWrap
       @always_restart
     end
 
-    # The name of the systemd service unit file to create for this
-    # instance of puma. If specified, the name should include a
-    # ".service" suffix, e.g. "puma.service". Will rput the same name
-    # (or .erb extended template) under :sync_paths
-    # /etc/systemd/system, or the generic puma.service(.erb) at the
-    # same location if not found. (Default: nil -> no service unit)
-    attr_accessor :systemd_service
-
     # Deprecated
     alias :systemd_unit :systemd_service
 
     # Deprecated
     alias :systemd_unit= :systemd_service=
-
-    # The name of the systemd socket unit file to create for this
-    # instance of puma, for socket activation. If specified, the name
-    # should include a ".socket" suffix, e.g. "puma.socket". The
-    # #systemd_service is also required if this is specified.  Will
-    # rput the same name (or .erb extended template) under :sync_paths
-    # /etc/systemd/system, or the generic puma.socket(.erb) at the
-    # same location if not found. (Default: nil -> no socket unit)
-    attr_accessor :systemd_socket
 
     # An array of ListenStream configuration values for
     # #systemd_socket. If a #puma_flags[:port] is specified, this
@@ -111,12 +94,8 @@ module SyncWrap
     def initialize( opts = {} )
       @puma_version = nil
       @always_restart = false
-      @change_key = nil
       @rack_path = nil
       @puma_flags = {}
-      @systemd_service = nil
-      @systemd_socket = nil
-      @listen_streams = nil
       super
       if systemd_socket && !systemd_service
         raise "Puma#systemd_service is required when #systemd_socket is specified"
@@ -128,45 +107,16 @@ module SyncWrap
         gem_install( 'puma', version: puma_version )
       end
 
-      changes = change_key && state[ change_key ]
-
       if systemd_service
-        serv_changes = rput( src_for_systemd_service,
-                             "/etc/systemd/system/#{systemd_service}",
-                             user: :root )
-
-        sock_changes = if systemd_socket
-                         rput( src_for_systemd_socket,
-                               "/etc/systemd/system/#{systemd_socket}",
-                               user: :root )
-                       else
-                         []
-                       end
-
-        if !serv_changes.empty? || !sock_changes.empty?
-          systemctl( 'daemon-reload' )
-          systemctl( 'enable', *systemd_units )
-        end
-        if( change_key.nil? || changes ||
-            !serv_changes.empty? || !sock_changes.empty? || always_restart? )
-          if !sock_changes.empty?
-            systemctl( 'restart', *systemd_units )
-          else
-            systemctl( 'restart', systemd_service )
-          end
-        else
-          systemctl( 'start', *systemd_units )
-        end
-
-        serv_changes + sock_changes
+        install_units( always_restart? || change_key_changes? )
       else
         rudo( "( cd #{rack_path}", close: ')' ) do
           rudo( "if [ -f puma.state -a -e control ]; then",
                 close: bare_else_start ) do
-            if ( change_key && !changes ) && !always_restart?
-              rudo 'true' #no-op
-            else
+            if always_restart? || change_key_changes?
               bare_restart
+            else
+              rudo 'true' #no-op
             end
           end
         end
@@ -176,15 +126,15 @@ module SyncWrap
 
     def start
       if systemd_service
-        systemctl( 'start', *systemd_units )
+        super
       else
         bare_start
       end
     end
 
-    def restart
+    def restart( *args )
       if systemd_service
-        systemctl( 'restart', systemd_service )
+        super
       else
         bare_restart
       end
@@ -192,7 +142,7 @@ module SyncWrap
 
     def stop
       if systemd_service
-        systemctl( 'stop', *systemd_units )
+        super
       else
         bare_stop
       end
@@ -200,7 +150,7 @@ module SyncWrap
 
     def status
       if systemd_service
-        systemctl( 'status', *systemd_units )
+        super
       else
         bare_status
       end
@@ -272,6 +222,16 @@ module SyncWrap
       '--' + key.to_s.gsub( /_/, '-' )
     end
 
+    def rput_unit_files
+      c = rput( src_for_systemd_service,
+                "/etc/systemd/system/#{systemd_service}", user: :root )
+      if systemd_socket
+        c += rput( src_for_systemd_socket,
+                   "/etc/systemd/system/#{systemd_socket}", user: :root )
+      end
+      c
+    end
+
     def src_for_systemd_service
       s = "/etc/systemd/system/#{systemd_service}"
       unless find_source( s )
@@ -286,10 +246,6 @@ module SyncWrap
         s = '/etc/systemd/system/puma.socket'
       end
       s
-    end
-
-    def systemd_units
-      [systemd_socket, systemd_service].compact
     end
 
   end
