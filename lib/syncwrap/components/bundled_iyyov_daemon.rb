@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/change_key_listener'
 
 module SyncWrap
 
@@ -30,6 +31,7 @@ module SyncWrap
   #
   # Host component dependencies: RunUser, <ruby>, Iyyov
   class BundledIyyovDaemon < Component
+    include ChangeKeyListener
 
     protected
 
@@ -44,16 +46,11 @@ module SyncWrap
     # one of 'name' on a host. (Default: nil)
     attr_accessor :instance
 
-    # An optional state key to check, indicating changes requiring
-    # a daemon restart (Default: nil; Example: :source_tree)
-    attr_accessor :change_key
-
     public
 
     def initialize( opts = {} )
       @name = nil
       @instance = nil
-      @change_key = nil
 
       super
     end
@@ -76,9 +73,7 @@ module SyncWrap
                           user: run_user )
       job_changes += iyyov_install_jobs
 
-      src_changes = ( change_key && state[ change_key ] ) || []
-
-      if ( ( src_changes + conf_changes ).length > 0 ||
+      if ( change_key_changes? || !conf_changes.empty? ||
            state[ :hashdot_updated ] ||
            state[ :imaging ] )
         rudo( "kill $(< #{daemon_service_dir}/#{name}.pid ) || true" )
