@@ -32,6 +32,7 @@ lib/syncwrap/rsync.rb
 lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
 lib/syncwrap/systemd.rb
+lib/syncwrap/systemd_service.rb
 lib/syncwrap/user_data.rb
 lib/syncwrap/version_support.rb
 lib/syncwrap/zone_balancer.rb
