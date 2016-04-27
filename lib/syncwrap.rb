@@ -422,7 +422,9 @@ module SyncWrap
 
   # Additional autoloads (optional support)
   autoload :AmazonEC2,     'syncwrap/amazon_ec2'
+  autoload :ChangeKeyListener, 'syncwrap/change_key_listener'
   autoload :GitHelp,       'syncwrap/git_help'
+  autoload :SystemDService, 'syncwrap/systemd_service'
   autoload :UserData,      'syncwrap/user_data'
   autoload :ZoneBalancer,  'syncwrap/zone_balancer'
 
