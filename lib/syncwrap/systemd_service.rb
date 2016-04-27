@@ -55,11 +55,11 @@ module SyncWrap
 
     public
 
-    # Install the systemd units files by #rput, detecting changes and
-    # performs `systemctl` daemon-reload, (re-)enable, and restart or
-    # start as required. Caller may also indicate restart_required,
-    # for example given other external changes, which will perform a
-    # restart instead of just a start.
+    # Install the systemd units files by #rput_unit_files, detecting
+    # changes and performs `systemctl` daemon-reload, (re-)enable, and
+    # restart or start as required. Caller may also pass
+    # restart_required true, for example given other external changes,
+    # which will mandate a restart instead of just a start.
     def install_units( restart_required = false )
       require_systemd_service!
       units_d = rput_unit_files
@@ -107,6 +107,12 @@ module SyncWrap
 
     protected
 
+    # Perform rput of systemd unit files and return changes
+    # array. This can be overridden, for example to use system
+    # provided units (no-op and return `[]`) or for additional "drop-in"
+    # config files (e.g. foo.service.d/overrides.conf).  Any changes
+    # signal that the service (or if included in changes, the socket)
+    # should be restarted.
     def rput_unit_files
       srcs = systemd_units.map { |u| "/etc/systemd/system/" + u }
       rput( *srcs, "/etc/systemd/system/", user: :root )
