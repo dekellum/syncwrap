@@ -16,6 +16,8 @@
 
 module SyncWrap
 
+  # Support module for components which listen for and act on changes
+  # set on SyncWrap::Context#state keys.
   module ChangeKeyListener
 
     protected
@@ -25,10 +27,11 @@ module SyncWrap
       super
     end
 
-    # An optional state key, or array of state keys, to check for changes
-    # (Default: nil; Example: :source_tree)
+    # An optional state key, or array of state keys, to check for
+    # changes.  (Default: nil; Example: :source_tree)
     attr_accessor :change_key
 
+    # Returns true if there are any changes with any #change_key.
     def change_key_changes?
       Array( change_key ).any? do |k|
         c = state[ k ]
@@ -36,6 +39,7 @@ module SyncWrap
       end
     end
 
+    # Returns the combined array of all changes on all #change_key.
     def change_key_changes
       Array( change_key ).inject( [] ) do |m,k|
         c = state[ k ]
@@ -48,4 +52,5 @@ module SyncWrap
     end
 
   end
+
 end
