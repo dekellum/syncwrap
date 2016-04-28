@@ -359,7 +359,7 @@ module SyncWrap
           opts[ :flush_component ] ? "start" : "enqueue" )
       end
 
-      comp.send( mth )
+      comp.public_send( mth )
 
       if opts[ :flush_component ]
         ctx.flush
