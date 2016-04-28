@@ -18,6 +18,7 @@ require 'syncwrap/component'
 
 require 'syncwrap/git_help'
 require 'syncwrap/path_util'
+require 'syncwrap/change_key_listener'
 
 module SyncWrap
 
@@ -26,6 +27,7 @@ module SyncWrap
   # Host component dependencies: RunUser?, SourceTree?, BundlerGem
   class Bundle < Component
     include PathUtil
+    include ChangeKeyListener
 
     # Path to the Gemfile(.lock)
     # (Default: SourceTree#remote_source_path)
@@ -44,10 +46,6 @@ module SyncWrap
     attr_accessor :bundle_install_bin_stubs
 
     protected
-
-    # An optional state key to check, indicating changes requiring
-    # bundle install (Default: nil; Example: :source_tree)
-    attr_accessor :change_key
 
     # Hash of environment key/values to set on call to bundle install
     # (Default: {} -> none)
@@ -69,7 +67,6 @@ module SyncWrap
     public
 
     def initialize( opts = {} )
-      @change_key = nil
       @bundle_path = nil
       @bundle_install_env = {}
       @bundle_install_path = '~/.gem'
@@ -79,7 +76,7 @@ module SyncWrap
     end
 
     def install
-      bundle_install if change_key.nil? || state[ change_key ]
+      bundle_install if change_key.nil? || change_key_changes?
     end
 
     def bundle_install

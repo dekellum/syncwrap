@@ -151,17 +151,33 @@ module SyncWrap
       end
     end
 
-    def iyyov_start
+    def start
       dist_service( 'iyyov', 'start' )
     end
 
-    def iyyov_stop
+    def stop
       dist_service( 'iyyov', 'stop' )
     end
 
-    def iyyov_restart
+    def restart
       dist_service( 'iyyov', 'restart' )
     end
+
+    # Output the server status (useful via CLI with --verbose)
+    def status
+      dist_service( 'iyyov', 'status' )
+    end
+
+    # Reload server configuration
+    def reload
+      dist_service( 'iyyov', 'reload' )
+    end
+
+    protected
+
+    alias :iyyov_start   :start
+    alias :iyyov_restart :restart
+    alias :iyyov_stop    :stop
 
   end
 

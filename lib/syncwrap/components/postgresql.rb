@@ -355,19 +355,35 @@ module SyncWrap
     end
 
     # Start the server
-    def pg_start
+    def start
       dist_service( service_name, 'start' )
     end
 
     # Restart the server
-    def pg_restart
+    def restart
       dist_service( service_name, 'restart' )
     end
 
     # Stop the server
-    def pg_stop
+    def stop
       dist_service( service_name, 'stop' )
     end
+
+    # Output the server status (useful via CLI with --verbose)
+    def status
+      dist_service( service_name, 'status' )
+    end
+
+    # Reload server configuration
+    def reload
+      dist_service( service_name, 'reload' )
+    end
+
+    protected
+
+    alias :pg_start   :start
+    alias :pg_restart :restart
+    alias :pg_stop    :stop
 
   end
 
