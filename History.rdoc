@@ -1,18 +1,33 @@
 === 2.8.0 (TBD)
-* Add optional SyncWrap::Puma#systemd_socket (activation) support:
-  * Puma#systemd_unit property is deprecated in favor of #systemd_service
+* Only allow public component methods to be executed via the
+  SyncWrap::Space#execute and thus the CLI. Previously it was possible
+  to execute protected or private methods.
+* Uniformly name start, stop, and restart methods on SyncWrap::Iyyov
+  and SyncWrap::PostgreSQL for consistency and use in the CLI.  Also
+  add reload and status methods to these components.
+* Add optional SyncWrap::Puma systemd_socket (activation) support:
+  * The systemd_unit property is deprecated in favor of systemd_service
   * Add lookup for systemd unit source files under the specific names
     configured, before using generic puma.service/puma.socket
+    templates.
   * Add systemctl daemon-reload based on changes
   * Restart service or both socket and service based on changes
-* Add Puma#puma_restart and #puma_stop (CLI) utility methods
 * Don't set a default port for SyncWrap::Puma, since users may prefer
   to set port(s) in a puma config file. If relying on this port
   selection, users will need to specify `port: 5874` on upgrade.
-* Add SyncWrap::RunUser#run_dir_mode and change the default to
-  0755. This was previously hardcoded to 0775, which caused ssh access
-  as the :run_user to fail (when :run_dir and :run_user_home are the
-  same).
+* Add SyncWrap::Puma start, stop, restart, and status methods.
+* Add SyncWrap::SystemDService module for reuse
+* SyncWrap::Bundle, SyncWrap::BundledIyyovDaemon and SyncWrap::Puma
+  now support 'listening' for changes on multiple change keys, which
+  is more intuitive to configure than having SyncWrap::SourceTree
+  produce changes on multiple change keys.  However, the later is
+  still supported.
+* Add SyncWrap::ChangeKeyListener module for reuse
+* Add :mode option to SyncWrap::RunUser#mkdir_run_user,
+  SyncWrap::RunUser#run_dir_mode, SyncWrap::SourceTree#remote_dir_mode
+  and change defaults to 0755. This was previously hard-coded to 0775,
+  which caused ssh access as the :run_user to fail and other conflicts
+  with distro security features.
 * Set ssh option PasswordAuthentication=no when using
   Users#ssh_user_pem. This is reasonable with use of a PEM file and
   provides a (partial) workaround for an occasionally observed timing
@@ -33,6 +48,7 @@
 * SyncWrap::Iyyov with systemd should also conditionally daemon-reload
 * Upgrade SyncWrap::CRubyVM default version to 2.1.10
 * Upgrade SyncWrap::JRubyVM default version to 1.7.24 (+ hash for 1.7.25)
+* Upgrade SyncWrap::BundlerGem default version to 1.9.9
 
 === 2.7.1 (2016-3-2)
 * Fix handling of the -R/--components-in-role flag to correctly limit
