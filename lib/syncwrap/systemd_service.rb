@@ -57,9 +57,9 @@ module SyncWrap
 
     # Install the systemd units files by #rput_unit_files, detecting
     # changes and performs `systemctl` daemon-reload, (re-)enable, and
-    # restart or start as required. Caller may also pass
-    # restart_required true, for example given other external changes,
-    # which will mandate a restart instead of just a start.
+    # #restart or #start as required. If restart_required evaluates to
+    # true, for example given other external changes, a #restart is
+    # mandated.
     def install_units( restart_required = false )
       require_systemd_service!
       units_d = rput_unit_files
@@ -81,11 +81,15 @@ module SyncWrap
       units_d
     end
 
+    # Start all #systemd_units.
     def start
       require_systemd_service!
       systemctl( 'start', *systemd_units )
     end
 
+    # Restart the service. If option :with_socket is passed as true,
+    # restart all #systemd_units which includes #systemd_socket if
+    # present.
     def restart( opts = {} )
       require_systemd_service!
       if opts[ :with_socket ]
@@ -95,11 +99,13 @@ module SyncWrap
       end
     end
 
+    # Stop all #systemd_units.
     def stop
       require_systemd_service!
       systemctl( 'stop', *systemd_units )
     end
 
+    # Output status of #systemd_units (useful via CLI with --verbose)
     def status
       require_systemd_service!
       systemctl( 'status', *systemd_units )
@@ -118,10 +124,13 @@ module SyncWrap
       rput( *srcs, "/etc/systemd/system/", user: :root )
     end
 
+    # Return Array of the unit names that were specified (not nil)
+    # via #systemd_service and #systemd_socket.
     def systemd_units
       [systemd_socket, systemd_service].compact
     end
 
+    # Raise if systemd_service not specified.
     def require_systemd_service!
       raise "#{self.class.name}#systemd_service not set" unless systemd_service
     end
