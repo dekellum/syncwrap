@@ -22,6 +22,10 @@ require_relative 'setup'
 require 'syncwrap'
 require 'syncwrap/version_support.rb'
 
+class SyncWrap::IyyovDaemon
+  public :daemon_service_dir
+end
+
 class TestSpaceMain < MiniTest::Unit::TestCase
   include SyncWrap
   include VersionSupport
