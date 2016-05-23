@@ -46,6 +46,9 @@
   SyncWrap::RHEL#dist_install_url, defaulting to package name
   extracted from rpm URL or file path for the install check
 * SyncWrap::Iyyov with systemd should also conditionally daemon-reload
+* Update SyncWrap::PostgreSQL and postgresql.conf for support of
+  version 9.6 (beta 1). Changes remain backward compatible with 9.1+ and
+  SyncWrap 2.3+
 * Upgrade SyncWrap::CRubyVM default version to 2.1.10
 * Upgrade SyncWrap::JRubyVM default version to 1.7.24 (+ hash for 1.7.25)
 * Upgrade SyncWrap::BundlerGem default version to 1.9.9
