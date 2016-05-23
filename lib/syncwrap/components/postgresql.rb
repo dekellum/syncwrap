@@ -174,10 +174,10 @@ module SyncWrap
     # Shared buffers (Default: '256MB' vs PG: '128MB')
     attr_accessor :shared_buffers
 
-    # Work memory (Default: '128MB' vs PG: '1MB')
+    # Work memory (Default: '128MB' vs PG 9.4+: '4MB')
     attr_accessor :work_mem
 
-    # Maintenance work memory (Default: '128MB' vs PG: '16MB')
+    # Maintenance work memory (Default: '128MB' vs PG 9.4+: '64MB')
     attr_accessor :maintenance_work_mem
 
     # Maximum stack depth (Default: '4MB' vs PG: '2MB')

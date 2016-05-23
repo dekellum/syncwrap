@@ -79,8 +79,6 @@ listen_addresses = '*'
                                         # defaults to 'localhost'; use '*' for all
                                         # (change requires restart)
 #port = 5432                            # (change requires restart)
-# Note: In RHEL-like installations, you can't set the port number here;
-# adjust it in the service file instead.
 max_connections = 100                   # (change requires restart)
 # Note:  Increasing max_connections costs ~400 bytes of shared memory per
 # connection slot, plus lock space (see max_locks_per_transaction).
@@ -136,6 +134,7 @@ max_connections = 100                   # (change requires restart)
 shared_buffers = <%= shared_buffers %>  # min 128kB
                                         # (change requires restart)
 #huge_pages = try                       # on, off, or try (9.4+)
+                                        # (change requires restart)
 #temp_buffers = 8MB                     # min 800kB
 #max_prepared_transactions = 0          # zero disables the feature
                                         # (change requires restart)
@@ -177,13 +176,20 @@ max_stack_depth = <%= max_stack_depth %> # min 100kB
 
 #bgwriter_delay = 200ms                 # 10-10000ms between rounds
 #bgwriter_lru_maxpages = 100            # 0-1000 max buffers written/round
-#bgwriter_lru_multiplier = 2.0          # 0-10.0 multipler on buffers scanned/round
+#bgwriter_lru_multiplier = 2.0          # 0-10.0 multiplier on buffers scanned/round
+#bgwriter_flush_after = 0               # 0 disables,
+                                        # default is 512kb on linux, 0 otherwise (9.6+)
 
 # - Asynchronous Behavior -
 
 effective_io_concurrency = <%= effective_io_concurrency %>
                                         # 1-1000; 0 disables prefetching
-#max_worker_processes = 8               # (9.4+)
+#max_worker_processes = 8               # (change requires restart, 9.4+)
+#max_parallel_degree = 2                # max number of worker processes per node  (9.6+)
+#old_snapshot_threshold = -1            # 1min-60d; -1 disables; 0 is immediate (9.6+)
+                                        # (change requires restart)
+#backend_flush_after = 0                # 0 disables,
+                                        # default is 128kb on linux, 0 otherwise (9.6+)
 
 #------------------------------------------------------------------------------
 # WRITE AHEAD LOG
@@ -192,6 +198,7 @@ effective_io_concurrency = <%= effective_io_concurrency %>
 # - Settings -
 
 #wal_level = minimal                    # minimal, archive, hot_standby, or logical
+                                        # 9.6+: minimal, replica, or logical
                                         # (change requires restart)
 #fsync = on                             # turns forced synchronization on or off
 synchronous_commit = <%= synchronous_commit %>  # synchronization level;
@@ -210,6 +217,7 @@ synchronous_commit = <%= synchronous_commit %>  # synchronization level;
 #wal_buffers = -1                       # min 32kB, -1 sets based on shared_buffers
                                         # (change requires restart)
 #wal_writer_delay = 200ms               # 1-10000 milliseconds
+#wal_writer_flush_after = 1MB           # 0 disables (9.6+)
 
 commit_delay = <%= commit_delay %>      # range 0-100000, in microseconds
 #commit_siblings = 5                    # range 1-1000
@@ -227,6 +235,8 @@ checkpoint_segments = <%= checkpoint_segments %> # in logfile segments, min 1, 1
 <% end %>
 #checkpoint_timeout = 5min              # range 30s-1h
 #checkpoint_completion_target = 0.5     # checkpoint target duration, 0.0 - 1.0
+#checkpoint_flush_after = 0             # 0 disables,
+                                        # default is 256kb on linux, 0 otherwise
 #checkpoint_warning = 30s               # 0 disables
 
 # - Archiving -
@@ -314,7 +324,9 @@ checkpoint_segments = <%= checkpoint_segments %> # in logfile segments, min 1, 1
 #cpu_tuple_cost = 0.01                  # same scale as above
 #cpu_index_tuple_cost = 0.005           # same scale as above
 #cpu_operator_cost = 0.0025             # same scale as above
-#effective_cache_size = 4GB             # 128MB default < 9.4
+#effective_cache_size = 4GB             # (128MB was default < 9.4)
+#parallel_tuple_cost = 0.1              # same scale as above (9.6+)
+#parallel_setup_cost = 1000.0           # same scale as above (9.6+)
 
 # - Genetic Query Optimizer -
 
@@ -334,6 +346,7 @@ checkpoint_segments = <%= checkpoint_segments %> # in logfile segments, min 1, 1
 #from_collapse_limit = 8
 #join_collapse_limit = 8                # 1 disables collapsing of explicit
                                         # JOIN clauses
+#force_parallel_mode = off              # (9.6+)
 
 #------------------------------------------------------------------------------
 # ERROR REPORTING AND LOGGING
@@ -376,6 +389,8 @@ log_rotation_size = 0                   # Automatic rotation of logfiles will
 # These are relevant when logging to syslog:
 #syslog_facility = 'LOCAL0'
 #syslog_ident = 'postgres'
+#syslog_sequence_numbers = on           # (9.6+)
+#syslog_split_messages = on             # (9.6+)
 
 # This is only relevant when logging to eventlog (win32):
 #event_source = 'PostgreSQL'
@@ -447,6 +462,7 @@ log_line_prefix = '< %m >'              # special values:
                                         #   %p = process ID
                                         #   %t = timestamp without milliseconds
                                         #   %m = timestamp with milliseconds
+                                        #   %n = timestamp with milliseconds (Unix epoch, 9.6+)
                                         #   %i = command tag
                                         #   %e = SQL state
                                         #   %c = session ID
@@ -540,6 +556,7 @@ log_timezone = 'UTC'
 #session_replication_role = 'origin'
 #statement_timeout = 0                  # in milliseconds, 0 is disabled
 #lock_timeout = 0                       # in milliseconds, 0 is disabled
+#idle_in_transaction_session_timeout = 0 # in milliseconds, 0 is disabled
 #vacuum_freeze_min_age = 50000000
 #vacuum_freeze_table_age = 150000000
 #vacuum_multixact_freeze_min_age = 5000000
