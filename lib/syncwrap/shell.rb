@@ -98,7 +98,7 @@ module SyncWrap
 
       if opts[ :coalesce ]
         args << '-c'
-        cmd = "exec 1>&2\n"
+        cmd = String.new( "exec 1>&2\n" )
         if opts[ :sh_verbose ]
           cmd << "set " << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' ) << "\n"
         end
@@ -110,7 +110,7 @@ module SyncWrap
           args << ( opts[ :sh_verbose ] == :x ? '-x' : '-v' )
         end
         args << '-c'
-        cmd = ""
+        cmd = String.new
         cmd << "cd /\n" if opts[:user]
         cmd << command_lines_cleanup( command )
         args << cmd
