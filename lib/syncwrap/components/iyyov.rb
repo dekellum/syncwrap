@@ -41,7 +41,7 @@ module SyncWrap
     # empty jobs.rb.
     def install
       # Shorten if the desired iyyov version is already running
-      pid, ver = capture_running_version( 'iyyov' )
+      _,ver = capture_running_version( 'iyyov' )
       if ver != iyyov_version
         install_run_dir    #as root
         install_iyyov_gem  #as root

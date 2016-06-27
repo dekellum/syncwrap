@@ -220,7 +220,7 @@ module SyncWrap
 
     def rsync( srcs, target, opts )
       args = rsync_args( ssh_host_name, srcs, target, opts )
-      exit_code, outputs = capture_stream( args, host, :rsync, opts )
+      _,outputs = capture_stream( args, host, :rsync, opts )
 
       # Return array of --itemize-changes on standard out.
       collect_stream( :out, outputs ).
