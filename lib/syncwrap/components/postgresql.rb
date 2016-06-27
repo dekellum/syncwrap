@@ -80,7 +80,7 @@ module SyncWrap
 
     # Location of postgresql data (and possibly also config) directory.
     # (Default: #pg_default_data_dir)
-    attr_accessor :pg_data_dir
+    attr_writer :pg_data_dir
 
     def pg_data_dir
       @pg_data_dir || pg_default_data_dir
