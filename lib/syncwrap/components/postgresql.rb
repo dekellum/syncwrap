@@ -120,7 +120,11 @@ module SyncWrap
     attr_writer :pg_specify_etc_config
 
     def pg_specify_etc_config
-      @pg_specify_etc_config || distro.is_a?( Debian )
+      if @pg_specify_etc_config.nil?
+        distro.is_a?( Debian )
+      else
+        @pg_specify_etc_config
+      end
     end
 
     # The package names, including \PostgreSQL server of the
@@ -245,6 +249,7 @@ module SyncWrap
       @pg_data_dir = nil
       @pg_default_data_dir = nil
       @pg_version = nil
+      @pg_specify_etc_config = nil
       @package_names = nil
       @service_name = 'postgresql'
       @synchronous_commit = :on
