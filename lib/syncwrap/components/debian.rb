@@ -46,7 +46,10 @@ module SyncWrap
     end
 
     def systemd?
-      @systemd ||= version_gte?( debian_version, [8] )
+      if @systemd.nil?
+        @systemd = version_gte?( debian_version, [8] )
+      end
+      @systemd
     end
 
     # Install the specified package names. The first time this is

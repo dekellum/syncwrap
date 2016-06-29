@@ -33,12 +33,23 @@ module SyncWrap
 
     alias :distro_version :rhel_version
 
+    protected
+
+    # Set true/false to override the default, distro version based
+    # determination of whether systemd is PID 1 on the system.
+    attr_writer :systemd
+
+    public
+
     def initialize( opts = {} )
       super
     end
 
     def systemd?
-      @is_systemd ||= version_gte?( rhel_version, [7] )
+      if @systemd.nil?
+        @systemd = version_gte?( rhel_version, [7] )
+      end
+      @systemd
     end
 
     # Install the specified packages. When rpm HTTP URLs or local file
