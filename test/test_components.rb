@@ -139,7 +139,7 @@ module SyncWrap
 
   end
 
-  class TestComponents < MiniTest::Unit::TestCase
+  class TestComponents < Minitest::Test
 
     def with_test_context( sp, host )
       ctx = TestContext.new( host, sp.default_options )

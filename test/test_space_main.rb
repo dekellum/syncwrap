@@ -26,7 +26,7 @@ class SyncWrap::IyyovDaemon
   public :daemon_service_dir
 end
 
-class TestSpaceMain < MiniTest::Unit::TestCase
+class TestSpaceMain < Minitest::Test
   include SyncWrap
   include VersionSupport
 
@@ -39,7 +39,7 @@ class TestSpaceMain < MiniTest::Unit::TestCase
     end
   end
 
-  def test
+  def test_wrap
     skip if ( defined?( JRUBY_VERSION ) &&
               ( version_lt?( JRUBY_VERSION, [1,7,24] ) ||
                 ( version_gte?( JRUBY_VERSION, [9] ) &&

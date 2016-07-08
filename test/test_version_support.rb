@@ -21,7 +21,7 @@ require_relative 'setup'
 
 require 'syncwrap/version_support'
 
-class TestVersionSupport < MiniTest::Unit::TestCase
+class TestVersionSupport < Minitest::Test
   include SyncWrap::VersionSupport
 
   def test_to_a

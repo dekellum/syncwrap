@@ -19,7 +19,7 @@ GEM
     json (1.8.3)
     json (1.8.3-java)
     mini_portile2 (2.0.0)
-    minitest (4.7.5)
+    minitest (5.8.4)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
     nokogiri (1.6.7.2-java)
@@ -43,7 +43,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  minitest (~> 4.7.4)
+  minitest (~> 5.8.4)
   rdoc (~> 4.0.1)
   rjack-tarpit (~> 2.1)
   syncwrap!

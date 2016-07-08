@@ -21,7 +21,7 @@ require_relative 'setup'
 
 require 'syncwrap/shell'
 
-class TestShell < MiniTest::Unit::TestCase
+class TestShell < Minitest::Test
   include TestOptions
   include SyncWrap::Shell
 
