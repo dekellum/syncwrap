@@ -47,3 +47,6 @@ DEPENDENCIES
   rdoc (~> 4.0.1)
   rjack-tarpit (~> 2.1)
   syncwrap!
+
+BUNDLED WITH
+   1.12.5
