@@ -57,14 +57,16 @@ module SyncWrap
       '2.1.8' =>
       'afd832b8d5ecb2e3e1477ec6a9408fdf9898ee73e4c5df17a2b2cb36bd1c355d',
       '2.1.10' =>
-      'fb2e454d7a5e5a39eb54db0ec666f53eeb6edc593d1d2b970ae4d150b831dd20' }
+      'fb2e454d7a5e5a39eb54db0ec666f53eeb6edc593d1d2b970ae4d150b831dd20',
+      '2.2.5' =>
+      '30c4b31697a4ca4ea0c8db8ad30cf45e6690a0f09687e5d483c933c03ca335e3' }
 
     # The ruby version to install, as it appears in source packages
     # from ruby-lang.org. Note that starting with 2.1.0, the patch
     # release (p#) no longer appears in package names.
     # (Default: DEFAULT_VERSION)
     #
-    # Example values: '2.0.0-p481', '2.1.10'
+    # Example values: '2.0.0-p481', '2.1.10', '2.2.5'
     attr_accessor :ruby_version
 
     # If true, attempt to uninstall any pre-existing distro packaged
