@@ -56,7 +56,8 @@
 * Upgrade dev dependencies to minitest 5.8.4 and tarpit 2.1.1
 * Upgrade SyncWrap::CRubyVM default version to 2.1.10 (+ hash for 2.2.5)
 * Upgrade SyncWrap::JRubyVM default version to 1.7.24 (+ hash for 1.7.25)
-* Upgrade SyncWrap::BundlerGem default version to 1.9.9
+* Upgrade SyncWrap::BundlerGem default version to 1.12.5
+* Upgrade SyncWrap::TarpitGem default version to 2.1.1
 
 === 2.7.1 (2016-3-2)
 * Fix handling of the -R/--components-in-role flag to correctly limit
