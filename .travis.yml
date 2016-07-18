@@ -10,7 +10,8 @@ rvm:
   - 2.2
   - ruby-head
   - rbx
-  - jruby-1.7.24
+  - jruby-1.7.25
+  - jruby-9.1.2.0
   - jruby-head
 script: "bundle exec rake test"
 matrix:
