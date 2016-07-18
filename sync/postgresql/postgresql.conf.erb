@@ -144,6 +144,8 @@ shared_buffers = <%= shared_buffers %>  # min 128kB
 # actively intend to use prepared transactions.
 work_mem = <%= work_mem %>              # min 64kB
 maintenance_work_mem = <%= maintenance_work_mem %> # min 1MB
+#replacement_sort_tuples = 150000       # limits use of replacement selection sort (9.6+)
+#autovacuum_work_mem = -1               # min 1MB, or -1 to use maintenance_work_mem (9.4+)
 max_stack_depth = <%= max_stack_depth %> # min 100kB
 #dynamic_shared_memory_type = posix     # the default is the first option (9.4+)
                                         # supported by the operating system:
@@ -185,7 +187,7 @@ max_stack_depth = <%= max_stack_depth %> # min 100kB
 effective_io_concurrency = <%= effective_io_concurrency %>
                                         # 1-1000; 0 disables prefetching
 #max_worker_processes = 8               # (change requires restart, 9.4+)
-#max_parallel_degree = 2                # max number of worker processes per node  (9.6+)
+#max_parallel_workers_per_gather = 2    # taken from max_worker_processes  (9.6+)
 #old_snapshot_threshold = -1            # 1min-60d; -1 disables; 0 is immediate (9.6+)
                                         # (change requires restart)
 #backend_flush_after = 0                # 0 disables,
@@ -324,9 +326,10 @@ checkpoint_segments = <%= checkpoint_segments %> # in logfile segments, min 1, 1
 #cpu_tuple_cost = 0.01                  # same scale as above
 #cpu_index_tuple_cost = 0.005           # same scale as above
 #cpu_operator_cost = 0.0025             # same scale as above
-#effective_cache_size = 4GB             # (128MB was default < 9.4)
 #parallel_tuple_cost = 0.1              # same scale as above (9.6+)
 #parallel_setup_cost = 1000.0           # same scale as above (9.6+)
+#min_parallel_relation_size = 8MB       # (9.6+)
+#effective_cache_size = 4GB             # (128MB was default < 9.4)
 
 # - Genetic Query Optimizer -
 
