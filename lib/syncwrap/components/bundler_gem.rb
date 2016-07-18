@@ -24,11 +24,11 @@ module SyncWrap
   #
   class BundlerGem < Component
 
-    # Bundler version to install (Default: 1.9.9)
+    # Bundler version to install (Default: 1.12.5)
     attr_accessor :bundler_version
 
     def initialize( opts = {} )
-      @bundler_version = '1.9.9'
+      @bundler_version = '1.12.5'
       super
     end
 
