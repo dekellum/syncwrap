@@ -243,6 +243,7 @@ class TestShell < Minitest::Test
       done
     SH
     exit_code, outputs = capture3( cmd )
+    assert_equal( 0, exit_code )
     assert_equal( 36_000, collect_stream( :err, outputs ).length )
     assert_equal( 0, collect_stream( :out, outputs ).length )
   end
