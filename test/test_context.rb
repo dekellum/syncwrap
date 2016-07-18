@@ -21,7 +21,7 @@ require_relative 'setup'
 
 require 'syncwrap'
 
-class TestContext < MiniTest::Unit::TestCase
+class TestContext < Minitest::Test
   include SyncWrap
 
   def sp

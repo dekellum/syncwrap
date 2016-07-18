@@ -21,10 +21,10 @@ require_relative 'setup'
 
 require 'syncwrap'
 
-class TestZoneBalancer < MiniTest::Unit::TestCase
+class TestZoneBalancer < Minitest::Test
   include SyncWrap
 
-  def test
+  def test_balance
     sp = Space.new
     zb = ZoneBalancer
     sp.with do

@@ -22,7 +22,7 @@ require_relative 'setup'
 require 'syncwrap'
 require 'syncwrap/rsync'
 
-class TestRsync < MiniTest::Unit::TestCase
+class TestRsync < Minitest::Test
   include SyncWrap::Rsync
 
   def test_expand_implied_target

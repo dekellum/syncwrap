@@ -21,7 +21,7 @@ require_relative 'setup'
 
 require 'syncwrap'
 
-class TestContextRput < MiniTest::Unit::TestCase
+class TestContextRput < Minitest::Test
   include SyncWrap
 
   VERBOSE = ARGV.include?( '--verbose' )

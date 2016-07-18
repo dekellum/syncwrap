@@ -24,7 +24,7 @@ require 'syncwrap'
 # These tests require a working test setup, some of which is not
 # checked in for security reasons, i.e. private/aws.json, key.pem,
 # etc.
-class TestAWSIntegration < MiniTest::Unit::TestCase
+class TestAWSIntegration < Minitest::Test
   include SyncWrap
 
   SYNC_FILE = File.expand_path( '../sync.rb', __FILE__ )
@@ -35,7 +35,7 @@ class TestAWSIntegration < MiniTest::Unit::TestCase
   end
 
   # Uninstall, install, install-again
-  def test
+  def test_all
     puts "[[ Create basic-test host ]]"
     @sp.provider.create_hosts( 1, :basic, 'basic-test', SYNC_FILE )
 

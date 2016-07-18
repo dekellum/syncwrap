@@ -24,7 +24,7 @@ require 'syncwrap'
 # Test using the local sync.rb, and 'ubuntu-1' (12.04.4 LTS) and
 # 'centos-1' (6.5) local VMs. This is not a default test.
 # THE TEST CHANGES ARE POTENTIALLY DAMAGING. See sync.rb
-class TestVMs < MiniTest::Unit::TestCase
+class TestVMs < Minitest::Test
   include SyncWrap
 
   def setup
@@ -33,7 +33,7 @@ class TestVMs < MiniTest::Unit::TestCase
   end
 
   # Uninstall, install, install-again
-  def test
+  def test_all
     puts "[[ Test execute Uninstaller.uninstall ]]"
     assert( @sp.execute( @sp.hosts, [ ['Uninstaller', :uninstall ]] ) )
 
