@@ -1,4 +1,4 @@
-=== 2.8.0 (TBD)
+=== 2.8.0 (2016-7-19)
 * Only allow public component methods to be executed via the
   SyncWrap::Space#execute and thus the CLI. Previously it was possible
   to execute protected or private methods.
