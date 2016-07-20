@@ -19,9 +19,13 @@ module SyncWrap
   # Support module for the systemd service manager, PID 1
   module SystemD
 
-    # Run systemd `systemctl` command with args via sudo as root.
+    # Run systemd `systemctl` command with args via sudo as root.  A
+    # trailing hash is interpreted as options and passed to
+    # sudo. Since systemctl returns non-zero for a variety of normal
+    # conditions, the :accept option can be passed to account for these.
     def systemctl( *args )
-      sudo "systemctl #{args.join ' '}"
+      opts = args.last.is_a?( Hash ) && args.pop || {}
+      sudo( "systemctl #{args.join ' '}", opts )
     end
 
     # Expand given shortname to "shortname.service" as used for the
