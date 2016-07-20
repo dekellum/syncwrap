@@ -1,4 +1,11 @@
 === 2.8.1 (TBD)
+* Add support for passing options to SyncWrap::SystemD#systemctl which
+  are passed though to sudo. Since systemctl returns non-zero for a
+  variety of normal conditions, the :accept option can be passed to
+  account for these.
+* Accept commonplace (normal operations) exit codes 0-3 from
+  `systemctl` in SyncWrap::SystemDService#status
+* Fix silly typo in SyncWrap::ChangeKeyListener
 
 === 2.8.0 (2016-7-19)
 * Only allow public component methods to be executed via the
