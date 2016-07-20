@@ -35,7 +35,7 @@ module SyncWrap
     def change_key_changes?
       Array( change_key ).any? do |k|
         c = state[ k ]
-        c && !c.emtpy?
+        c && !c.empty?
       end
     end
 
