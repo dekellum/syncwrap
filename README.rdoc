@@ -2,7 +2,7 @@
 
 * http://github.com/dekellum/syncwrap
 * http://rdoc.gravitext.com/syncwrap/
-* {<img src="https://travis-ci.org/dekellum/syncwrap.png" />}[https://travis-ci.org/dekellum/syncwrap]
+* {<img src="https://travis-ci.org/dekellum/syncwrap.svg?branch=dev" />}[https://travis-ci.org/dekellum/syncwrap]
 
 == Description
 
