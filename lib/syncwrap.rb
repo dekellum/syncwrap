@@ -393,6 +393,8 @@ module SyncWrap
   autoload :BundlerGem,    'syncwrap/components/bundler_gem'
   autoload :Arch,          'syncwrap/components/arch'
   autoload :CentOS,        'syncwrap/components/centos'
+  autoload :ChangeGuard,   'syncwrap/components/change_guard'
+  autoload :ChangeUnGuard, 'syncwrap/components/change_guard'
   autoload :CommercialJDK, 'syncwrap/components/commercial_jdk'
   autoload :CRubyVM,       'syncwrap/components/cruby_vm'
   autoload :Debian,        'syncwrap/components/debian'
