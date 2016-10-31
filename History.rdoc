@@ -1,4 +1,9 @@
 === 2.8.2 (TBD)
+* Add new SyncWrap::ChangeGuard component to preserve change key state
+  in remote guard files, across any transient component failures.
+* Upgrade SyncWrap::JRubyVM default version to 1.7.25 (+ hash for 1.7.26)
+* Additional, comment-only updates to postgresql.conf as of version
+  9.6.1. Changes remain backward compatible with 9.1+.
 
 === 2.8.1 (2016-7-20)
 * Add support for passing options to SyncWrap::SystemD#systemctl which
