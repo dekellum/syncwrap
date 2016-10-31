@@ -114,6 +114,8 @@ Components implementing \#install:
 
 * SyncWrap::SourceTree, SyncWrap::Bundle
 
+* SyncWrap::ChangeGuard
+
 * SyncWrap::Puma
 
 * SyncWrap::Iyyov - job scheduler and process monitor with

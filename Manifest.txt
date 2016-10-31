@@ -43,6 +43,7 @@ lib/syncwrap/components/bundle.rb
 lib/syncwrap/components/bundled_iyyov_daemon.rb
 lib/syncwrap/components/bundler_gem.rb
 lib/syncwrap/components/centos.rb
+lib/syncwrap/components/change_guard.rb
 lib/syncwrap/components/commercial_jdk.rb
 lib/syncwrap/components/cruby_vm.rb
 lib/syncwrap/components/debian.rb
