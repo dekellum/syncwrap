@@ -1,3 +1,5 @@
+=== 2.8.2 (TBD)
+
 === 2.8.1 (2016-7-20)
 * Add support for passing options to SyncWrap::SystemD#systemctl which
   are passed though to sudo. Since systemctl returns non-zero for a
