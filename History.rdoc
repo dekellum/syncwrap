@@ -1,4 +1,4 @@
-=== 2.8.2 (TBD)
+=== 2.8.2 (2016-11-1)
 * Add new SyncWrap::ChangeGuard component to preserve change key state
   in remote guard files, across any transient component failures.
 * Upgrade SyncWrap::JRubyVM default version to 1.7.25 (+ hash for 1.7.26)
