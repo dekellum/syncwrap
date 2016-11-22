@@ -17,7 +17,7 @@
 module SyncWrap
 
   # A Support module for Ruby VM components, also providing gem
-  # handling utilties which are largely common to all Ruby VMs.
+  # handling utilities which are largely common to all Ruby VMs.
   module RubySupport
 
     # The name of the gem command to be installed/used (default: gem)
