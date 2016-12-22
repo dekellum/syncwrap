@@ -1,4 +1,8 @@
 === 2.8.3 (TBD)
+* Add SyncWrap::CRubyVM hashes for 2.2.6 and 2.3.3
+* Also disable exit on error for `systemctl` in
+  SyncWrap::SystemDService#status. Early exit was interfering with
+  combining and merging `systemctl status` calls.
 
 === 2.8.2 (2016-11-1)
 * Add new SyncWrap::ChangeGuard component to preserve change key state
