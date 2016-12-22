@@ -5,13 +5,13 @@ before_install: "gem install rjack-tarpit -v'~>2.1' || \
 bundler_args: ""
 sudo: false
 rvm:
-  - 2.0
   - 2.1
   - 2.2
+  - 2.3
   - ruby-head
   - rbx
-  - jruby-1.7.25
-  - jruby-9.1.2.0
+  - jruby-1.7.26
+  - jruby-9.1.6.0
   - jruby-head
 script: "bundle exec rake test"
 matrix:
