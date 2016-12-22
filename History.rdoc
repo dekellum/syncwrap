@@ -1,3 +1,5 @@
+=== 2.8.3 (TBD)
+
 === 2.8.2 (2016-11-1)
 * Add new SyncWrap::ChangeGuard component to preserve change key state
   in remote guard files, across any transient component failures.
