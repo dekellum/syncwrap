@@ -108,10 +108,11 @@ module SyncWrap
     # Output status of #systemd_units (useful via CLI with --verbose).
     # Exit codes 0-3 are accepted from `systemctl`, since these will
     # be returned in normal operational contexts, for example, when
-    # services are intentionally and manually stopped.
+    # services are intentionally and manually stopped. Exit on error
+    # is also disabled, which may be relevent for merged commands.
     def status
       require_systemd_service!
-      systemctl( 'status', *systemd_units, accept: [0,1,2,3] )
+      systemctl( 'status', *systemd_units, error: false, accept: [0,1,2,3] )
     end
 
     protected

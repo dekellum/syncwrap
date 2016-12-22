@@ -22,7 +22,8 @@ module SyncWrap
     # Run systemd `systemctl` command with args via sudo as root.  A
     # trailing hash is interpreted as options and passed to
     # sudo. Since systemctl returns non-zero for a variety of normal
-    # conditions, the :accept option can be passed to account for these.
+    # conditions, the :accept option can be passed to account for
+    # these, as well as :error => false.
     def systemctl( *args )
       opts = args.last.is_a?( Hash ) && args.pop || {}
       sudo( "systemctl #{args.join ' '}", opts )
