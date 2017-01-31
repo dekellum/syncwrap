@@ -1,4 +1,4 @@
-=== 2.8.3 (TBD)
+=== 2.8.3 (2017-1-31)
 * Upgrade SyncWrap::CRubyVM default version to 2.2.6 (+ hash for 2.3.3)
 * Upgrade SyncWrap::JRubyVM default version to 1.7.26
 * Disable exit on error for `systemctl` in
