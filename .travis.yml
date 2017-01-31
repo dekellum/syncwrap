@@ -3,9 +3,8 @@ before_install:
   - "gem install rjack-tarpit -v'~>2.1' || \
       ( sleep 1; gem install rjack-tarpit -v'~>2.1' ) || \
       ( sleep 5; gem install rjack-tarpit -v'~>2.1' )"
-  - "gem uninstall bundler"
-  - "gem install bundler --version '~> 1.13.5'"
-bundler_args: ""
+  - "gem install bundler --version 1.13.7"
+install: "bundle _1.13.7_ install --retry=3"
 sudo: false
 rvm:
   - 2.1.9
