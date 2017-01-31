@@ -1,6 +1,7 @@
 === 2.8.3 (TBD)
-* Add SyncWrap::CRubyVM hashes for 2.2.6 and 2.3.3
-* Also disable exit on error for `systemctl` in
+* Upgrade SyncWrap::CRubyVM default version to 2.2.6 (+ hash for 2.3.3)
+* Upgrade SyncWrap::JRubyVM default version to 1.7.26
+* Disable exit on error for `systemctl` in
   SyncWrap::SystemDService#status. Early exit was interfering with
   combining and merging `systemctl status` calls.
 
