@@ -15,7 +15,7 @@ rvm:
   - jruby-1.7.26
   - jruby-9.1.6.0
   - jruby-head
-script: "bundle exec rake test"
+script: "bundle _1.13.7_ exec rake test"
 matrix:
   allow_failures:
     - rvm: ruby-head
