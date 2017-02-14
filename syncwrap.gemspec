@@ -17,7 +17,7 @@ RJack::TarPit.specify do |s|
   s.depend 'nokogiri',       '>= 1.5.9', '< 1.7' #constrain aws-sdk
 
   s.depend 'minitest', '~> 5.8.4', :dev
-  s.depend 'rdoc',     '~> 4.0.1', :dev
+  s.depend 'rdoc',     '~> 4.3.0', :dev
 
   s.required_ruby_version = '>= 1.9.1'
   s.extra_rdoc_files |= %w[ README.rdoc History.rdoc examples/LAYOUT.rdoc ]
