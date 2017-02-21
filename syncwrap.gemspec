@@ -1,5 +1,6 @@
 # -*- ruby -*-
 
+require 'bundler/plugin/api/source'
 require 'rjack-tarpit/spec' if gem 'rjack-tarpit', '~> 2.1'
 
 RJack::TarPit.specify do |s|
