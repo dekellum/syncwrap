@@ -6,14 +6,14 @@ Gravitext::DevTools.configure do |c|
     h.holder = "David Kellum"
     h.inception = 2011
     h.license = :apache
-    h.exclusions += %w[ .travis.yml sync/**/*
+    h.exclusions += %w[ .travis.yml sync/**/* rdoc_css/**/*
                         examples/**/* examples/sync/home/bob/.ssh/*
                         test/muddled_sync.rb test/sync/**/* test/zfile ]
   end
 
   c.setup_manifest do |m|
     m.exclusions -= [ %r{(^|/)src(/|$)} ]
-    m.exclusions += %w[ .travis.yml test/local/**/* test/aws/**/* ]
+    m.exclusions += %w[ .travis.yml test/local/**/* test/aws/**/* rdoc_css/**/* ]
   end
 
 end
