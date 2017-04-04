@@ -95,9 +95,10 @@ module SyncWrap
           vgextend #{vgextend_flags.join ' '} #{vg} #{raw_device}
           lvcreate -L #{meta_size} -n #{lv_cache_meta} #{vg} #{raw_device}
           lvcreate #{cache_size_flag} -n #{lv_cache} #{vg} #{raw_device}
-          lvconvert --type cache-pool --cachemode writethrough --yes \
+          lvconvert --yes --type cache-pool --cachemode writethrough \
                     --poolmetadata #{vg}/#{lv_cache_meta} #{vg}/#{lv_cache}
-          lvconvert --type cache --cachepool #{vg}/#{lv_cache} #{vg}/#{lv_cache_target}
+          lvconvert --yes --type cache --cachepool #{vg}/#{lv_cache} \
+                    #{vg}/#{lv_cache_target}
         SH
       end
     end
