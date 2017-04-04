@@ -1,4 +1,7 @@
 === 2.8.4 (TBD)
+* SyncWrap::CRubyVM; add hash for 2.2.7
+* SyncWrap::LVMCache; add --yes flag to final lvconvert call, as
+  required by later versions, and compatible with earlier versions.
 
 === 2.8.3 (2017-1-31)
 * Upgrade SyncWrap::CRubyVM default version to 2.2.6 (+ hash for 2.3.3)
