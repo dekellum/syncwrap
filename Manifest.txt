@@ -32,6 +32,7 @@ lib/syncwrap/path_util.rb
 lib/syncwrap/rsync.rb
 lib/syncwrap/ruby_support.rb
 lib/syncwrap/shell.rb
+lib/syncwrap/sudoers.rb
 lib/syncwrap/systemd.rb
 lib/syncwrap/systemd_service.rb
 lib/syncwrap/user_data.rb

@@ -16,6 +16,7 @@
 
 require 'syncwrap/component'
 require 'syncwrap/path_util'
+require 'syncwrap/sudoers'
 
 module SyncWrap
 
@@ -23,6 +24,7 @@ module SyncWrap
   # home directory files.
   class Users < Component
     include PathUtil
+    include Sudoers
 
     # The list of user names to install. If default nil, home_users
     # will be determined by the set of home directories found in
@@ -165,16 +167,7 @@ module SyncWrap
     end
 
     def set_sudoers( user )
-      #FIXME: Use local_root for secure_path? (Order issue)
-
-      sudo <<-SH
-        echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
-        echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
-        echo 'Defaults:#{user} always_set_home' >> /etc/sudoers.d/#{user}
-        echo 'Defaults:#{user} secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin' \
-          >> /etc/sudoers.d/#{user}
-        chmod 440 /etc/sudoers.d/#{user}
-      SH
+      sudo sudoers_d_commands( user )
     end
 
     protected
