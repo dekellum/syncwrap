@@ -29,7 +29,7 @@ module SyncWrap
                       /sbin
                       /bin ].freeze
 
-    private
+    protected
 
     # Return an sh script, including 'shebang' preamble, to writing
     # the file /etc/sudoers.d/<user>

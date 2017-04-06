@@ -20,14 +20,14 @@ module SyncWrap
 
   # Utility methods for generating scripts to pass as user data.
   module UserData
-    include Sudoers
+    extend Sudoers
 
     private
 
     # Returns an sh script to allow no password, no tty sudo for a
     # specified user by writing a file to /etc/sudoers.d/<user>
     def no_tty_sudoer( user, opts = {} )
-      sudoers_d_script( user, opts )
+      self.sudoers_d_script( user, opts )
     end
 
     module_function :no_tty_sudoer
