@@ -58,6 +58,10 @@ module SyncWrap
       else
         set_etc_hostname( name )
       end
+
+      if distro.is_a?( Debian ) && !dns_search
+        set_etc_hosts_name( name )
+      end
     end
 
     # Test if change to etc/hostname is needed. If so also immediately
@@ -67,6 +71,19 @@ module SyncWrap
         if [ ! -e /etc/hostname -o "$(< /etc/hostname)" != "#{name}" ]; then
           echo #{name} > /etc/hostname
           hostname #{name}
+        fi
+      SH
+    end
+
+    def set_etc_hosts_name( name )
+      f = '/etc/hosts'
+      # If name not already in /etc/hosts append it to the beginning
+      # of the file.
+      sudo <<-SH
+        if ! grep -q -E '\s#{name}(\s|$)' #{f}; then
+          cp -f #{f} #{f}~
+          echo '127.0.0.1 #{name}' > #{f}
+          cat #{f}~ >> #{f}
         fi
       SH
     end
