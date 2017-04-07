@@ -170,14 +170,11 @@ module SyncWrap
       sudo <<-SH
         echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
         echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
+        echo 'Defaults:#{user} always_set_home' >> /etc/sudoers.d/#{user}
         echo 'Defaults:#{user} secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin' \
           >> /etc/sudoers.d/#{user}
         chmod 440 /etc/sudoers.d/#{user}
       SH
-
-      #FIXME: Centos 6.5:
-      # secure_path is the same as above already
-      #FIXME: echo 'Defaults:#{user} always_set_home' >> /etc/sudoers.d/#{user}
     end
 
     protected

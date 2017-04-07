@@ -28,6 +28,7 @@ module SyncWrap
         #!/bin/sh -e
         echo '#{user} ALL=(ALL) NOPASSWD:ALL'  > /etc/sudoers.d/#{user}
         echo 'Defaults:#{user} !requiretty'   >> /etc/sudoers.d/#{user}
+        echo 'Defaults:#{user} always_set_home' >> /etc/sudoers.d/#{user}
         chmod 440 /etc/sudoers.d/#{user}
       SH
       script.split( "\n" ).map( &:strip ).join( "\n" )
