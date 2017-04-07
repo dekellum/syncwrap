@@ -125,6 +125,8 @@ module SyncWrap
       end
     end
 
+    # Wrap block in a sudo bash conditional testing if the single
+    # specified pkg is installed.
     def dist_if_installed?( pkg, opts = {}, &block )
       qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkg}"
       tst = qry + " | grep -q 'installed'"
