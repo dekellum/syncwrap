@@ -64,6 +64,10 @@ module SyncWrap
     #
     # :minimal:: Eqv to --no-install-recommends
     #
+    # :update_required:: If true always perform dist_update before
+    #                    actually installing. Otherwise this is still
+    #                    done for the first install of a session.
+    #
     # Options are also passed to the sudo calls.
     def dist_install( *args )
       opts = args.last.is_a?( Hash ) && args.pop || {}
@@ -73,8 +77,25 @@ module SyncWrap
       chk = opts[ :check_install ]
       chk = check_install? if chk.nil?
       dist_if_not_installed?( args, chk != false, opts ) do
-        sudo( "apt-get -yqq update", opts ) if first_apt?
+        dist_update( opts )
         sudo( "apt-get -yq install #{(flags + args).join ' '}", opts )
+      end
+    end
+
+    # Conditionally run "apt-get update" to resynchronize the package
+    # index files from their sources.
+    #
+    # ==== Options
+    #
+    # :update_required:: If true always perform update. Otherwise this
+    #                    is still done for the first run of a session.
+    #
+    # Options are also passed to the sudo calls.
+    def dist_update( opts = {} )
+      opts = opts.dup
+      always = opts.delete( :update_required )
+      if always || first_apt?
+        sudo( "apt-get -yqq update", opts )
       end
     end
 
@@ -93,7 +114,7 @@ module SyncWrap
     # If chk is true, then wrap block in a sudo bash conditional
     # testing if any specified pkgs are not installed. Otherwise just
     # yield to block.
-    def dist_if_not_installed?( pkgs, chk, opts, &block )
+    def dist_if_not_installed?( pkgs, chk = true, opts = {}, &block )
       if chk
         qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkgs.join ' '}"
         cnt = qry + " | grep -c -E '^installed$'"
@@ -104,7 +125,7 @@ module SyncWrap
       end
     end
 
-    def dist_if_installed?( pkg, opts, &block )
+    def dist_if_installed?( pkg, opts = {}, &block )
       qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkg}"
       tst = qry + " | grep -q 'installed'"
       cond = "if #{tst}; then"
