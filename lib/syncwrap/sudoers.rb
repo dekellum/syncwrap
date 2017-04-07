@@ -31,7 +31,7 @@ module SyncWrap
 
     protected
 
-    # Return an sh script, including 'shebang' preamble, to writing
+    # Return an sh script, including 'shebang' preamble, for writing
     # the file /etc/sudoers.d/<user>
     def sudoers_d_script( user, opts = {} )
       "#!/bin/sh -e\n" + sudoers_d_commands( user, opts )
@@ -40,11 +40,10 @@ module SyncWrap
     # Return sh command lines string for writing the file
     # /etc/sudoers.d/<user>
     def sudoers_d_commands( user, opts = {} )
-      lines = sudoers_d_template( user, opts )
-      sh  = [ "echo '#{lines.shift}'  > /etc/sudoers.d/#{user}" ]
-      sh += lines.map do |l|
-        "echo '#{l}' >> /etc/sudoers.d/#{user}"
-      end
+      sh = []
+      sh << "cat > /etc/sudoers.d/#{user} <<_CONF_"
+      sh += sudoers_d_template( user, opts )
+      sh << "_CONF_"
       sh << "chmod 440 /etc/sudoers.d/#{user}"
       sh.join( "\n" )
     end
