@@ -19,9 +19,11 @@ module SyncWrap
   # Utility methods for generating sudoers.d config
   module Sudoers
 
-    # Default paths array for sudoers secure_path (PATH setting)
-    # Versus RHEL* this has /usr/local support.
-    # Versus recent Ubuntu this is identical save '/snap/bin'
+    # Default paths array for sudoers secure_path (PATH setting) As
+    # compared with RHEL derives this has /usr/local support and
+    # retains /bin for distro's like Ubuntu that retain those
+    # separately.  As compared with recent Ubuntu, this is the same
+    # other than avoiding '/snap/bin'
     SECURE_PATH = %w[ /usr/local/sbin
                       /usr/local/bin
                       /usr/sbin
