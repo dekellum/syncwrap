@@ -38,7 +38,7 @@
 # option or PGDATA environment variable, represented here as ConfigDir.
 
 <% if pg_specify_etc_config %>
-data_directory = '/var/lib/postgresql/<%= pg_version %>/main'
+data_directory = '<%= pg_data_dir %>'
                                         # use data in another directory
                                         # (change requires restart)
 hba_file = '/etc/postgresql/<%= pg_version %>/main/pg_hba.conf'
