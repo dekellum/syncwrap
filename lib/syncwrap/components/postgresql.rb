@@ -291,13 +291,20 @@ module SyncWrap
     # #shared_memory_max adjustment and stops the server for subsequent
     # reconfigure or data relocation.
     def package_install
-      dist_install( *package_names )
       if distro.is_a?( Debian )
-        pg_stop
-        if shared_memory_max
-          rput( 'etc/sysctl.d/61-postgresql-shm.conf', user: :root )
-          sudo "sysctl -p /etc/sysctl.d/61-postgresql-shm.conf"
+        dist_if_not_installed?( package_names, true, {} ) do
+          dist_install( *package_names, check_install: false )
+          pg_stop
         end
+        if shared_memory_max
+          c = rput( 'etc/sysctl.d/61-postgresql-shm.conf', user: :root )
+          unless c.empty?
+            sudo "sysctl -p /etc/sysctl.d/61-postgresql-shm.conf"
+          end
+          c
+        end
+      else
+        dist_install( *package_names )
       end
     end
 
