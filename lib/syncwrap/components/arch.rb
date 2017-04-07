@@ -64,7 +64,7 @@ module SyncWrap
     # If chk is true, then wrap block in a sudo bash conditional
     # testing if any specified pkgs are not installed. Otherwise just
     # yield to block.
-    def dist_if_not_installed?( pkgs, chk, opts, &block )
+    def dist_if_not_installed?( pkgs, chk = true, opts = {}, &block )
       if chk
         c = "if ! pacman -Q #{pkgs.join ' '} >/dev/null 2>&1; then"
         sudo( c, opts.merge( close: 'fi' ), &block )
@@ -75,7 +75,7 @@ module SyncWrap
 
     # Wrap block in a sudo bash conditional testing if the single
     # specified pkg is installed. Otherwise just yield to block.
-    def dist_if_installed?( pkg, opts, &block )
+    def dist_if_installed?( pkg, opts = {}, &block )
       c = "if pacman -Q #{pkg} >/dev/null 2>&1; then"
       sudo( c, opts.merge( close: 'fi' ), &block )
     end
