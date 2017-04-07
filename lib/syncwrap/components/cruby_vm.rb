@@ -65,7 +65,9 @@ module SyncWrap
       '2.2.7' =>
       '374184c6c5bbc88fb7bad422368d4053a236fb6587f0eff76146dcba57f93da5',
       '2.3.3' =>
-      '241408c8c555b258846368830a06146e4849a1d58dcaf6b14a3b6a73058115b7' }
+      '241408c8c555b258846368830a06146e4849a1d58dcaf6b14a3b6a73058115b7',
+      '2.3.4' =>
+      '98e18f17c933318d0e32fed3aea67e304f174d03170a38fd920c4fbe49fec0c3' }
 
     # The ruby version to install, as it appears in source packages
     # from ruby-lang.org. Note that starting with 2.1.0, the patch
