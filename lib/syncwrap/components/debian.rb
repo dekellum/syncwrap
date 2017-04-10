@@ -52,9 +52,9 @@ module SyncWrap
       @systemd
     end
 
-    # Install the specified package names. The first time this is
-    # applied to any given host, an "apt-get update" is issued as
-    # well.  A trailing hash is interpreted as options, see below.
+    # Install the specified package names. Also calls #dist_update
+    # before any package is actually installed. A trailing hash is
+    # interpreted as options, see below.
     #
     # ==== Options
     #
@@ -62,11 +62,10 @@ module SyncWrap
     #                  installed. Thus no upgrades will be
     #                  performed. (Default: true)
     #
-    # :minimal:: Eqv to --no-install-recommends
+    # :minimal:: If true, pass --no-install-recommends flag to
+    #            apt-get.
     #
-    # :update_required:: If true always perform dist_update before
-    #                    actually installing. Otherwise this is still
-    #                    done for the first install of a session.
+    # :update_required:: Passed to #dist_update
     #
     # Options are also passed to the sudo calls.
     def dist_install( *args )
@@ -83,18 +82,20 @@ module SyncWrap
     end
 
     # Conditionally run "apt-get update" to resynchronize the package
-    # index files from their sources.
+    # index files from their sources. Normally this is handled
+    # automatically by #dist_install, but it can also be called
+    # directly, for example when a new source is added.
     #
     # ==== Options
     #
-    # :update_required:: If true always perform update. Otherwise this
-    #                    is still done for the first run of a session.
+    # :update_required:: If true, always perform update. If specified
+    #                    as false, do nothing.  If unspecified, run on
+    #                    the first call per Context only.
     #
     # Options are also passed to the sudo calls.
     def dist_update( opts = {} )
-      opts = opts.dup
-      always = opts.delete( :update_required )
-      if always || first_apt?
+      req = opts[ :update_required ]
+      if ( req != false ) && ( first_apt? || req )
         sudo( "apt-get -yqq update", opts )
       end
     end
