@@ -1,7 +1,35 @@
 === 2.9.0 (TBD)
-* SyncWrap::CRubyVM; add hash for 2.2.7
-* SyncWrap::LVMCache; add --yes flag to final lvconvert call, as
-  required by later versions, and compatible with earlier versions.
+* SyncWrap::Debian
+  * Fix Debian#dist_if_installed? grep pattern. Was previously giving
+    some (so far harmless) false positives for known but not-installed
+    packages.
+  * Make the dist_if_installed? and dist_if_not_installed? methods
+    more friendly for external use, with default arguments.
+  * Expose a dist_update for external/explicit use, including
+    :update_required option with dist_install.
+* SyncWrap::Arch, SyncWrap::RHEL; dist_if_* default arguments parity
+* SyncWrap::Network; Add name to /etc/hosts if necessary on Debian
+* SyncWrap::CRubyVM
+  * Add hashes for 2.2.7 and 2.3.4
+  * Preemptively add 2.4 to distro rubies to uninstall
+* SyncWrap::LVMCache
+  * Add --yes flag to final lvconvert call, required by later
+    versions, compatible with earlier
+  * Add thin-provisioning-tools as dependency on Debian, as the included
+    cached_check command is needed for reboot.
+* SyncWrap::Sudoers
+  * Collect all sudoers config details here. This was previously
+    spread between SyncWrap::Users and SyncWrap::UserData.
+  * Add always_set_home option (was only default on RHEL)
+  * Use common ordering of secure_path
+* SyncWrap::PostgreSQL
+  * Make the stop after Debian package install conditional
+  * Make Debian move of pg_data_dir conditional
+  * Use the more obvious pg_data_dir with etc config on Debian
+* SyncWrap::OpenJDK support for Ubuntu 16.04 package openjdk-8-jdk-headless
+* Add SyncWrap::SystemD#systemctl_status with filtering of end-of-line
+  whitespace in output, as has been oberved when calling `systemctl
+  status` remotely over SSH.
 
 === 2.8.3 (2017-1-31)
 * Upgrade SyncWrap::CRubyVM default version to 2.2.6 (+ hash for 2.3.3)
