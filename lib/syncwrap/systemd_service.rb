@@ -112,7 +112,7 @@ module SyncWrap
     # is also disabled, which may be relevent for merged commands.
     def status
       require_systemd_service!
-      systemctl( 'status', *systemd_units, error: false, accept: [0,1,2,3] )
+      systemctl_status( *systemd_units, error: false, accept: [0,1,2,3] )
     end
 
     protected

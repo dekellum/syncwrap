@@ -19,14 +19,37 @@ module SyncWrap
   # Support module for the systemd service manager, PID 1
   module SystemD
 
-    # Run systemd `systemctl` command with args via sudo as root.  A
-    # trailing hash is interpreted as options and passed to
+    # Run systemd `systemctl` command with args via sudo. If the first
+    # arg is 'status', defer to #systemctl_status.  A trailing hash is
+    # interpreted as options and passed to sudo. Since systemctl
+    # returns non-zero for a variety of normal conditions, the :accept
+    # option can be passed to account for these, as well as :error =>
+    # false.
+    def systemctl( *args )
+      opts = args.last.is_a?( Hash ) && args.pop || {}
+      args.flatten!
+      if args.first == 'status'
+        args.shift
+        systemctl_status( *args, opts )
+      else
+        sudo( "systemctl #{args.join ' '}", opts )
+      end
+    end
+
+    # Run `systemctl status` via sudo, with special case stripping of
+    # whitespace from the end of line output via a sed filter. This is
+    # not an issue with an interactive terminal because output is
+    # piped to pager (less), apparently with '--chop-long-lines'.
+    #
+    # A trailing hash is interpreted as options and passed to
     # sudo. Since systemctl returns non-zero for a variety of normal
     # conditions, the :accept option can be passed to account for
     # these, as well as :error => false.
-    def systemctl( *args )
-      opts = args.last.is_a?( Hash ) && args.pop || {}
-      sudo( "systemctl #{args.join ' '}", opts )
+    def systemctl_status( *units )
+      opts = units.last.is_a?( Hash ) && units.pop || {}
+      sudo( <<-SH, opts )
+        systemctl status #{units.join ' '} | sed -E -e 's/\\s+$//'
+      SH
     end
 
     # Expand given shortname to "shortname.service" as used for the
