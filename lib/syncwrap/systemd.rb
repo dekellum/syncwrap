@@ -39,7 +39,7 @@ module SyncWrap
     # Run `systemctl status` via sudo, with special case stripping of
     # whitespace from the end of line output via a sed filter. This is
     # not an issue with an interactive terminal because output is
-    # piped to pager (less), apparently with '--chop-long-lines".
+    # piped to pager (less), apparently with '--chop-long-lines'.
     #
     # A trailing hash is interpreted as options and passed to
     # sudo. Since systemctl returns non-zero for a variety of normal
