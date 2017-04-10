@@ -130,7 +130,7 @@ module SyncWrap
     # specified pkg is installed.
     def dist_if_installed?( pkg, opts = {}, &block )
       qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkg}"
-      tst = qry + " | grep -q 'installed'"
+      tst = qry + " | grep -q -E '^installed$'"
       cond = "if #{tst}; then"
       sudo( cond, opts.merge( close: 'fi' ), &block )
     end
