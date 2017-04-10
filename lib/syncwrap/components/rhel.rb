@@ -121,7 +121,7 @@ module SyncWrap
     # If chk is true, then wrap block in a sudo bash conditional that tests
     # if any specified pkgs are not installed. Otherwise just
     # yield to block.
-    def dist_if_not_installed?( pkgs, chk, opts, &block )
+    def dist_if_not_installed?( pkgs, chk = true, opts = {}, &block )
       if chk
         pkgs = Array( pkgs )
         cnt = "rpm -q #{pkgs.join ' '} | grep -cv 'not installed'"

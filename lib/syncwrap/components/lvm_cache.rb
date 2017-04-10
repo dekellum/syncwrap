@@ -88,7 +88,11 @@ module SyncWrap
     end
 
     def install
-      dist_install( "lvm2", minimal: true )
+      if distro.is_a?( Debian )
+        dist_install( "lvm2", "thin-provisioning-tools", minimal: true )
+      else
+        dist_install( "lvm2", minimal: true )
+      end
       sudo( "if ! lvs /dev/#{vg}/#{lv_cache}; then", close: "fi" ) do
         unmount_device( raw_device )
         sudo <<-SH
