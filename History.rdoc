@@ -1,4 +1,4 @@
-=== 2.8.4 (TBD)
+=== 2.9.0 (TBD)
 * SyncWrap::CRubyVM; add hash for 2.2.7
 * SyncWrap::LVMCache; add --yes flag to final lvconvert call, as
   required by later versions, and compatible with earlier versions.
