@@ -292,7 +292,7 @@ module SyncWrap
     # reconfigure or data relocation.
     def package_install
       if distro.is_a?( Debian )
-        dist_if_not_installed?( package_names, true, {} ) do
+        dist_if_not_installed?( package_names ) do
           dist_install( *package_names, check_install: false )
           pg_stop
         end
