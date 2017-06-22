@@ -39,6 +39,7 @@ PLATFORMS
   java
   ruby
   universal-java-1.8
+  x86_64-linux
 
 DEPENDENCIES
   minitest (~> 5.8.4)
