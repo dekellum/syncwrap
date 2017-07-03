@@ -14,10 +14,7 @@
 # permissions and limitations under the License.
 #++
 
-require 'rubygems'
 require 'bundler/setup'
-
-require 'minitest/unit'
 require 'minitest/autorun'
 
 begin

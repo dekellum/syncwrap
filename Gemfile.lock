@@ -19,7 +19,7 @@ GEM
     json (1.8.6)
     json (1.8.6-java)
     mini_portile2 (2.1.0)
-    minitest (5.8.5)
+    minitest (5.9.1)
     nokogiri (1.6.8.1)
       mini_portile2 (~> 2.1.0)
     nokogiri (1.6.8.1-java)
@@ -42,7 +42,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  minitest (~> 5.8.4)
+  minitest (~> 5.9.1)
   rdoc (~> 4.3.0)
   rjack-tarpit (~> 2.1)
   syncwrap!

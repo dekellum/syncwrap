@@ -16,7 +16,7 @@ RJack::TarPit.specify do |s|
   s.depend 'json',           '>= 1.7.1', '< 1.9' #constrain aws-sdk
   s.depend 'nokogiri',       '>= 1.5.9', '< 1.7' #constrain aws-sdk
 
-  s.depend 'minitest', '~> 5.8.4', :dev
+  s.depend 'minitest', '~> 5.9.1', :dev
   s.depend 'rdoc',     '~> 4.3.0', :dev
 
   s.required_ruby_version = '>= 1.9.1'
