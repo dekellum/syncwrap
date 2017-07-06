@@ -11,6 +11,7 @@
 * SyncWrap::Network; Add name to /etc/hosts if necessary on Debian
 * SyncWrap::CRubyVM
   * Add hashes for 2.2.7 and 2.3.4
+  * Update default version to 2.2.7
   * Preemptively add 2.4 to distro rubies to uninstall
 * SyncWrap::LVMCache
   * Add --yes flag to final lvconvert call, required by later
