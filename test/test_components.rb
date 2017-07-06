@@ -40,6 +40,7 @@ module SyncWrap
     [ [ RHEL, CommercialJDK ],
       [ Debian ],
       [ Debian, CRubyVM ],
+      [ Debian, OpenJDK, JRubyVM, jruby_version: '9.1.12.0' ],
       [ CentOS, CRubyVM ],
       [ Arch, CRubyVM ],
       [ EtcHosts ],

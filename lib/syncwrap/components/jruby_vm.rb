@@ -35,8 +35,8 @@ module SyncWrap
     DEFAULT_VERSION = '1.7.26'
 
     # A set of known cryptographic hashes, keyed by version
-    # string. Note, we prefer sha256 but sha1 is what is currently
-    # published.
+    # string. We prefer sha256 but sha1 is what is published for
+    # 1.7.x.
     KNOWN_HASHES = {
       '1.7.22' => '6b9e310a04ad8173d0d6dbe299da04c0ef85fc15',
       '1.7.23' => '2b5e796feeed2bcfab02f8bf2ff3d77ca318e310',
@@ -44,9 +44,13 @@ module SyncWrap
       '1.7.25' => 'cd15aef419f97cff274491e53fcfb8b88ec36785',
       '1.7.26' => 'cca25a1ffb8b75a8d4a4d4667e7f6b20341c2b74',
       '1.7.27' => '4a24fe103d3735b23cc58668dec711857125a6f3',
+      '9.1.12.0' =>
+      'ddb23c95f4b3cc3fc1cc57b81cb4ceee776496ede402b9a6eb0622cf15e1a597',
     }
 
     # JRuby version to install (default: DEFAULT_VERSION)
+    #
+    # Example values: '1.7.26', '9.1.12.0'
     attr_accessor :jruby_version
 
     # A cryptographic hash value (hexadecimal, some standard length)
@@ -146,6 +150,10 @@ module SyncWrap
     end
 
     alias :jruby_gem_install :gem_install
+
+    def jruby_gem_home_prop?
+      version_lt?( jruby_version, [9] )
+    end
 
     protected
 

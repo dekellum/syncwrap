@@ -10,4 +10,8 @@ jruby.bindir  = <%= local_root %>/bin
 hashdot.profile += jruby-common
 
 # Rubygems Home (Install)
+<% if jruby_gem_home_prop? %>
 jruby.gem.home = <%= local_root %>/lib/jruby/gems
+<% else %>
+hashdot.env.GEM_HOME = <%= local_root %>/lib/jruby/gems
+<% end %>
