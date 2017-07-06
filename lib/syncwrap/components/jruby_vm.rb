@@ -49,6 +49,8 @@ module SyncWrap
     }
 
     # JRuby version to install (default: DEFAULT_VERSION)
+    #
+    # Example values: '1.7.26', '9.1.12.0'
     attr_accessor :jruby_version
 
     # A cryptographic hash value (hexadecimal, some standard length)
