@@ -149,6 +149,10 @@ module SyncWrap
 
     alias :jruby_gem_install :gem_install
 
+    def jruby_gem_home_prop?
+      version_lt?( jruby_version, [9] )
+    end
+
     protected
 
     def min_deps_supported?
