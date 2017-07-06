@@ -13,6 +13,9 @@
   * Add hashes for 2.2.7 and 2.3.4
   * Update default version to 2.2.7
   * Preemptively add 2.4 to distro rubies to uninstall
+* SyncWrap::JRubyVM
+  * Add hash for 1.7.27
+  * Add hash and support for 9.1.12.0
 * SyncWrap::LVMCache
   * Add --yes flag to final lvconvert call, required by later
     versions, compatible with earlier
