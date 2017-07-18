@@ -1,4 +1,4 @@
-=== 2.9.0 (TBD)
+=== 2.9.0 (2017-7-18)
 * SyncWrap::Debian
   * Fix Debian#dist_if_installed? grep pattern. Was previously giving
     some (so far harmless) false positives for known but not-installed
