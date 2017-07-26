@@ -15,7 +15,7 @@
 #++
 
 module SyncWrap
-  VERSION='2.9.0'
+  VERSION='2.9.1'
 
   GEM_ROOT = File.dirname(File.dirname(File.dirname(__FILE__))) # :nodoc:
 end
