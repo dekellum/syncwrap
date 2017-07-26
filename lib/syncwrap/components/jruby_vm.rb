@@ -181,7 +181,7 @@ module SyncWrap
         specs = [ "#{prefix}/specifications/#{gem}-#{ver}-java.gemspec",
                   "#{prefix}/specifications/#{gem}-#{ver}.gemspec" ]
 
-        cond = "if [ ! -e '#{specs[0]}' -a ! -e '#{specs[1]}' ]; then"
+        cond = "if [ ! -e #{specs[0]} -a ! -e #{specs[1]} ]; then"
         shopts = { close: 'fi' }
         case opts[ :user_install ]
         when String
