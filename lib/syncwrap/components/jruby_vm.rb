@@ -77,8 +77,27 @@ module SyncWrap
       "#{jruby_dist_path}/etc"
     end
 
+    # The jruby system gem home, depending on #jruby_gem_home_prop?
     def jruby_gem_home
-      "#{local_root}/lib/jruby/gems"
+      if jruby_gem_home_prop?
+        "#{local_root}/lib/jruby/gems"
+      else
+        "#{jruby_dist_path}/lib/ruby/gems/shared"
+      end
+    end
+
+    # True if jruby (1.7.x) supports an alternative system gem home
+    # via the jruby.gem.home java property. By default, for jruby
+    # 1.7.x this will be used to move gems outside to allow for
+    # graceful jruby upgrades without needing to reinstall gems.
+    #
+    # Jruby 9.x continues to abide by this property, through 9.1.12.0
+    # atleast, but with an incessant warning, so the setting is
+    # dropped by default.
+    attr_writer :jruby_gem_home_prop
+
+    def jruby_gem_home_prop?
+      @jruby_gem_home_prop ||= version_lt?( jruby_version, [9] )
     end
 
     # Install jruby if the jruby_version is not already present.
@@ -150,10 +169,6 @@ module SyncWrap
     end
 
     alias :jruby_gem_install :gem_install
-
-    def jruby_gem_home_prop?
-      version_lt?( jruby_version, [9] )
-    end
 
     protected
 
