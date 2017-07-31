@@ -106,10 +106,10 @@ module SyncWrap
 
     # The ruby compatability version, as can be found in
     # RbConfig::CONFIG['ruby_version'] on the same ruby, and used as a
-    # sub-directory of the user gem dir. In recent rubies this is 3
+    # sub-directory of the user gem directory. In recent rubies this is 3
     # version numbers with 0 in the least significant (ruby naming:
     # TEENY) position, e.g. '2.3.0'. By default, computed based on
-    # jruby_version.
+    # jruby_version for known versions.
     attr_writer :ruby_compat_version
 
     def ruby_compat_version
