@@ -77,8 +77,43 @@ module SyncWrap
       "#{jruby_dist_path}/etc"
     end
 
+    # The jruby system gem home, depending on #jruby_gem_home_prop?
     def jruby_gem_home
-      "#{local_root}/lib/jruby/gems"
+      if jruby_gem_home_prop?
+        "#{local_root}/lib/jruby/gems"
+      else
+        "#{jruby_dist_path}/lib/ruby/gems/shared"
+      end
+    end
+
+    def jruby_user_gem_dir( user )
+      "~#{user}/.gem/jruby/#{ruby_compat_version}"
+    end
+
+    # True if jruby (1.7.x) supports an alternative system gem home
+    # via the jruby.gem.home java property. By default, for jruby
+    # 1.7.x this will be used to move gems outside to allow for
+    # graceful jruby upgrades without needing to reinstall gems.
+    #
+    # Jruby 9.x continues to abide by this property, through 9.1.12.0
+    # atleast, but with an incessant warning, so the setting is
+    # dropped by default.
+    attr_writer :jruby_gem_home_prop
+
+    def jruby_gem_home_prop?
+      @jruby_gem_home_prop ||= version_lt?( jruby_version, [9] )
+    end
+
+    # The ruby compatability version, as can be found in
+    # RbConfig::CONFIG['ruby_version'] on the same ruby, and used as a
+    # sub-directory of the user gem directory. In recent rubies this is 3
+    # version numbers with 0 in the least significant (ruby naming:
+    # TEENY) position, e.g. '2.3.0'. By default, computed based on
+    # jruby_version for known versions.
+    attr_writer :ruby_compat_version
+
+    def ruby_compat_version
+      @ruby_compat_version ||= default_ruby_compat_version
     end
 
     # Install jruby if the jruby_version is not already present.
@@ -132,28 +167,38 @@ module SyncWrap
       version = Array( opts[ :version ] )
       ver = (version.length == 1) && version[0] =~ /^=?\s*([0-9]\S+)/ && $1
 
-      unless ( opts[:check] || opts[:user_install] ||
-               opts[:minimize] == false || opts[:spec_check] == false ||
+      unless ( opts[:check] ||
+               opts[:minimize] == false ||
+               opts[:spec_check] == false ||
                ver.nil? )
 
-        specs = [ "#{jruby_gem_home}/specifications/#{gem}-#{ver}-java.gemspec",
-                  "#{jruby_gem_home}/specifications/#{gem}-#{ver}.gemspec" ]
+        prefix = if opts[:user_install]
+                   jruby_user_gem_dir( opts[:user_install] )
+                 else
+                   jruby_gem_home
+                 end
 
-        sudo( "if [ ! -e '#{specs[0]}' -a ! -e '#{specs[1]}' ]; then",
-              close: "fi" ) do
+        specs = [ "#{prefix}/specifications/#{gem}-#{ver}-java.gemspec",
+                  "#{prefix}/specifications/#{gem}-#{ver}.gemspec" ]
+
+        cond = "if [ ! -e #{specs[0]} -a ! -e #{specs[1]} ]; then"
+        shopts = { close: 'fi' }
+        case opts[ :user_install ]
+        when String
+          shopts[ :user ] = opts[ :user_install ]
+        when nil, false
+          shopts[ :user ] = :root
+        end
+
+        sh( cond, shopts ) do
           super
         end
       else
         super
       end
-
     end
 
     alias :jruby_gem_install :gem_install
-
-    def jruby_gem_home_prop?
-      version_lt?( jruby_version, [9] )
-    end
 
     protected
 
@@ -163,6 +208,16 @@ module SyncWrap
 
     def jruby_gem_version_flags( reqs )
       Array( reqs ).flatten.compact.map { |req| "-v'#{req}'" }
+    end
+
+    def default_ruby_compat_version
+      if version_lt?( jruby_version, [9] )
+        '1.9'
+      elsif version_lt?( jruby_version, [9,1] )
+        '2.2.0'
+      else
+        '2.3.0'
+      end
     end
 
   end

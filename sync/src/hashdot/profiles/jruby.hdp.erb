@@ -1,4 +1,4 @@
-# HashDot launch profile for JRuby (http://jruby.codehaus.org/)
+# HashDot launch profile for JRuby
 #. hashdot.profile = jruby
 
 jruby.home    = <%= jruby_dist_path %>
@@ -8,10 +8,8 @@ jruby.shell   = /bin/sh
 jruby.bindir  = <%= local_root %>/bin
 
 hashdot.profile += jruby-common
-
-# Rubygems Home (Install)
 <% if jruby_gem_home_prop? %>
-jruby.gem.home = <%= local_root %>/lib/jruby/gems
-<% else %>
-hashdot.env.GEM_HOME = <%= local_root %>/lib/jruby/gems
+
+# System Rubygems Home
+jruby.gem.home = <%= jruby_gem_home %>
 <% end %>
