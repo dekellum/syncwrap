@@ -1,4 +1,14 @@
 === 2.9.1 (TBD)
+* SyncWrap::JRubyVM
+  * Avoid setting Env['GEM_HOME'] in the jruby 9.x installed profile
+    by default. In 2.9.0, this was added as a substitute for the
+    jruby.gem.home system property, which when set caused incessant
+    warnings with 9.x. However setting GEM_HOME also undesirably
+    effects gem bin wrapper install location. Instead just use the
+    default in-dist path of jruby 9.x, and system gems will need to be
+    re-installed with a jruby upgrade.
+  * Add support for fast path gem user_install (no-op if same version
+    specification is found)
 
 === 2.9.0 (2017-7-18)
 * SyncWrap::Debian
@@ -22,7 +32,7 @@
   * Add --yes flag to final lvconvert call, required by later
     versions, compatible with earlier
   * Add thin-provisioning-tools as dependency on Debian, as the included
-    cached_check command is needed for reboot.
+    cache_check command is needed for reboot.
 * SyncWrap::Sudoers
   * Collect all sudoers config details here. This was previously
     spread between SyncWrap::Users and SyncWrap::UserData.
