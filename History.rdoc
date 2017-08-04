@@ -1,12 +1,12 @@
 === 2.9.1 (2017-8-4)
 * SyncWrap::JRubyVM
-  * Avoid setting Env['GEM_HOME'] in the jruby 9.x installed profile
-    by default. In 2.9.0, this was added as a substitute for the
-    jruby.gem.home system property, which when set caused incessant
-    warnings with 9.x. However setting GEM_HOME also undesirably
-    effects gem bin wrapper install location. Instead just use the
-    default in-dist path of jruby 9.x, and system gems will need to be
-    re-installed with a jruby upgrade.
+  * Avoid setting GEM_HOME environment var in the jruby 9.x installed
+    profile by default. In 2.9.0, this was added as a substitute for
+    the jruby.gem.home system property, which when set caused
+    incessant warnings with 9.x. However setting GEM_HOME also
+    undesirably effects gem bin wrapper install location. Instead just
+    use the default in-dist path of jruby 9.x, and system gems will
+    need to be re-installed with a jruby upgrade.
   * Add support for fast path gem user_install (no-op if same version
     specification is found)
 * Fix error message for CLI -S (session) with host not found
