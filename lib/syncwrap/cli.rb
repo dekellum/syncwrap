@@ -268,7 +268,7 @@ TEXT
 
       if @ssh_session
         host = space.get_host( @ssh_session )
-        host = space.ssh_host_name( host )
+        host &&= space.ssh_host_name( host )
         raise "Host #{@ssh_session} not found in sync file" unless host
         extra_args = @component_plan
         raise "SSH args? #{extra_args.inspect}" if extra_args.first =~ /^[^\-]/
