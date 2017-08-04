@@ -9,6 +9,7 @@
     re-installed with a jruby upgrade.
   * Add support for fast path gem user_install (no-op if same version
     specification is found)
+* Fix error message for CLI -S (session) with host not found
 
 === 2.9.0 (2017-7-18)
 * SyncWrap::Debian
