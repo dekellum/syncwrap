@@ -1,4 +1,4 @@
-=== 2.9.1 (TBD)
+=== 2.9.1 (2017-8-4)
 * SyncWrap::JRubyVM
   * Avoid setting Env['GEM_HOME'] in the jruby 9.x installed profile
     by default. In 2.9.0, this was added as a substitute for the
