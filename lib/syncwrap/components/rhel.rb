@@ -125,8 +125,7 @@ module SyncWrap
       if chk
         pkgs = Array( pkgs )
         cnt = "rpm -q #{pkgs.join ' '} | grep -cv 'not installed'"
-        cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}
-        sudo( cond, opts.merge( close: 'fi' ), &block )
+        sudo_if( %Q{[ "$(#{cnt})" != "#{pkgs.count}" ]}, opts, &block )
       else
         block.call
       end

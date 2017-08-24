@@ -119,8 +119,7 @@ module SyncWrap
       if chk
         qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkgs.join ' '}"
         cnt = qry + " | grep -c -E '^installed$'"
-        cond = %Q{if [ "$(#{cnt})" != "#{pkgs.count}" ]; then}
-        sudo( cond, opts.merge( close: 'fi' ), &block )
+        sudo_if( %Q{[ "$(#{cnt})" != "#{pkgs.count}" ]}, opts, &block )
       else
         block.call
       end
@@ -131,8 +130,7 @@ module SyncWrap
     def dist_if_installed?( pkg, opts = {}, &block )
       qry = "dpkg-query -W -f '${db:Status-Status}\\n' #{pkg}"
       tst = qry + " | grep -q -E '^installed$'"
-      cond = "if #{tst}; then"
-      sudo( cond, opts.merge( close: 'fi' ), &block )
+      sudo_if( tst, opts, &block )
     end
 
     # Install a System V style init.d service script

@@ -66,8 +66,7 @@ module SyncWrap
     # yield to block.
     def dist_if_not_installed?( pkgs, chk = true, opts = {}, &block )
       if chk
-        c = "if ! pacman -Q #{pkgs.join ' '} >/dev/null 2>&1; then"
-        sudo( c, opts.merge( close: 'fi' ), &block )
+        sudo_if( "! pacman -Q #{pkgs.join ' '} >/dev/null 2>&1", opts, &block )
       else
         block.call
       end
@@ -76,8 +75,7 @@ module SyncWrap
     # Wrap block in a sudo bash conditional testing if the single
     # specified pkg is installed.
     def dist_if_installed?( pkg, opts = {}, &block )
-      c = "if pacman -Q #{pkg} >/dev/null 2>&1; then"
-      sudo( c, opts.merge( close: 'fi' ), &block )
+      sudo_if( "pacman -Q #{pkg} >/dev/null 2>&1", opts, &block )
     end
 
     alias_method :dist_service, :dist_service_via_systemctl

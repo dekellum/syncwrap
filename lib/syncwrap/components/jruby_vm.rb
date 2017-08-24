@@ -181,8 +181,7 @@ module SyncWrap
         specs = [ "#{prefix}/specifications/#{gem}-#{ver}-java.gemspec",
                   "#{prefix}/specifications/#{gem}-#{ver}.gemspec" ]
 
-        cond = "if [ ! -e #{specs[0]} -a ! -e #{specs[1]} ]; then"
-        shopts = { close: 'fi' }
+        shopts = {}
         case opts[ :user_install ]
         when String
           shopts[ :user ] = opts[ :user_install ]
@@ -190,7 +189,7 @@ module SyncWrap
           shopts[ :user ] = :root
         end
 
-        sh( cond, shopts ) do
+        sh_if( "[ ! -e #{specs[0]} -a ! -e #{specs[1]} ]", shopts ) do
           super
         end
       else

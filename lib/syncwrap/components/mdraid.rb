@@ -120,9 +120,7 @@ module SyncWrap
 
       paths = lvm_volumes.map { |r| r[1] }
       test = paths.map { |p| "! -e #{p}" }.join( " -a " )
-
-      sudo( "if [ #{test} ]; then", close: "fi" ) do
-
+      sudo_if( "[ #{test} ]" ) do
         dist_install( "mdadm", "lvm2", minimal: true )
 
         raw_devices.each do |d|
@@ -138,7 +136,6 @@ module SyncWrap
         end
 
         create_volumes( dev )
-
       end
     end
 

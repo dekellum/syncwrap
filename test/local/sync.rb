@@ -24,7 +24,7 @@ space.prepend_sync_path # local's
 
 class Uninstaller < Component
   def uninstall
-    sudo( "if [ -e /etc/init.d/iyyov ]; then", close: "fi" ) do
+    sudo_if( "[ -e /etc/init.d/iyyov ]" ) do
       dist_service( "iyyov", "stop" )
     end
     sudo <<-SH

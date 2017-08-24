@@ -70,7 +70,7 @@ module SyncWrap
         map { |b| "../lib/java/bin/#{b}" }.
         join( ' ' )
 
-      sudo( "if [ ! -d #{jdk_dir} ]; then", close: "fi" ) do
+      sudo_if( "[ ! -d #{jdk_dir} ]" ) do
         dist_install( 'curl', minimal: true, check_install: true )
         sudo <<-SH
           curl -sSL -o #{distro} #{jdk_url}

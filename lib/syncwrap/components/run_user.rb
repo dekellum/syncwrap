@@ -63,7 +63,7 @@ module SyncWrap
 
     # Create run_user if not already present
     def create_run_user
-      sudo( "if ! id #{run_user} >/dev/null 2>&1; then", close: "fi" ) do
+      sudo_if( "id #{run_user} >/dev/null 2>&1" ) do
         user_opts  = "-r -c 'Run User' -s /bin/bash"
         user_opts += " -d #{run_user_home}" if run_user_home
         if run_group && run_group != run_user
