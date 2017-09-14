@@ -47,7 +47,7 @@ module SyncWrap
     include HashSupport
 
     # Default #ruby_version to install
-    DEFAULT_VERSION = '2.2.7'
+    DEFAULT_VERSION = '2.3.5'
 
     # A set of known (sha256) cryptographic hashes, keyed by version
     # string, for the source ruby-(version).tar.gz package.
