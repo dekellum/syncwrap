@@ -4,8 +4,8 @@ install: "bundle install --jobs=3 --retry=3"
 sudo: false
 dist: trusty
 rvm:
-  - 2.2.7
-  - 2.3.4
+  - 2.2.8
+  - 2.3.5
   - ruby-head
   - rbx
   - jruby-1.7.26
