@@ -319,7 +319,7 @@ module SyncWrap
           changes = rput( 'etc/sysconfig/pgsql/postgresql', user: :root )
         end
 
-        sudo( "if [ ! -d '#{pg_data_dir}/base' ]; then", close: "fi" ) do
+        sudo_if( "[ ! -d '#{pg_data_dir}/base' ]" ) do
           sudo <<-SH
             mkdir -p #{pg_data_dir}
             chown postgres:postgres #{pg_data_dir}

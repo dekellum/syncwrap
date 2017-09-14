@@ -123,6 +123,8 @@ module SyncWrap
     #     sudo "touch /var/foobar" #=> NestingError
     #   end
     #
+    # See also #sh_if, #sudo_if for convenience methods.
+    #
     # While executing the block, #flush is _locked_.  The above fails
     # with a NestingError and accurate stack trace, without running
     # any potentially dangerous, incomplete bash fragments on the
@@ -198,6 +200,23 @@ module SyncWrap
     # would typically come from the RunUser component.
     def rudo( command, opts = {}, &block )
       sh( command, { user: run_user }.merge( opts ), &block )
+    end
+
+    # Wraps cond in a bash "if cond; then" expression and close: "fi",
+    # and then calls #sh with the remaining options and block.
+    def sh_if( cond, opts = {}, &block )
+      cmd = "if #{cond}; then"
+      sh( cmd, opts.merge( close: 'fi' ), &block )
+    end
+
+    # Equivalent to `sh_if( cond, user: :root )`
+    def sudo_if( cond, opts = {}, &block )
+      sh_if( cond, { user: :root }.merge( opts ), &block )
+    end
+
+    # Equivalent to `sh_if( cond, user: run_user )`
+    def rudo_if( cond, opts = {}, &block )
+      sh_if( cond, { user: run_user }.merge( opts ), &block )
     end
 
     # Capture and return [exit_code, stdout] from command, where

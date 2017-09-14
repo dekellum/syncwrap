@@ -93,7 +93,7 @@ module SyncWrap
       else
         dist_install( "lvm2", minimal: true )
       end
-      sudo( "if ! lvs /dev/#{vg}/#{lv_cache}; then", close: "fi" ) do
+      sudo_if( "! lvs /dev/#{vg}/#{lv_cache}" ) do
         unmount_device( raw_device )
         sudo <<-SH
           vgextend #{vgextend_flags.join ' '} #{vg} #{raw_device}

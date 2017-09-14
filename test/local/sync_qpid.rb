@@ -24,8 +24,7 @@ space.prepend_sync_path # local's
 
 class Uninstaller < Component
   def uninstall
-    sudo( "if [ -e /usr/local/sbin/qpidd -a -e /etc/init.d/qpidd ]; then",
-          close: "fi" ) do
+    sudo_if( "[ -e /usr/local/sbin/qpidd -a -e /etc/init.d/qpidd ]" ) do
       dist_service( "qpidd", "stop" )
     end
     sudo <<-SH
