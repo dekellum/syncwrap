@@ -32,7 +32,7 @@ module SyncWrap
     include HashSupport
 
     # Default #jruby_version to install
-    DEFAULT_VERSION = '1.7.26'
+    DEFAULT_VERSION = '9.1.13.0'
 
     # A set of known cryptographic hashes, keyed by version
     # string. We prefer sha256 but sha1 is what is published for
