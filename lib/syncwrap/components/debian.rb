@@ -33,6 +33,8 @@ module SyncWrap
 
     alias :distro_version :debian_version
 
+    UPDATE_LOCK = "/var/lock/subsys/syncwrap-apt-get-update".freeze
+
     protected
 
     # Set true/false to override the default, distro version based
@@ -89,14 +91,20 @@ module SyncWrap
     # ==== Options
     #
     # :update_required:: If true, always perform update. If specified
-    #                    as false, do nothing.  If unspecified, run on
-    #                    the first call per Context only.
+    #                    as false, do nothing.  If unspecified, update
+    #                    if it hasn't already been run in the last
+    #                    hour via syncwrap (using a lock file).
     #
     # Options are also passed to the sudo calls.
     def dist_update( opts = {} )
       req = opts[ :update_required ]
-      if ( req != false ) && ( first_apt? || req )
-        sudo( "apt-get -yqq update", opts )
+      if ( req != false )
+        dist_if_update_old?( req != true, opts ) do
+          sudo( <<-SH, opts )
+            apt-get -yqq update
+            touch #{UPDATE_LOCK}
+          SH
+        end
       end
     end
 
@@ -161,13 +169,13 @@ module SyncWrap
 
     protected
 
-    def first_apt?
-      s = state
-      if s[ :debian_apt_updated ]
-        false
+    def dist_if_update_old?( chk = true, opts = {}, &block )
+      if chk
+        l = UPDATE_LOCK
+        sudo_if( %Q{[ ! -e #{l} -o -n "$(find #{l} -mmin +60)" ]},
+                 opts, &block )
       else
-        s[ :debian_apt_updated ] = true
-        true
+        block.call
       end
     end
 
