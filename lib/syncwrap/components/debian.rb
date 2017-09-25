@@ -172,7 +172,7 @@ module SyncWrap
     def dist_if_update_old?( chk = true, opts = {}, &block )
       if chk
         l = UPDATE_LOCK
-        sudo_if( %Q{[ ! -e #{l} -o -n "$(find #{l} -mmin +60)" ]},
+        sudo_if( %Q{[[ ! -e #{l} || -n "$(find #{l} -mmin +60)" ]]},
                  opts, &block )
       else
         block.call
