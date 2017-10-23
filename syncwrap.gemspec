@@ -9,8 +9,8 @@ RJack::TarPit.specify do |s|
 
   s.add_developer( 'David Kellum', 'dek-oss@gravitext.com' )
 
-  s.depend 'term-ansicolor', '~> 1.2.2'
-  s.depend 'tins',           '~> 0.13.2' #constrain term-ansicolor
+  s.depend 'term-ansicolor', '>= 1.2.2', '< 1.5'
+  s.depend 'tins',           '~> 1.13.2' #constrain term-ansicolor
 
   s.depend 'aws-sdk',        '~> 1.46'
   s.depend 'json',           '>= 1.7.1', '< 2.2' #constrain aws-sdk
