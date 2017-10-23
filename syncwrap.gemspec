@@ -13,8 +13,8 @@ RJack::TarPit.specify do |s|
   s.depend 'tins',           '~> 0.13.2' #constrain term-ansicolor
 
   s.depend 'aws-sdk',        '~> 1.46'
-  s.depend 'json',           '>= 1.7.1', '< 1.9' #constrain aws-sdk
-  s.depend 'nokogiri',       '>= 1.5.9', '< 1.7' #constrain aws-sdk
+  s.depend 'json',           '>= 1.7.1', '< 2.2' #constrain aws-sdk
+  s.depend 'nokogiri',       '>= 1.5.9', '< 1.9' #constrain aws-sdk
 
   s.depend 'minitest', '~> 5.9.1', :dev
   s.depend 'rdoc',     '~> 4.3.0', :dev
