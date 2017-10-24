@@ -24,7 +24,7 @@ module SyncWrap
   #
   class TarpitGem < Component
 
-    # Tarpit version to install (Default: 2.1.1)
+    # Tarpit version to install (Default: 2.1.2)
     attr_accessor :tarpit_version
 
     protected
@@ -39,7 +39,7 @@ module SyncWrap
     public
 
     def initialize( opts = {} )
-      @tarpit_version = '2.1.1'
+      @tarpit_version = '2.1.2'
       @user_install = false
       super
     end
