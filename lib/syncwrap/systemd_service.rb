@@ -105,6 +105,18 @@ module SyncWrap
       systemctl( 'stop', *systemd_units )
     end
 
+    # Disable all #systemd_units.
+    def disable
+      require_systemd_service!
+      systemctl( 'disable', *systemd_units )
+    end
+
+    # Enable all #systemd_units.
+    def enable
+      require_systemd_service!
+      systemctl( 'enable', *systemd_units )
+    end
+
     # Output status of #systemd_units (useful via CLI with --verbose).
     # Exit codes 0-3 are accepted from `systemctl`, since these will
     # be returned in normal operational contexts, for example, when

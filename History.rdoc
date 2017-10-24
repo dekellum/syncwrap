@@ -7,6 +7,7 @@
 * Add SyncWrap::Component#sh_if, sudo_if, and rudo_if helper methods
   for common bash conditionals.  Using these where applicable to
   simplify various internal components.
+* SyncWrap::SystemDService; add enable and disable commands
 * SyncWrap::CRubyVM
   * Add hashes for 2.2.8, 2.3.5 and 2.4.2
   * Update default version to 2.3.5
