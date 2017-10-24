@@ -6,7 +6,7 @@ PATH
       json (>= 1.7.1, < 2.2)
       nokogiri (>= 1.5.9, < 1.9)
       term-ansicolor (>= 1.2.2, < 1.5)
-      tins (~> 1.13.2)
+      tins (>= 1.6.0, < 1.14)
 
 GEM
   remote: https://rubygems.org/

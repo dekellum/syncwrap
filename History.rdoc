@@ -13,7 +13,10 @@
 * SyncWrap::JRubyVM; Add hash for 9.1.13.0 and make it the default
 * SyncWrap::TarpitGem; default version 2.1.2
 * Expand transitive dependency constraints for new releases:
-  term-ansicolor, tins, json and nokogiri.
+  term-ansicolor, tins, json and nokogiri. The latest of some tins and
+  nokogiri is incompatible with jruby 1.7.x (in 1.9 mode) which
+  prompts dropping jruby 1.7.x from syncwrap's Travis CI. Compatible
+  earlier versions are still available to users however.
 
 === 2.9.1 (2017-8-4)
 * SyncWrap::JRubyVM
