@@ -20,27 +20,40 @@ module SyncWrap
 
   # Provision for the rake rubygem and its (j)rake command
   #
-  # Host component dependencies: <Ruby>
+  # Host component dependencies: RunUser?, <ruby>
   #
   class RakeGem < Component
 
-    # Rake version to install (Default: 10.3.2)
+    # Rake version to install (Default: 12.1.0)
     attr_accessor :rake_version
 
-    def initialize( opts = {} )
-      @rake_version = '10.3.2'
-      super
+    protected
+
+    # Perform a user_install as the run_user? (Default: false)
+    attr_writer :user_install
+
+    def user_install?
+      @user_install
     end
+
+    public
 
     def rake_command
       ( ruby_command == 'jruby' ) ? 'jrake' : 'rake'
     end
 
+    def initialize( opts = {} )
+      @rake_version = '12.1.0'
+      @user_install = false
+      super
+    end
+
     def install
-      opts = { version: rake_version }
+      opts = { version: rake_version, user_install: user_install? && run_user }
       opts[ :format_executable ] = true unless rake_command == 'rake'
       gem_install( 'rake', opts )
     end
 
   end
+
 end
