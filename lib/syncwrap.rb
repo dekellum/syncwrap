@@ -417,6 +417,7 @@ module SyncWrap
   autoload :RunUser,       'syncwrap/components/run_user'
   autoload :SourceTree,    'syncwrap/components/source_tree'
   autoload :TarpitGem,     'syncwrap/components/tarpit_gem'
+  autoload :TimeChecker,   'syncwrap/components/time_checker'
   autoload :Ubuntu,        'syncwrap/components/ubuntu'
   autoload :Users,         'syncwrap/components/users'
 
