@@ -7,7 +7,7 @@
 * Add SyncWrap::Component#sh_if, sudo_if, and rudo_if helper methods
   for common bash conditionals.  Using these where applicable to
   simplify various internal components.
-* SyncWrap::SystemDService; add enable and disable commands
+* Add SyncWrap::SystemDService#enable and disable commands
 * SyncWrap::CRubyVM
   * Add hashes for 2.2.8, 2.3.5 and 2.4.2
   * Update default version to 2.3.5
@@ -15,8 +15,8 @@
 * SyncWrap::TarpitGem; default version 2.1.2
 * SyncWrap::RakeGem; default version 12.1.0, support user_install
 * Expand transitive dependency constraints for new releases:
-  term-ansicolor, tins, json and nokogiri. The latest of some tins and
-  nokogiri is incompatible with jruby 1.7.x (in 1.9 mode) which
+  term-ansicolor, tins, json and nokogiri. The latest of tins and
+  nokogiri are incompatible with jruby 1.7.x (in 1.9 mode) which
   prompts dropping jruby 1.7.x from syncwrap's Travis CI. Compatible
   earlier versions are still available to users however.
 
