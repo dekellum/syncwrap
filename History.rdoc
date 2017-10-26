@@ -8,6 +8,7 @@
   for common bash conditionals.  Using these where applicable to
   simplify various internal components.
 * Add SyncWrap::SystemDService#enable and disable commands
+* Add SyncWrap::TimeChecker utility component
 * SyncWrap::CRubyVM
   * Add hashes for 2.2.8, 2.3.5 and 2.4.2
   * Update default version to 2.3.5
