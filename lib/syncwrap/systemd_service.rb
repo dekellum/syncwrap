@@ -18,8 +18,8 @@ module SyncWrap
 
   # Support module for components which install SystemD
   # services. Provide unit file installation with `systemctl` calls,
-  # and also provides standard #start, #restart, #stop, and #status
-  # commands for use in the CLI.
+  # and also provides standard #enable, #start, #status, #restart,
+  # #stop, and #disable commands for use in the CLI.
   #
   # Host component dependencies: <Distro>
   module SystemDService
