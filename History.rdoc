@@ -1,4 +1,4 @@
-=== 2.10.0 (TBD)
+=== 2.10.0 (2017-10-26)
 * SyncWrap::Debian: dist_update condition based on local context
   hasn't worked properly since 2.7.0, when remote conditional install
   was implemented. Fix this by using a remote lock file and running
