@@ -50,11 +50,13 @@ module SyncWrap
       '9d156646623ac2f27174721035b52572a4b05690db7c1293295aa2c04aad3908',
       '9.1.14.0' =>
       '074057e672350a6652d92ccaaa5d517fc7d6b980bce8b947515fb64d114d1651',
+      '9.1.15.0' =>
+      '4a0d9305867ed327a8cf4f7ff8a65c7ff62094a495ec85463d0792656762469e',
     }
 
     # JRuby version to install (default: DEFAULT_VERSION)
     #
-    # Example values: '1.7.27', '9.1.13.0'
+    # Example values: '1.7.27', '9.1.15.0'
     attr_accessor :jruby_version
 
     # A cryptographic hash value (hexadecimal, some standard length)
