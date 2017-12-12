@@ -48,6 +48,8 @@ module SyncWrap
       'ddb23c95f4b3cc3fc1cc57b81cb4ceee776496ede402b9a6eb0622cf15e1a597',
       '9.1.13.0' =>
       '9d156646623ac2f27174721035b52572a4b05690db7c1293295aa2c04aad3908',
+      '9.1.14.0' =>
+      '074057e672350a6652d92ccaaa5d517fc7d6b980bce8b947515fb64d114d1651',
     }
 
     # JRuby version to install (default: DEFAULT_VERSION)
