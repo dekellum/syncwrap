@@ -30,52 +30,73 @@ module SyncWrap
   # Host component dependencies: <Distro>
   #
   # Currently provided (sync/postgresql) configuration is \PostgreSQL
-  # 9.x compatible.  You will need to provide your own complete
-  # configuration for any other versions.
+  # 9.4+ and 10+ compatible.  You will need to provide your own
+  # complete configuration for any other versions.
   #
   # Most distros provide reasonably updated \PostgreSQL 9.x in more
   # recent releases:
   #
-  # * RHEL, CentOS 6: 8.4
   # * RHEL, CentOS 7: 9.2
-  # * AmazonLinux 2013.03: 8.4 9.2
-  # * AmazonLinux 2014.09: 8.4 9.2 9.3
   # * AmazonLinux 2015.09: 9.2 9.3 9.4
-  # * Debian 7: 9.1
+  # * AmazonLinux 2017.09: 9.3 9.5 9.6
   # * Debian 8: 9.4
+  # * Debian 9: 9.6
   # * Ubuntu 14: 9.3
+  # * Ubuntu 16: 9.5
   #
   # The latest stable and beta packages can also be obtained via the
   # \PostgreSQL {Yum Repo}[http://yum.postgresql.org] or
   # {Apt Repo}[http://wiki.postgresql.org/wiki/Apt]. Create your own
   # repo component to install these repo's, then configure the
   # \PostgreSQL component accordingly for #pg_version,
-  # #pg_default_data_dir, #package_names.
+  # #pg_default_data_dir, and #package_names, etc.
   #
   class PostgreSQL < Component
     include VersionSupport
 
-    # \PostgreSQL _MAJOR.MINOR_ version to install. Since there are
-    # multiple versions in use even for _default_ system packages across
-    # distros, this should be set the same as the version that will
-    # be installed via #package_names.
-    # (Default: guess based on distro/version or '9.1')
+    # \PostgreSQL _MAJOR.MINOR_ (e.g. '9.6') or _MAJOR_ (e.g. '10')
+    # version to install, not including the patch release number.  As
+    # of \PostgreSQL 10, this is the single value '10'. Since there are
+    # multiple versions in use even for _default_ system packages
+    # across distros, this should be set the same as the version that
+    # will be installed via #package_names.  (Default: guess based on
+    # distro/version or '9.1')
     attr_writer :pg_version
 
     def pg_version
       ( @pg_version ||
         ( case distro
           when AmazonLinux
-            '9.2' if version_gte?( amazon_version, [2013,3] )
+            if version_gte?( amazon_version, [2017,9] )
+              '9.6'
+            elsif version_gte?( amazon_version, [2015,9] )
+              '9.4'
+            elsif version_gte?( amazon_version, [2013,3] )
+              '9.2'
+            end
           when RHEL
             '9.2' if version_gte?( rhel_version, [7] )
           when Ubuntu
-            '9.3' if version_gte?( ubuntu_version, [14,4] )
+            if version_gte?( ubuntu_version, [16,4] )
+              '9.5'
+            elsif version_gte?( ubuntu_version, [14,4] )
+              '9.3'
+            end
           when Debian
-            '9.4' if version_gte?( debian_version, [8] )
+            if version_gte?( debian_version, [9] )
+              '9.6'
+            elsif version_gte?( debian_version, [8] )
+              '9.4'
+            end
           end
           ) ||
           '9.1' )
+    end
+
+    # Per #pg_version, but with any '.' decimal separators removed,
+    # e.g. '9.6' => '96', '10' => '10'.
+    def compact_pg_version
+      pg_version.gsub('.','')
     end
 
     # Location of postgresql data (and possibly also config) directory.
@@ -136,7 +157,8 @@ module SyncWrap
       ( @package_names ||
         ( distro.is_a?( Debian ) && [ "postgresql-#{pg_version}" ] ) ||
         ( distro.is_a?( AmazonLinux ) &&
-          ( ( version_gte?( amazon_version, [2014,9] ) && [ "postgresql92-server" ] ) ||
+          ( ( version_gte?( amazon_version, [2014,9] ) &&
+              [ "postgresql#{compact_pg_version}-server" ] ) ||
             [ "postgresql9-server" ] ) ) ||
         [ "postgresql-server" ] )
     end
