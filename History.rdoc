@@ -1,4 +1,7 @@
 === 2.10.1 (TBD)
+* SyncWrap::PostgreSQL; Update component and postgresql.conf for
+  support of version 10. Changes are mostly cosmetic and remain
+  backward compatible with Postgres 9.4+
 
 === 2.10.0 (2017-10-26)
 * SyncWrap::Debian: dist_update condition based on local context
