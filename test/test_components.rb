@@ -97,7 +97,7 @@ module SyncWrap
       [ Debian, PostgreSQL ],
       [ Ubuntu, PostgreSQL ],
       [ CentOS, PostgreSQL ],
-      [ CentOS, PostgreSQL, pg_version: '9.5' ],
+      [ CentOS, PostgreSQL, pg_version: '10' ],
       [ RHEL, Qpid ],
       [ CentOS, QpidRepo, qpid_prebuild_repo: 'http://localhost' ],
       [ RHEL ],
