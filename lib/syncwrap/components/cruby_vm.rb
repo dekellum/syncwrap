@@ -51,29 +51,19 @@ module SyncWrap
 
     # A set of known (sha256) cryptographic hashes, keyed by version
     # string, for the source ruby-(version).tar.gz package.
-    KNOWN_HASHES = {
-      '2.1.7' =>
-      'f59c1596ac39cc7e60126e7d3698c19f482f04060674fdfe0124e1752ba6dd81',
-      '2.1.8' =>
-      'afd832b8d5ecb2e3e1477ec6a9408fdf9898ee73e4c5df17a2b2cb36bd1c355d',
-      '2.1.10' =>
-      'fb2e454d7a5e5a39eb54db0ec666f53eeb6edc593d1d2b970ae4d150b831dd20',
-      '2.2.5' =>
-      '30c4b31697a4ca4ea0c8db8ad30cf45e6690a0f09687e5d483c933c03ca335e3',
-      '2.2.6' =>
-      'de8e192791cb157d610c48a9a9ff6e7f19d67ce86052feae62b82e3682cc675f',
-      '2.2.7' =>
-      '374184c6c5bbc88fb7bad422368d4053a236fb6587f0eff76146dcba57f93da5',
-      '2.2.8' =>
-      '8f37b9d8538bf8e50ad098db2a716ea49585ad1601bbd347ef84ca0662d9268a',
-      '2.3.3' =>
-      '241408c8c555b258846368830a06146e4849a1d58dcaf6b14a3b6a73058115b7',
-      '2.3.4' =>
-      '98e18f17c933318d0e32fed3aea67e304f174d03170a38fd920c4fbe49fec0c3',
-      '2.3.5' =>
-      '5462f7bbb28beff5da7441968471ed922f964db1abdce82b8860608acc23ddcc',
-      '2.4.2' =>
-      '93b9e75e00b262bc4def6b26b7ae8717efc252c47154abb7392e54357e6c8c9c' }
+    KNOWN_HASHES = %w[
+      2.1.7  f59c1596ac39cc7e60126e7d3698c19f482f04060674fdfe0124e1752ba6dd81
+      2.1.8  afd832b8d5ecb2e3e1477ec6a9408fdf9898ee73e4c5df17a2b2cb36bd1c355d
+      2.1.10 fb2e454d7a5e5a39eb54db0ec666f53eeb6edc593d1d2b970ae4d150b831dd20
+      2.2.5  30c4b31697a4ca4ea0c8db8ad30cf45e6690a0f09687e5d483c933c03ca335e3
+      2.2.6  de8e192791cb157d610c48a9a9ff6e7f19d67ce86052feae62b82e3682cc675f
+      2.2.7  374184c6c5bbc88fb7bad422368d4053a236fb6587f0eff76146dcba57f93da5
+      2.2.8  8f37b9d8538bf8e50ad098db2a716ea49585ad1601bbd347ef84ca0662d9268a
+      2.3.3  241408c8c555b258846368830a06146e4849a1d58dcaf6b14a3b6a73058115b7
+      2.3.4  98e18f17c933318d0e32fed3aea67e304f174d03170a38fd920c4fbe49fec0c3
+      2.3.5  5462f7bbb28beff5da7441968471ed922f964db1abdce82b8860608acc23ddcc
+      2.4.2  93b9e75e00b262bc4def6b26b7ae8717efc252c47154abb7392e54357e6c8c9c
+    ].map(&:freeze).each_slice(2).to_h.freeze
 
     # The ruby version to install, as it appears in source packages
     # from ruby-lang.org. Note that starting with 2.1.0, the patch
