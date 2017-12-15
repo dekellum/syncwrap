@@ -37,22 +37,18 @@ module SyncWrap
     # A set of known cryptographic hashes, keyed by version
     # string. We prefer sha256 but sha1 is what is published for
     # 1.7.x.
-    KNOWN_HASHES = {
-      '1.7.22' => '6b9e310a04ad8173d0d6dbe299da04c0ef85fc15',
-      '1.7.23' => '2b5e796feeed2bcfab02f8bf2ff3d77ca318e310',
-      '1.7.24' => '0c321d2192768dfec419bee6b44c7190f4db32e1',
-      '1.7.25' => 'cd15aef419f97cff274491e53fcfb8b88ec36785',
-      '1.7.26' => 'cca25a1ffb8b75a8d4a4d4667e7f6b20341c2b74',
-      '1.7.27' => '4a24fe103d3735b23cc58668dec711857125a6f3',
-      '9.1.12.0' =>
-      'ddb23c95f4b3cc3fc1cc57b81cb4ceee776496ede402b9a6eb0622cf15e1a597',
-      '9.1.13.0' =>
-      '9d156646623ac2f27174721035b52572a4b05690db7c1293295aa2c04aad3908',
-      '9.1.14.0' =>
-      '074057e672350a6652d92ccaaa5d517fc7d6b980bce8b947515fb64d114d1651',
-      '9.1.15.0' =>
-      '4a0d9305867ed327a8cf4f7ff8a65c7ff62094a495ec85463d0792656762469e',
-    }
+    KNOWN_HASHES = %w[
+      1.7.22   6b9e310a04ad8173d0d6dbe299da04c0ef85fc15
+      1.7.23   2b5e796feeed2bcfab02f8bf2ff3d77ca318e310
+      1.7.24   0c321d2192768dfec419bee6b44c7190f4db32e1
+      1.7.25   cd15aef419f97cff274491e53fcfb8b88ec36785
+      1.7.26   cca25a1ffb8b75a8d4a4d4667e7f6b20341c2b74
+      1.7.27   4a24fe103d3735b23cc58668dec711857125a6f3
+      9.1.12.0 ddb23c95f4b3cc3fc1cc57b81cb4ceee776496ede402b9a6eb0622cf15e1a597
+      9.1.13.0 9d156646623ac2f27174721035b52572a4b05690db7c1293295aa2c04aad3908
+      9.1.14.0 074057e672350a6652d92ccaaa5d517fc7d6b980bce8b947515fb64d114d1651
+      9.1.15.0 4a0d9305867ed327a8cf4f7ff8a65c7ff62094a495ec85463d0792656762469e
+    ].map(&:freeze).each_slice(2).to_h.freeze
 
     # JRuby version to install (default: DEFAULT_VERSION)
     #
