@@ -45,6 +45,8 @@ module SyncWrap
       [ Arch, CRubyVM ],
       [ EtcHosts ],
       [ AmazonLinux, JRubyVM, RunUser, Iyyov, Geminabox ],
+      [ AmazonLinux, { amazon_version: '2017.12' },
+        JRubyVM, RunUser, Iyyov, Geminabox ],
       [ RHEL,   JRubyVM, BundlerGem ],
       [ RHEL,   CRubyVM, BundlerGem ],
       [ CentOS, JRubyVM, RakeGem ],
