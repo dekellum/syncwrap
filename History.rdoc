@@ -2,6 +2,10 @@
 * SyncWrap::PostgreSQL; Update component and postgresql.conf for
   support of version 10. Changes are mostly cosmetic and remain
   backward compatible with Postgres 9.4+
+* SyncWrap::CRubyVM; Add hashes of 2.2.9, 2.2.10, 2.3.6, 2.3.7,
+  2.4.3, 2.4.4, 2.5.1
+* SyncWrap::JrubyVM; Add hashes of 9.1.14, 9.1.15
+* SyncWrap::AmazonLinux; Finally has systemd as of 2017.12
 
 === 2.10.0 (2017-10-26)
 * SyncWrap::Debian; dist_update condition based on local context
