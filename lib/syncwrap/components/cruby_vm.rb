@@ -15,6 +15,7 @@
 #++
 
 require 'syncwrap/component'
+require 'syncwrap/components/debian'
 require 'syncwrap/components/rhel'
 require 'syncwrap/ruby_support'
 require 'syncwrap/version_support'
@@ -162,8 +163,14 @@ module SyncWrap
         dist_install( %w[ curl gcc make autoconf zlib-devel
                           openssl-devel readline-devel libyaml-devel libffi-devel ] )
       else
-        dist_install( %w[ curl gcc make autoconf zlib1g-dev
-                          libssl-dev libreadline-dev libyaml-dev libffi-dev ] )
+        dist_install( %w[ curl gcc make autoconf ] )
+        if distro.is_a?( Debian )
+           dist_install( %w[ zlib1g-dev libssl-dev libreadline-dev
+                             libyaml-dev libffi-dev ] )
+           if version_lt?(ruby_version, [2,4]) && version_gte?(debian_version, [10])
+             dist_install( %w[ libssl1.0-dev ] )
+           end
+        end
       end
     end
 
