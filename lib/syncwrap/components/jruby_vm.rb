@@ -48,6 +48,7 @@ module SyncWrap
       9.1.13.0 9d156646623ac2f27174721035b52572a4b05690db7c1293295aa2c04aad3908
       9.1.14.0 074057e672350a6652d92ccaaa5d517fc7d6b980bce8b947515fb64d114d1651
       9.1.15.0 4a0d9305867ed327a8cf4f7ff8a65c7ff62094a495ec85463d0792656762469e
+      9.1.17.0 6a22f7bf8fef1a52530a9c9781a9d374ad07bbbef0d3d8e2af0ff5cbead0dfd5
     ].map(&:freeze).each_slice(2).to_h.freeze
 
     # JRuby version to install (default: DEFAULT_VERSION)
