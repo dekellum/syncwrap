@@ -82,25 +82,25 @@ examples directory and LAYOUT.
 Component hierarchy implementing SyncWrap::Distro, for common methods
 like dist_install and other distribution-specific behaviors:
 
-* SyncWrap::Arch (limited support)
 * SyncWrap::Debian
   * SyncWrap::Ubuntu
 * SyncWrap::RHEL
   * SyncWrap::CentOS
   * SyncWrap::AmazonLinux
+* SyncWrap::Arch (limited)
 
-Components implementing \#install:
+Non-exhaustive list of components implementing \#install:
 
-* SyncWrap::MDRaid, SyncWrap::LVMCache - Software raid, lvm volumes,
+* SyncWrap::MDRaid, SyncWrap::LVMCache — software raid, lvm volumes,
   lvm cache, filesystems, mounts
 
-* SyncWrap::Network and SyncWrap::EtcHosts - hostname, static names,
+* SyncWrap::Network and SyncWrap::EtcHosts — hostname, static names,
   resolver config
 
-* SyncWrap::Users - developer accounts, home directory files (incl. ssh
+* SyncWrap::Users — developer accounts, home directory files (incl. ssh
   keys), sudoers access
 
-* SyncWrap::RunUser - a user for running deployed daemons, jobs, in
+* SyncWrap::RunUser — a user for running deployed daemons, jobs, in
   var directories.
 
 * SyncWrap::PostgreSQL
@@ -109,35 +109,23 @@ Components implementing \#install:
 
 * SyncWrap::JRubyVM and/or SyncWrap::CRubyVM (MRI, from source)
 
-* SyncWrap::BundlerGem, SyncWrap::RakeGem, SyncWrap::TarpitGem - base
-  (pre-bundle) Rubygems
+* SyncWrap::BundlerGem, SyncWrap::RakeGem, SyncWrap::TarpitGem — base
+  (pre-bundle) rubygems
 
-* SyncWrap::SourceTree, SyncWrap::Bundle
+* SyncWrap::SourceTree
 
-* SyncWrap::ChangeGuard
+* SyncWrap::Bundle — Ruby Bundler installed (source) dependencies
 
 * SyncWrap::Puma
 
-* SyncWrap::Iyyov - job scheduler and process monitor with
-  utilities for SyncWrap::IyyovDaemon deployment.
+Other utilities:
 
-* SyncWrap::Geminabox - private gem server
+* SyncWrap::ChangeGuard — make changes transactional via a remote guard file
 
-* SyncWrap::Qpid - AMQP broker
+* SyncWrap::TimeChecker (.check) — compare remote host system clocks
 
-=== Component wish list
-
-The above only represents my more recent project needs. Pull requests
-to add, for example, the following would be well received:
-
-* Rails (based on SourceTree, Bundle and ideally without per-host
-  asset compile)
-* Nginx
-* Mongo
-* Redis
-
-\SyncWrap makes it reasonable to implement any of the above
-yourself.
+\SyncWrap makes customizing the above or implementing new components
+easy, as needed in your own projects.
 
 == License
 
