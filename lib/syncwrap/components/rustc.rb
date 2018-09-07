@@ -127,6 +127,11 @@ module SyncWrap
       "#{local_root}/bin/rustc"
     end
 
+    # Installed path to the `cargo` command
+    def cargo_command
+      "#{local_root}/bin/cargo"
+    end
+
     protected
 
     # The URL to the installer tarball (xz compressed)

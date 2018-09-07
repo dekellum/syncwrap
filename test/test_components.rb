@@ -110,6 +110,10 @@ module SyncWrap
       [ RHEL, RunUser, JRubyVM, TarpitGem, user_install: true ],
       [ Debian, Rustc ],
       [ RHEL, Rustc ],
+      [ Debian, Rustc,
+        SourceTree, { source_dir: 'lib', remote_source_root: '/usr/local/src',
+                      require_clean: false },
+        Cargo ],
       [ Users, home_users: [ 'bob' ] ] ]
 
   # Test overrides to standard Context.
