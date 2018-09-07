@@ -108,6 +108,8 @@ module SyncWrap
       [ RHEL,  CRubyVM, TarpitGem ],
       [ RHEL,  JRubyVM, TarpitGem ],
       [ RHEL, RunUser, JRubyVM, TarpitGem, user_install: true ],
+      [ Debian, Rustc ],
+      [ RHEL, Rustc ],
       [ Users, home_users: [ 'bob' ] ] ]
 
   # Test overrides to standard Context.

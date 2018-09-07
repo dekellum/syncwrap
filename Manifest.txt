@@ -64,6 +64,7 @@ lib/syncwrap/components/qpid.rb
 lib/syncwrap/components/rake_gem.rb
 lib/syncwrap/components/rhel.rb
 lib/syncwrap/components/run_user.rb
+lib/syncwrap/components/rustc.rb
 lib/syncwrap/components/source_tree.rb
 lib/syncwrap/components/tarpit_gem.rb
 lib/syncwrap/components/time_checker.rb

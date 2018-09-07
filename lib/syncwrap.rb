@@ -414,6 +414,7 @@ module SyncWrap
   autoload :QpidRepo,      'syncwrap/components/qpid'
   autoload :RakeGem,       'syncwrap/components/rake_gem'
   autoload :RHEL,          'syncwrap/components/rhel'
+  autoload :Rustc,         'syncwrap/components/rustc'
   autoload :RunUser,       'syncwrap/components/run_user'
   autoload :SourceTree,    'syncwrap/components/source_tree'
   autoload :TarpitGem,     'syncwrap/components/tarpit_gem'
