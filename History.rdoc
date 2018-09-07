@@ -1,3 +1,5 @@
+=== 2.11.0 (TBD)
+
 === 2.10.1 (2018-9-7)
 * SyncWrap::PostgreSQL; Update component and postgresql.conf for
   support of version 10. Changes are mostly cosmetic and remain

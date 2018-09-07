@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    syncwrap (2.10.1)
+    syncwrap (2.11.0)
       aws-sdk (~> 1.46)
       json (>= 1.7.1, < 2.2)
       nokogiri (>= 1.5.9, < 1.9)
@@ -17,12 +17,10 @@ GEM
       json (~> 1.4)
       nokogiri (~> 1)
     json (1.8.6)
-    json (1.8.6-java)
     mini_portile2 (2.3.0)
     minitest (5.9.1)
-    nokogiri (1.8.1)
+    nokogiri (1.8.4)
       mini_portile2 (~> 2.3.0)
-    nokogiri (1.8.1-java)
     rake (12.1.0)
     rdoc (4.3.0)
     rjack-maven (3.0.5.0-java)
