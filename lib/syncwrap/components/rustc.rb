@@ -40,13 +40,13 @@ module SyncWrap
     attr_accessor :rustc_version
 
     # A set of known (sha256) cryptographic hashes, keyed by version
-    # string, for the standalone installer binary xz file.
+    # string, for the standalone installer tarball (xz compressed).
     KNOWN_HASHES = %w[
       1.27.2 090a3bfc536b7211ae84f6667c941c861eddfdcadb5e472a32e72d074f793dd4
     ].map(&:freeze).each_slice(2).to_h.freeze
 
     # A cryptographic hash value (hexadecimal, some standard length)
-    # to use for verifying the installer tarball.
+    # to use for verifying the installer tarball (xz compressed).
     # (Default: KNOWN_HASHES[ rustc_version ])
     attr_writer :hash
 
@@ -107,7 +107,6 @@ module SyncWrap
 
       hash_verify( hash, ifile, user: :root ) if hash
 
-      # FIXME: Use something other than ./install.sh for non-linux platforms?
       sudo <<-SH
         tar -Jxf #{ifile}
         rm -f #{ifile}
