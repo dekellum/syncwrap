@@ -3,8 +3,7 @@ before_install:
   - "gem install rjack-tarpit -v=2.1.2"
   - "gem install bundler -v=1.17.3"
 install: "bundle _1.17.3_ install --jobs=3 --retry=3"
-sudo: false
-dist: trusty
+dist: xenial
 rvm:
   - 2.3.8
   - 2.5.3
