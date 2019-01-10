@@ -4,6 +4,7 @@ before_install:
   - "gem install bundler -v=1.17.3"
 install: "bundle _1.17.3_ install --jobs=3 --retry=3"
 dist: xenial
+jdk: openjdk8
 rvm:
   - 2.3.8
   - 2.5.3
