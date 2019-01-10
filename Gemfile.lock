@@ -17,11 +17,13 @@ GEM
       json (~> 1.4)
       nokogiri (~> 1)
     json (1.8.6)
+    json (1.8.6-java)
     mini_portile2 (2.3.0)
     minitest (5.9.1)
-    nokogiri (1.8.4)
+    nokogiri (1.8.5)
       mini_portile2 (~> 2.3.0)
-    rake (12.1.0)
+    nokogiri (1.8.5-java)
+    rake (12.3.2)
     rdoc (4.3.0)
     rjack-maven (3.0.5.0-java)
     rjack-tarpit (2.1.2)
@@ -46,4 +48,4 @@ DEPENDENCIES
   syncwrap!
 
 BUNDLED WITH
-   1.15.1
+   1.17.3
