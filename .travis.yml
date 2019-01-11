@@ -3,16 +3,16 @@ before_install:
   - "gem install rjack-tarpit -v=2.1.2"
   - "gem install bundler -v=1.17.3"
 install: "bundle _1.17.3_ install --jobs=3 --retry=3"
-dist: xenial
-rvm:
-  - 2.3.8
-  - 2.5.3
-  - ruby-head
-  - jruby-9.1.17.0
-    jdk: openjdk8
-  - jruby-9.2.5.0
-    jdk: openjdk10
 script: "bundle exec rake test"
+dist: xenial
 matrix:
+  include:
+  - rvm: 2.3.8
+  - rvm: 2.5.3
+  - rvm: ruby-head
+  - rvm: jruby-9.1.17.0
+    jdk: openjdk8
+  - rvm: jruby-9.2.5.0
+    jdk: openjdk10
   allow_failures:
     - rvm: ruby-head
