@@ -13,6 +13,10 @@ matrix:
   - rvm: jruby-9.1.17.0
     jdk: openjdk8
   - rvm: jruby-9.2.5.0
+    jdk: openjdk8
+  - rvm: jruby-head
     jdk: openjdk10
   allow_failures:
     - rvm: ruby-head
+    - rvm: jruby-head
+      jdk: openjdk10
