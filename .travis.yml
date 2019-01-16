@@ -8,6 +8,7 @@ dist: xenial
 matrix:
   include:
   - rvm: 2.3.8
+  - rvm: 2.4.5
   - rvm: 2.5.3
   - rvm: ruby-head
   - rvm: jruby-9.1.17.0
