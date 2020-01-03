@@ -118,6 +118,10 @@ Non-exhaustive list of components implementing \#install:
 
 * SyncWrap::Puma
 
+* SyncWrap::Rustc — Rust language compiler and tools
+
+* SyncWrap::Cargo — Rust cargo install
+
 Other utilities:
 
 * SyncWrap::ChangeGuard — make changes transactional via a remote guard file

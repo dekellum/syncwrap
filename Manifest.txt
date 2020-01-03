@@ -43,6 +43,7 @@ lib/syncwrap/components/arch.rb
 lib/syncwrap/components/bundle.rb
 lib/syncwrap/components/bundled_iyyov_daemon.rb
 lib/syncwrap/components/bundler_gem.rb
+lib/syncwrap/components/cargo.rb
 lib/syncwrap/components/centos.rb
 lib/syncwrap/components/change_guard.rb
 lib/syncwrap/components/commercial_jdk.rb
@@ -64,6 +65,7 @@ lib/syncwrap/components/qpid.rb
 lib/syncwrap/components/rake_gem.rb
 lib/syncwrap/components/rhel.rb
 lib/syncwrap/components/run_user.rb
+lib/syncwrap/components/rustc.rb
 lib/syncwrap/components/source_tree.rb
 lib/syncwrap/components/tarpit_gem.rb
 lib/syncwrap/components/time_checker.rb
