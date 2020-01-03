@@ -31,18 +31,19 @@ module SyncWrap
     include VersionSupport
     include HashSupport
 
-    DEFAULT_VERSION = "1.27.2"
+    DEFAULT_VERSION = "1.40.0"
 
     # The rustc version being installed.
     # (Default: DEFAULT_VERSION)
     #
-    # Example values: '1.27.2'
+    # Example values: '1.40.0'
     attr_accessor :rustc_version
 
     # A set of known (sha256) cryptographic hashes, keyed by version
     # string, for the standalone installer tarball (xz compressed).
     KNOWN_HASHES = %w[
       1.27.2 090a3bfc536b7211ae84f6667c941c861eddfdcadb5e472a32e72d074f793dd4
+      1.40.0 37492d6467bcea611b2c7388aed50b655524f81410e255142ef6cfb6cef1ec53
     ].map(&:freeze).each_slice(2).to_h.freeze
 
     # A cryptographic hash value (hexadecimal, some standard length)
