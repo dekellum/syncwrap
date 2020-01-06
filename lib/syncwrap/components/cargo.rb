@@ -23,7 +23,7 @@ require 'syncwrap/change_key_listener'
 
 module SyncWrap
 
-  # Provision to `bundle install`, optionally triggered by a state change key.
+  # Provision to `cargo install`, optionally triggered by a state change key.
   #
   # Host component dependencies: SourceTree?, Rustc#cargo_command
   class Cargo < Component
