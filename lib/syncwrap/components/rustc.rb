@@ -46,6 +46,20 @@ module SyncWrap
       1.40.0 37492d6467bcea611b2c7388aed50b655524f81410e255142ef6cfb6cef1ec53
     ].map(&:freeze).each_slice(2).to_h.freeze
 
+    # Optionally use some rust release channel other than stable. When
+    # specified, also specify a build date or version (for rustc comparison)
+    # (Default: nil)
+    #
+    # Example values: 'nightly', 'beta'
+    attr_accessor :channel
+
+    # Specify a build date assocated with an alternative channel, in YEAR-MM-DD
+    # format.
+    # (Default: nil)
+    #
+    # Example values: '2019-12-31'
+    attr_accessor :date
+
     # A cryptographic hash value (hexadecimal, some standard length)
     # to use for verifying the installer tarball (xz compressed).
     # (Default: KNOWN_HASHES[ rustc_version ])
@@ -62,6 +76,8 @@ module SyncWrap
 
     def initialize( opts = {} )
       @rustc_version = DEFAULT_VERSION
+      @channel = nil
+      @date = nil
       @hash = nil
       @do_uninstall_distro_rust = true
       @platform = 'x86_64-unknown-linux-gnu'
@@ -73,12 +89,22 @@ module SyncWrap
     end
 
     def install
-      cond = <<-SH
-        rvr=`[ -x #{rustc_command} ] &&
-             #{rustc_command} -V | grep -o -E '[0-9]+(\\.[0-9]+)+' \
-             || true`
-        if [ "$rvr" != "#{rustc_version}" ]; then
-      SH
+      cond =
+        if date
+          <<-SH
+            rdate=`[ -x #{rustc_command} ] &&
+                 #{rustc_command} -V | grep -o -E '[0-9]{4}-[0-9]{2}-[0-9]{2}' \
+                 || true`
+            if [ "$rdate" != "#{date}" ]; then
+          SH
+        else
+          <<-SH
+            rvr=`[ -x #{rustc_command} ] &&
+                 #{rustc_command} -V | grep -o -E '[0-9]+(\\.[0-9]+)+' \
+                 || true`
+            if [ "$rvr" != "#{rustc_version}" ]; then
+          SH
+        end
       sudo( cond, close: "fi" ) do
         install_deps
         download_and_install
@@ -91,9 +117,9 @@ module SyncWrap
 
     def install_deps
       if distro.is_a?( Debian )
-        dist_install( %w[ xz-utils pkg-config] )
+        dist_install( %w[xz-utils pkg-config] )
       else
-        dist_install( %w[ xz pkg-config] )
+        dist_install( %w[xz pkg-config] )
       end
     end
 
@@ -111,7 +137,7 @@ module SyncWrap
       sudo <<-SH
         tar -Jxf #{ifile}
         rm -f #{ifile}
-        cd rust-#{rustc_version}-#{platform}
+        cd #{installer_dir}
         bash ./install.sh
         cd / && rm -rf /tmp/src
       SH
@@ -134,11 +160,27 @@ module SyncWrap
 
     protected
 
+    def installer_dir
+      if channel
+        "rust-#{channel}-#{platform}"
+      else
+        "rust-#{rustc_version}-#{platform}"
+      end
+    end
+
     # The URL to the installer tarball (xz compressed)
     def installer_url
-      [ 'https://static.rust-lang.org/dist',
-        "rust-#{rustc_version}-#{platform}.tar.xz"
-      ].join( '/' )
+      if channel && date
+        [ 'https://static.rust-lang.org/dist',
+          date,
+          "rust-#{channel}-#{platform}.tar.xz"
+          ].join( '/' )
+      else
+        [ 'https://static.rust-lang.org/dist',
+          "rust-#{rustc_version}-#{platform}.tar.xz"
+        ].join( '/' )
+      end
+
     end
 
   end
