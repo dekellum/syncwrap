@@ -1,4 +1,5 @@
 === 2.11.0 (TBD)
+* Added SyncWrap::Rustc and SyncWrap::Cargo for rust language support.
 
 === 2.10.1 (2018-9-7)
 * SyncWrap::PostgreSQL; Update component and postgresql.conf for

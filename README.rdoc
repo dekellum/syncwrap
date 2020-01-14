@@ -120,7 +120,7 @@ Non-exhaustive list of components implementing \#install:
 
 * SyncWrap::Rustc — Rust language compiler and tools
 
-* SyncWrap::Cargo — Rust cargo install
+* SyncWrap::Cargo — Rust `cargo install`
 
 Other utilities:
 
