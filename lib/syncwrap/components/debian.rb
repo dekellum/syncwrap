@@ -99,9 +99,15 @@ module SyncWrap
     def dist_update( opts = {} )
       req = opts[ :update_required ]
       if ( req != false )
+        flags = if verbose?
+                  "-y"
+                else
+                  "-yqq"
+                end
+        flags += " --allow-releaseinfo-change"
         dist_if_update_old?( req != true, opts ) do
           sudo( <<-SH, opts )
-            apt-get -yqq update
+            apt-get #{flags} update
             touch #{UPDATE_LOCK}
           SH
         end
